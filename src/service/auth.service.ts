@@ -59,16 +59,26 @@ private userProfile: any = null; // store profile
 
   logout() {
     this.clearToken();
+    localStorage.removeItem(this.tokenKey)
     this.loggedInSubject.next(false);
-    this.router.navigate(['/login']);
+    this.router.navigate(['']);
   }
   islogout(){
     return this.logout()
   }
  
 
+
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey) ;
+  }
+
+  isNotLoggedIN(): boolean{
+   if(this.getToken())
+   {
+    return false
+   }
+   return true
   }
 
   getRefreshtoken(): string | null {
