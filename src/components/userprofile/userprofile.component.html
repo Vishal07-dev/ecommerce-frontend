@@ -1,0 +1,62 @@
+<div *ngIf="user" class="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
+  <div class="flex flex-col items-center space-y-4">
+    <!-- Avatar Upload -->
+    <!-- <label class="relative w-32 h-32">
+      <input type="file" class="hidden" (change)="onFileSelected($event)" />
+      <div
+        class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:opacity-80 border border-dashed border-gray-300 cursor-pointer">
+        <span class="text-sm text-center">Upload<br />Image</span>
+      </div>
+    </label> -->
+
+    <!-- Name -->
+    <div class="w-full">
+      <label class="block text-sm font-medium text-gray-700">Name</label>
+      <input
+        [(ngModel)]="user.user.name"
+        class="mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-700"
+        type="text"
+        placeholder="Enter name"
+      />
+    </div>
+
+    <!-- Email -->
+    <div class="w-full">
+      <label class="block text-sm font-medium text-gray-700">Email</label>
+      <input
+        [(ngModel)]="user.user.email"
+        class="mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-700"
+        type="email"
+        placeholder="Enter email"
+      />
+    </div>
+
+    <!-- Address -->
+    <div class="w-full">
+      <label class="block text-sm font-medium text-gray-700">Address</label>
+      <input
+        [(ngModel)]="user.user.address"
+        class="mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-700"
+        type="text"
+        placeholder="Enter address"
+      />
+    </div>
+
+    <!-- Role (Readonly) -->
+    <!-- <div class="w-full">
+      <label class="block text-sm font-medium text-gray-700">Role</label>
+      <input
+        [value]="user.userProfile.role"
+        readonly
+        class="mt-1 w-full rounded-lg bg-gray-100 border-gray-300 text-gray-500 shadow-sm"
+      />
+    </div> -->
+
+    <!-- Update Button -->
+    <button
+      (click)="updateProfile()"
+      class="mt-4 px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md">
+      Update Profile
+    </button>
+  </div>
+</div>

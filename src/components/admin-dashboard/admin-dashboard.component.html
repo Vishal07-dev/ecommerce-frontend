@@ -1,0 +1,69 @@
+<div class="p-6 max-w-full ">
+  <h2 class="text-2xl font-bold mb-4">Admin Dashboard</h2>
+
+  <!-- Button toggles form popup -->
+  <button (click)="showForm = true" 
+          class="bg-green-600 text-white px-4 py-2 rounded mb-4">
+    Add New Product
+  </button>
+
+  <!-- Modal Background -->
+  <div *ngIf="showForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <!-- Modal Content -->
+    <div class="bg-white w-full max-w-lg p-6 rounded shadow-lg relative">
+      <button (click)="showForm = false" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+      <h3 class="text-xl font-bold mb-4">Create New Product</h3>
+
+      <form (ngSubmit)="onSubmit()" [formGroup]="productForm" class="space-y-4">
+        <div>
+          <label class="block font-semibold">Name</label>
+          <input type="text" formControlName="name" class="w-full border border-gray-300 p-2 rounded" />
+        </div>
+
+        <div>
+          <label class="block font-semibold">Price</label>
+          <input type="number" formControlName="price" class="w-full border border-gray-300 p-2 rounded" />
+        </div>
+
+        <div>
+          <label class="block font-semibold">Category (ID)</label>
+          <input type="text" formControlName="category" class="w-full border border-gray-300 p-2 rounded" />
+          <small class="text-gray-500">Use Category ID for now</small>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Description</label>
+          <textarea formControlName="description" class="w-full border border-gray-300 p-2 rounded"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Stock</label>
+          <input type="number" formControlName="stock" class="w-full border border-gray-300 p-2 rounded" />
+        </div>
+
+        <div>
+          <label class="block font-semibold">Image URL</label>
+          <input type="text" formControlName="image" class="w-full border border-gray-300 p-2 rounded" />
+        </div>
+
+        <button type="submit" [disabled]="productForm.invalid"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Save Product
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Static list of products (replace later with real data) -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+    <div class="bg-white shadow-md p-4 rounded-lg" *ngFor="let product of products">
+      <h3 class="text-xl font-semibold mb-2">{{ product.name }}</h3>
+      <p class="text-gray-600 mb-2">{{ product.description }}</p>
+      <div class="text-sm text-blue-600 font-bold mb-3">{{ product.price }}</div>
+      <div class="space-x-2">
+        <button class="bg-yellow-500 text-white px-3 py-1 rounded">Update</button>
+        <button class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

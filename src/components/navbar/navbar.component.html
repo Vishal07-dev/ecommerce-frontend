@@ -1,0 +1,9 @@
+<nav class="bg-white shadow-md px-6 py-4 flex justify-between items-center">
+  <div class="text-xl font-bold text-blue-600">MyShop</div>
+  <div class="space-x-4 flex">
+    <a routerLink="/" class="text-gray-700 hover:text-blue-600">Home</a>
+    <a  routerLink="/login" class="text-gray-700 hover:text-blue-600">Login</a>
+    <a *ngIf="auth.isLoggedIn()" routerLink="/profile" class="text-gray-700 hover:text-blue-600">My Profile</a>
+    <a *ngIf="auth.isLoggedIn()" (click)="auth.logout()" class="text-gray-700 hover:text-blue-600 cursor-pointer">Logout</a>
+  </div>
+</nav>
