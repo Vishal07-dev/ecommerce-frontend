@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 interface Order {
@@ -20,7 +20,7 @@ interface Order {
 
 @Component({
   selector: 'app-order',
-  imports: [NgIf,FormsModule],
+  imports: [NgIf,FormsModule,CommonModule],
   templateUrl: './order.component.html',
   styleUrl: './order.component.css'
 })

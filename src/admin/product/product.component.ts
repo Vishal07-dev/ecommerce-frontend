@@ -1,9 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { NgFor, NgIf } from '@angular/common';
+import { ProductsService } from '../../service/products.service';
 import { FormsModule } from '@angular/forms';
+import { debouncingSignal } from '../../../debounce-util';
+import { CategoryService } from '../../service/category.service';
+
 interface Product {
-  id: string;
+  _id: string;
   name: string;
-  category: string;
+  category: any;
   price: number;
   stock: number;
   status: 'active' | 'inactive';
@@ -11,111 +18,159 @@ interface Product {
   description: string;
   sku: string;
 }
+
 @Component({
   selector: 'app-product',
-  imports: [FormsModule],
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule, NgFor, NgIf],
   templateUrl: './product.component.html',
-  styleUrl: './product.component.css'
+  styleUrl: './product.component.css',
 })
 export class ProductComponent {
-searchTerm = '';
+  showForm = false;
+  updateForm=false
+  productForm: FormGroup;
+categoryService = inject(CategoryService) 
+  products: Product[] = [];
+  filteredProducts = signal<Product[]>([]);
+  id :string = ''
+  searchTerm = signal('');
+  searchQuery = debouncingSignal(this.searchTerm, 500, '');
   selectedCategory = '';
   selectedStatus = '';
+  categories: any[] = [];
 
-  products: Product[] = [
-    {
-      id: '1',
-      name: 'Wireless Bluetooth Headphones',
-      category: 'Electronics',
-      price: 299.99,
-      stock: 45,
-      status: 'active',
-      image: '/api/placeholder/40/40',
-      description: 'High-quality wireless headphones with noise cancellation',
-      sku: 'WBH-001'
-    },
-    {
-      id: '2',
-      name: 'Smart Fitness Watch',
-      category: 'Electronics',
-      price: 199.99,
-      stock: 23,
-      status: 'active',
-      image: '/api/placeholder/40/40',
-      description: 'Advanced fitness tracking with heart rate monitor',
-      sku: 'SFW-002'
-    },
-    {
-      id: '3',
-      name: 'Laptop Stand Adjustable',
-      category: 'Accessories',
-      price: 79.99,
-      stock: 67,
-      status: 'active',
-      image: '/api/placeholder/40/40',
-      description: 'Ergonomic laptop stand for better posture',
-      sku: 'LSA-003'
-    },
-    {
-      id: '4',
-      name: 'USB-C Charging Cable',
-      category: 'Accessories',
-      price: 24.99,
-      stock: 8,
-      status: 'active',
-      image: '/api/placeholder/40/40',
-      description: 'Fast charging USB-C cable 6ft length',
-      sku: 'UCC-004'
-    },
-    {
-      id: '5',
-      name: 'Cotton T-Shirt Basic',
-      category: 'Clothing',
-      price: 29.99,
-      stock: 0,
-      status: 'inactive',
-      image: '/api/placeholder/40/40',
-      description: '100% cotton comfortable t-shirt',
-      sku: 'CTB-005'
-    },
-    {
-      id: '6',
-      name: 'Coffee Mug Ceramic',
-      category: 'Home',
-      price: 15.99,
-      stock: 125,
-      status: 'active',
-      image: '/api/placeholder/40/40',
-      description: 'Premium ceramic coffee mug 12oz',
-      sku: 'CMC-006'
-    }
-  ];
+   productService = inject(ProductsService);
 
-  filteredProducts = signal<Product[]>([]);
+  constructor(private fb: FormBuilder, private http: HttpClient) {
+    this.productForm = this.initForm();
+    effect(() => {
+      // if(this.showForm == true) this.productForm.reset()
+      this.handleSearch(this.searchQuery());
+    });
 
-  ngOnInit() {
-    this.updateFilteredProducts();
+    
   }
 
-  updateFilteredProducts() {
-    let filtered = this.products;
+  ngOnInit(): void {
+      this.fetchCategories();
 
-    if (this.searchTerm) {
-      filtered = filtered.filter(product => 
-        product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        product.sku.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    }
+    this.productService.productCreate$.subscribe((created) => {
+      if (created) this.loadProducts();
+    });
 
-    if (this.selectedCategory) {
-      filtered = filtered.filter(product => product.category === this.selectedCategory);
-    }
-
-    if (this.selectedStatus) {
-      filtered = filtered.filter(product => product.status === this.selectedStatus);
-    }
-
-    this.filteredProducts.set(filtered);
+    this.loadProducts();
   }
+
+  private initForm(): FormGroup {
+    return this.fb.group({
+      name: ['', Validators.required],
+      price: ['', [Validators.required, Validators.min(0)]],
+      description: ['', Validators.required],
+      stock: [0, [Validators.required, Validators.min(0)]],
+      image: [''],
+      category: ['', Validators.required],
+    });
+  }
+fetchCategories() {
+  this.categoryService.getCategory().subscribe({
+    next: (categories: any) => {
+      this.categories = categories;
+    },
+    error: (err) => {
+      console.error('Failed to fetch categories:', err);
+    }
+  });
+  
 }
 
+  private handleSearch(term: string): void {
+    const params: any = {};
+    if (term) params.name = term;
+
+    this.productService.fetchProduct(params).subscribe((res: any) => {
+      this.products = res.products ?? res;
+      this.filteredProducts.set(this.products);
+    });
+  }
+
+  private extractCategories(): void {
+    const unique = new Set(this.products.map((p) => p.category));
+    this.categories = Array.from(unique);
+  }
+
+  private loadProducts(): void {
+    this.productService.fetchProduct().subscribe((res: any) => {
+      this.products = res.products ?? res;
+      this.filteredProducts.set(this.products);
+      this.extractCategories();
+    });
+  }
+showform(data?: Product): void {
+ 
+  if (data) {
+    this.updateForm = true
+     this.id = data?._id
+    this.productForm.patchValue({
+      name: data.name,
+      price: data.price,
+      description: data.description,
+      stock: data.stock,
+      image: data.image,
+      category: data.category._id
+    });
+  } else {
+    this.productForm.reset(); // Prepare blank form for creating a new product
+  }
+}
+  onSubmit(): void {
+    if (this.productForm.valid) {
+      const productData = this.productForm.value;
+      if (this.updateForm) {
+      this.productService.updateProduct(productData,this.id);
+    } else {
+      this.productService.createProduct(productData);
+    }
+
+    
+    this.showForm = false;
+    this.updateForm = false;
+
+    this.productForm.reset();
+    }
+  }
+  createbutton()
+  {
+    this.fetchCategories()
+    console.log(this.showForm);
+    
+  }
+
+  
+
+  applyFilters(): void {
+    const params: any = {};
+    if (this.selectedCategory) params.category = this.selectedCategory;
+
+    this.productService.fetchProduct(params).subscribe((res: any) => {
+      this.products = res.products ?? res;
+      this.filteredProducts.set(this.products);
+    });
+  }
+
+  resetFilters(): void {
+    this.selectedCategory = '';
+    this.searchTerm = signal('');
+    this.loadProducts();
+  }
+
+  closeForm():void{
+    
+    this.updateForm=false
+    this.showForm=false
+    this.productForm.reset()
+    console.log(this.updateForm);
+  }
+
+  
+}

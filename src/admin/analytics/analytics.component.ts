@@ -1,8 +1,9 @@
+import { NgFor } from '@angular/common';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-analytics',
-  imports: [],
+  imports: [NgFor],
   templateUrl: './analytics.component.html',
   styleUrl: './analytics.component.css'
 })

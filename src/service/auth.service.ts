@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, throwError, timer } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
-
+import { BehaviorSubject, Observable } from 'rxjs';
+import {  switchMap } from 'rxjs/operators';
+import { CartService } from './cartService/cart.service';
+import { environment } from '../environment/environment';
 // Use require instead of import for jwt-decode
 // import jwtDecode from '';
 import {jwtDecode} from 'jwt-decode'
@@ -17,23 +18,58 @@ interface LoginResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:2000/api/user'; // your backend URL
+  private apiUrl = environment.apiUrl; // your backend URL
   private tokenKey = 'accessToken';
   private refreshInProgress = false;
   private loggedInSubject = new BehaviorSubject<boolean>(this.hasValidToken());
   public loggedIn$ = this.loggedInSubject.asObservable();
-
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private cartService:CartService) {}
 private userProfile: any = null; // store profile
 
-  login(email: string, password: string): Observable<any> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { email, password }).pipe(
-      switchMap(res => {
-        this.setToken(res.accessToken);
+   login(email: string, password: string): Observable<any> {
+  let guestCart: any[] = [];
+  try {
+    const productRaw = localStorage.getItem('Product');
+    if (productRaw) {
+      guestCart = JSON.parse(productRaw);
+    }
+  } catch (error) {
+    console.error('Error parsing guest cart from localStorage:', error);
+    guestCart = [];
+  }
+
+  // Proceed with login only after guestCart is ready
+  return this.http.post<LoginResponse>(`${this.apiUrl}/user/login`, { email, password }).pipe(
+    switchMap(res => {
+      this.setToken(res.accessToken);
+      const decoded: any = jwtDecode(res.accessToken);
+
+      // Now safely merge cart after login
+      if (guestCart.length > 0) {
+        return this.cartService.mergeGuestCartWithUser(guestCart, decoded.id).pipe(
+          switchMap(() => {
+            this.loggedInSubject.next(true);
+            this.userProfile = res;
+
+            // Redirect by role
+            const role = this.getUserRole();
+            if (role === 'user') {
+              this.router.navigate(['/']);
+            } else if (role === 'admin') {
+              this.router.navigate(['/admin']);
+            }
+
+            return new Observable(observer => {
+              observer.next(res);
+              observer.complete();
+            });
+          })
+        );
+      } else {
         this.loggedInSubject.next(true);
-        console.log(res);
-      this.userProfile = res; 
-        // Redirect based on role
+        this.userProfile = res;
+
+        // Redirect by role
         const role = this.getUserRole();
         if (role === 'user') {
           this.router.navigate(['/']);
@@ -45,20 +81,23 @@ private userProfile: any = null; // store profile
           observer.next(res);
           observer.complete();
         });
-      })
-    );
-  }
+      }
+    })
+  );
+}
+
 
   register(name: string, email: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create`, { name, email, password });
+    return this.http.post(`${this.apiUrl}/user/create`, { name, email, password });
   }
 
   getprofile(){ 
-    return this.http.get(`${this.apiUrl}/profile`)
+    return this.http.get(`${this.apiUrl}/user/profile`)
   }
 
   logout() {
     this.clearToken();
+    this.cartService.clearCart();
     localStorage.removeItem(this.tokenKey)
     this.loggedInSubject.next(false);
     this.router.navigate(['']);
@@ -126,7 +165,7 @@ private userProfile: any = null; // store profile
     }
   }
 updateuser(data:any){
-  return this.http.put(`${this.apiUrl}/update/${data._id}`,data)
+  return this.http.put(`${this.apiUrl}/user/update/${data._id}`,data)
 }
 
 private refreshtoken():boolean{

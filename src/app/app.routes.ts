@@ -14,6 +14,9 @@ import { AnalyticsComponent } from '../admin/analytics/analytics.component';
 import { SettingComponent } from '../admin/setting/setting.component';
 import { LayoutComponent1 } from '../admin/layout/layout1.component';
 import { adminGuard } from '../guard/admin.guard';
+import { CategoryComponent } from '../admin/category/category.component';
+import { CartPageComponent } from '../components/cart-page/cart-page.component';
+import { ProductInformationComponent } from '../components/product-information/product-information.component';
 
 export const routes: Routes = [
   // Public routes
@@ -24,7 +27,9 @@ export const routes: Routes = [
       { path: '', component: HomeComponent },
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
-      { path: 'profile', component: UserprofileComponent }
+      { path: 'profile', component: UserprofileComponent },
+      { path: 'cart', component: CartPageComponent },
+      { path: 'product/:id', component: ProductInformationComponent }
     ]
   },
 
@@ -40,7 +45,8 @@ export const routes: Routes = [
       { path: 'orders', component: OrderComponent },
       { path: 'customers', component: CustomerComponent },
       { path: 'analytics', component: AnalyticsComponent },
-      { path: 'settings', component: SettingComponent }
+      { path: 'settings', component: SettingComponent },
+      { path: 'category', component: CategoryComponent }
     ]
   },
 

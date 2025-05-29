@@ -1,101 +1,198 @@
-<div class="overflow-hidden whitespace-nowrap relative my-6">
-  <div class="inline-flex animate-marquee space-x-6">
-    <ng-container *ngFor="let img of images">
-      <img [src]="img" class="w-[500px] h-[300px] object-cover rounded-2xl shadow-lg" />
-    </ng-container>
-    <!-- Duplicate images for infinite loop -->
-    <ng-container *ngFor="let img of images">
-      <img [src]="img" class="w-[500px] h-[300px] object-cover rounded-2xl shadow-lg" />
-    </ng-container>
+<!-- ✅ Modern Carousel Section -->
+<div class="relative w-full max-w-7xl mx-auto my-6 overflow-hidden rounded-2xl shadow-lg group"
+     (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()">
+  <div class="flex transition-transform duration-700 ease-in-out" [style.transform]="'translateX(-' + currentImageIndex * 100 + '%)'">
+    <div *ngFor="let img of images; let i = index" class="w-full flex-shrink-0">
+      <img [src]="img" alt="Banner {{i + 1}}" class="w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105" />
+    </div>
   </div>
+
+  <!-- Navigation buttons for carousel -->
+  <button class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          (click)="prevImage()">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  </button>
+  
+  <button class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          (click)="nextImage()">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </button>
 </div>
 
-<!-- Filter + Product Grid Container -->
-<div class="flex flex-col lg:flex-row gap-8 p-6">
+<!-- ✅ Filter Toggle Button -->
+<div class="px-6 pt-6 max-w-7xl mx-auto text-left">
+  <button
+    (click)="toggleFilter()"
+    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L13 10.414V15a1 1 0 01-.293.707l-2 2A1 1 0 019 17v-1.586L4.293 10.707A1 1 0 014 10V3zm1 1v5.586l4 4V16l2-2v-3.414l4-4V4H4z" clip-rule="evenodd" />
+    </svg>
+    {{ isFilterOpen ? 'Hide' : 'Show' }} Filters
+  </button>
+</div>
 
-  <!-- Funnel Filter Panel -->
-  <aside class="w-full lg:w-1/4 bg-white rounded-2xl shadow-md p-6 space-y-6">
-    <h2 class="text-2xl font-semibold text-gray-800">Filter Products</h2>
+<!-- ✅ Main Grid Layout -->
+<div class="relative flex flex-col lg:flex-row gap-x-8 px-6 py-10 max-w-7xl mx-auto">
+
+  <!-- Backdrop for mobile filter -->
+  <div *ngIf="isFilterOpen" 
+       (click)="toggleFilter()" 
+       class="fixed inset-0 bg-black/40 z-30 lg:hidden transition-opacity duration-300 ease-in-out"
+       [ngClass]="{'opacity-100': isFilterOpen, 'opacity-0 pointer-events-none': !isFilterOpen}">
+  </div>
+
+  <!-- 🎯 Filter Sidebar -->
+  <aside
+    *ngIf="isFilterOpen" 
+    class="fixed top-0 left-0 h-full w-full max-w-[280px] sm:max-w-[320px] z-40 <!-- Mobile: Fixed width, drawer from left -->
+           bg-white dark:bg-gray-900 rounded-r-lg lg:rounded-2xl shadow-xl p-6 border-r lg:border border-gray-200 dark:border-gray-700 dark:lg:border-gray-800
+           overflow-y-auto
+           transition-transform duration-300 ease-in-out transform translate-x-0 <!-- Slides in when *ngIf makes it appear -->
+           lg:static lg:w-1/4 lg:h-auto lg:max-w-none lg:translate-x-0 lg:shadow-2xl <!-- Desktop: static, part of layout -->
+          "
+  >
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl lg:text-2xl font-semibold text-gray-800 dark:text-gray-200">Filter Products</h2>
+      <!-- Close button for mobile filter -->
+      <button (click)="toggleFilter()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 lg:hidden p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <hr class="my-4 border-gray-200 dark:border-gray-700" />
 
     <!-- Category Filter -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+    <div class="mb-4">
+      <label for="category-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
       <select
+        id="category-filter"
         [(ngModel)]="selectedCategory"
         (change)="applyFilters()"
-        class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 p-2"
+        class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:ring-blue-500 focus:border-blue-500 p-2.5 text-sm"
       >
         <option value="">All Categories</option>
-        <!-- <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.name }}</option> -->
-        <option >Shirt</option>
+        <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.name }}</option>
       </select>
     </div>
 
     <!-- Price Filter -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+    <div class="mb-6"> <!-- Increased margin-bottom -->
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price Range</label>
       <div class="flex gap-2">
         <input
           type="number"
           [(ngModel)]="minPrice"
           placeholder="Min"
-          class="w-1/2 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 p-2"
+          class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2.5 text-sm"
         />
         <input
           type="number"
           [(ngModel)]="maxPrice"
           placeholder="Max"
-          class="w-1/2 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 p-2"
+          class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2.5 text-sm"
         />
       </div>
     </div>
 
-    <!-- Apply + Reset Buttons -->
-    <div class="flex flex-col gap-2">
+    <!-- Filter Buttons -->
+    <div class="flex flex-col gap-3 mt-6"> <!-- Increased gap and margin-top -->
       <button
         (click)="applyFilters()"
-        class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+        class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
         Apply Filters
       </button>
       <button
         (click)="resetFilters()"
-        class="w-full text-blue-600 border border-blue-600 py-2 rounded-lg font-medium hover:bg-blue-50 transition"
+        class="w-full text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 py-2.5 px-4 rounded-lg font-medium hover:bg-blue-50 dark:hover:bg-gray-800 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         Reset
       </button>
     </div>
   </aside>
 
-  <!-- Product Grid -->
-  <section class="flex-1">
-    <div *ngIf="product.length > 0; else noProduct" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-      <div *ngFor="let item of product" class="bg-white rounded-2xl shadow-lg p-4 hover:shadow-xl transition-shadow duration-300">
-        <div class="w-full h-64 overflow-hidden rounded-xl relative group bg-gray-100">
-          <img
-            [src]="item.image"
-            alt="Product"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        </div>
-        <div class="mt-4">
-          <h3 class="text-lg font-bold text-gray-800 truncate">{{ item.name }}</h3>
-          <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ item.description }}</p>
-          <div class="mt-2 text-lg font-semibold text-blue-600">${{ item.price }}</div>
-          <button
-            class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+  <!-- ✅ Product Grid Section -->
+  <section class="flex-1 mt-8 lg:mt-0">
+    <!-- ✅ Product Grid Container -->
+    <div *ngIf="product.length > 0; else noProduct" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Adjusted grid columns for better spacing, especially when filter is open on lg -->
+  
+      <!-- Product Card (Example) -->
+      <div *ngFor="let item of product" class="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-700/50 overflow-hidden hover:shadow-xl dark:hover:shadow-gray-700/70 transition-shadow duration-300 flex flex-col h-full relative group">
+        <!-- Image Container with Hover Overlay -->
+        <div (click)="productInfo(item)" class="relative pt-[100%] bg-gray-50 dark:bg-gray-700 overflow-hidden cursor-pointer">
+          <img 
+            [src]="item.image" 
+            [alt]="item.name"
+            class="absolute top-0 left-0 w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
           >
-            Add to Cart
-          </button>
+          
+          <!-- Hover Overlay with Add to Cart Button -->
+          <div class="absolute inset-0 bg-black/10 dark:bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-3 justify-center">
+            <button 
+              (click)=" addtocart(item)" 
+              class="bg-white text-blue-600 hover:bg-blue-600 hover:text-white rounded-full py-2 px-4 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+              </svg>
+              <span class="ml-2 text-sm font-medium">Add to Cart</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="p-4 flex flex-col flex-grow"> <!-- ✅ Corrected typo: flex-grow -->
+          <h3 class="font-semibold text-md lg:text-lg mb-1 text-gray-900 dark:text-gray-100 truncate">{{item.name}}</h3> <!-- ✅ truncate, adjusted text size -->
+          <p class="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2 min-h-[2.5em]">{{item.description}}</p> <!-- ✅ line-clamp with min-height -->
+          
+          <div class="flex items-center mb-3">
+            <div class="flex text-yellow-400">
+              <!-- Basic star display, replace with your actual rating logic if needed -->
+              <ng-container *ngFor="let i of [1,2,3,4,5]">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                </svg>
+              </ng-container>
+            </div>
+            <span class="text-gray-500 dark:text-gray-400 text-xs ml-1.5">({{item.reviewCount || 0}})</span>
+          </div>
+          
+          <div class="mt-auto pt-3 border-t border-gray-200 dark:border-gray-700/50"> <!-- ✅ Pushed to bottom, added separator -->
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-lg xl:text-xl text-gray-900 dark:text-white">${{item.price | currency:'INR'}}</span>
+              <button 
+                (click)="addtocart(item)" 
+                class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition duration-150 ease-in-out whitespace-nowrap flex-shrink-0 hidden sm:block focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Buy Now
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- ❌ No Products -->
     <ng-template #noProduct>
-      <div class="text-center text-gray-500 py-12">
-        No products found matching your filters.
+      <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+        <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+        </svg>
+        <p class="text-lg font-medium">No products found.</p>
+        <p class="text-sm mt-1">Try adjusting your filters or check back later.</p>
+        <button (click)="resetFilters()" class="mt-4 text-blue-600 hover:text-blue-700 underline font-medium">
+          Clear all filters
+        </button>
       </div>
     </ng-template>
   </section>
 </div>
-
