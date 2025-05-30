@@ -1,5 +1,5 @@
 import { NgFor, NgIf, NgClass, CommonModule } from '@angular/common'; // Added NgClass and CommonModule for [style.transform]
-import { Component, inject, OnInit, OnDestroy } from '@angular/core'; // Added OnDestroy
+import { Component, inject, OnInit, OnDestroy, effect } from '@angular/core'; // Added OnDestroy
 import { ProductsService } from '../../service/products.service';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -14,7 +14,13 @@ import { Router } from '@angular/router'; // Corrected: Route to Router
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit, OnDestroy { // Implement OnDestroy
+export class HomeComponent implements OnInit, OnDestroy {
+goToSlide(_t33: number) {
+throw new Error('Method not implemented.');
+}
+subscribeNewsletter() {
+throw new Error('Method not implemented.');
+} // Implement OnDestroy
   images = [
     'https://img.freepik.com/free-psd/horizontal-banner-online-fashion-sale_23-2148585404.jpg?semt=ais_hybrid&w=1380', // Example: Using wider images
     'https://img.freepik.com/free-vector/gradient-shopping-discount-horizontal-sale-banner_23-2150322008.jpg?ga=GA1.1.1569401692.1747807102&semt=ais_hybrid&w=1380',
@@ -22,6 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy { // Implement OnDestroy
     'https://img.freepik.com/free-vector/gradient-shopping-discount-horizontal-sale-banner_23-2150321984.jpg?ga=GA1.1.1569401692.1747807102&semt=ais_hybrid&w=1380',
     'https://img.freepik.com/free-vector/flat-horizontal-sale-banner-template-with-photo_23-2149000923.jpg?ga=GA1.1.1569401692.1747807102&semt=ais_hybrid&w=1380',
   ];
+  public currentYear: number = new Date().getFullYear(); // Add this line
 
   product: any[] = [];
   categories: any[] = [];
@@ -38,8 +45,13 @@ export class HomeComponent implements OnInit, OnDestroy { // Implement OnDestroy
 
   // Property for Filter Toggle
   public isFilterOpen: boolean = false;
+newsletterEmail: any;
 
-  constructor(private productService: ProductsService, private http: HttpClient) { }
+  constructor(private productService: ProductsService, private http: HttpClient) { 
+     effect(() => {
+    this.product = this.productService.searchResults();
+  });
+  }
 
   ngOnInit(): void {
     this.cartService.getUserCart();
@@ -141,13 +153,17 @@ export class HomeComponent implements OnInit, OnDestroy { // Implement OnDestroy
   addtocart(product: any) {
     // console.log(product); // Keep if needed for debugging
     this.cartService.addtocart(product);
-    this.router.navigateByUrl('/cart'); // Using 'router' instead of 'route'
+    this.router.navigateByUrl('/cart').then(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' }); // Scrolls to top smoothly
+  });
   }
 
   //Product Information Routing
   productInfo(product:any)
   {
     this.productService.getProductById(product._id)
-    this.router.navigateByUrl(`/product/${product._id}`);
+    this.router.navigateByUrl(`/product/${product._id}`).then(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' }); // Scrolls to top smoothly
+  });
   }
 }

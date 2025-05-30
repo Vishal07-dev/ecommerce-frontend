@@ -1,35 +1,80 @@
+<!-- ✅ Announcement Bar (Scrolling Text Example) -->
+<div class="bg-blue-600 dark:bg-blue-700 text-white py-2.5 overflow-hidden shadow-md">
+  <div class="max-w-full mx-auto">
+    <div class="animate-marquee whitespace-nowrap text-sm font-medium">
+      <span class="mx-8">🎉 Special Offer: Get 20% OFF on all new arrivals! Use code NEW20</span>
+      <span class="mx-8">🚚 Free Shipping on orders over $75! Limited time only.</span>
+      <span class="mx-8">🌟 Discover our latest summer collection - Fresh styles added daily!</span>
+      <!-- Repeat for seamless scroll, ensure total width is >2x screen width -->
+      <span class="mx-8">🎉 Special Offer: Get 20% OFF on all new arrivals! Use code NEW20</span>
+      <span class="mx-8">🚚 Free Shipping on orders over $75! Limited time only.</span>
+      <span class="mx-8">🌟 Discover our latest summer collection - Fresh styles added daily!</span>
+    </div>
+  </div>
+</div>
+
 <!-- ✅ Modern Carousel Section -->
-<div class="relative w-full max-w-7xl mx-auto my-6 overflow-hidden rounded-2xl shadow-lg group"
+<div class="relative w-full max-w-7xl mx-auto my-6 md:my-10 overflow-hidden rounded-2xl shadow-xl group"
      (mouseenter)="stopCarousel()" (mouseleave)="startCarousel()">
   <div class="flex transition-transform duration-700 ease-in-out" [style.transform]="'translateX(-' + currentImageIndex * 100 + '%)'">
-    <div *ngFor="let img of images; let i = index" class="w-full flex-shrink-0">
-      <img [src]="img" alt="Banner {{i + 1}}" class="w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105" />
+    <div *ngFor="let slide of images; let i = index" class="w-full flex-shrink-0 relative">
+      <!-- Ensure slide.src is used if images is an array of objects -->
+      <img [src]="slide || slide" alt="Banner {{i + 1}}" class="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[580px] object-cover" />
+      <!-- Darker Overlay for better text contrast -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+      <!-- Content Overlay -->
+      <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 md:p-12">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 md:mb-4 leading-tight
+                   transform transition-all duration-500 ease-out opacity-0 translate-y-8 group-hover:opacity-100 group-hover:translate-y-0"
+            [style.transition-delay]="(i === currentImageIndex ? '200ms' : '0ms')">
+
+        </h2>
+        <p class="text-base sm:text-lg md:text-xl text-gray-200 mb-6 md:mb-8 max-w-lg md:max-w-xl
+                  transform transition-all duration-500 ease-out opacity-0 translate-y-8 group-hover:opacity-100 group-hover:translate-y-0"
+            [style.transition-delay]="(i === currentImageIndex ? '350ms' : '0ms')">
+       
+        </p>
+        <button class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-5 md:py-3 md:px-7 rounded-lg shadow-md hover:shadow-lg
+                       transform transition-all duration-500 ease-out opacity-0 translate-y-8 group-hover:opacity-100 group-hover:translate-y-0
+                       focus:outline-none focus:ring-4 focus:ring-blue-400/50"
+                [style.transition-delay]="(i === currentImageIndex ? '500ms' : '0ms')">
+          Shop Collection
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Navigation buttons for carousel -->
-  <button class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  <!-- Navigation buttons -->
+  <button class="absolute left-3 md:left-5 top-1/2 transform -translate-y-1/2 bg-white/60 hover:bg-white text-gray-900 p-2.5 md:p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 z-10"
           (click)="prevImage()">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
     </svg>
   </button>
-  
-  <button class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  <button class="absolute right-3 md:right-5 top-1/2 transform -translate-y-1/2 bg-white/60 hover:bg-white text-gray-900 p-2.5 md:p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 z-10"
           (click)="nextImage()">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
     </svg>
   </button>
+
+  <!-- Pagination Dots -->
+  <div class="absolute bottom-5 md:bottom-7 left-1/2 transform -translate-x-1/2 flex space-x-2.5 z-10">
+    <button *ngFor="let item of images; let i = index"
+            (click)="goToSlide(i)"            class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full transition-all duration-300 ease-in-out"
+            [ngClass]="{'bg-white scale-125 ring-2 ring-white/50': currentImageIndex === i, 'bg-white/40 hover:bg-white/70': currentImageIndex !== i}">
+      <span class="sr-only">Go to slide {{i + 1}}</span>
+    </button>
+  </div>
 </div>
 
 <!-- ✅ Filter Toggle Button -->
 <div class="px-6 pt-6 max-w-7xl mx-auto text-left">
   <button
     (click)="toggleFilter()"
-    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 transition-transform duration-300" [class.rotate-180]="isFilterOpen" viewBox="0 0 20 20" fill="currentColor">
       <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L13 10.414V15a1 1 0 01-.293.707l-2 2A1 1 0 019 17v-1.586L4.293 10.707A1 1 0 014 10V3zm1 1v5.586l4 4V16l2-2v-3.414l4-4V4H4z" clip-rule="evenodd" />
     </svg>
     {{ isFilterOpen ? 'Hide' : 'Show' }} Filters
@@ -42,136 +87,135 @@
   <!-- Backdrop for mobile filter -->
   <div *ngIf="isFilterOpen" 
        (click)="toggleFilter()" 
-       class="fixed inset-0 bg-black/40 z-30 lg:hidden transition-opacity duration-300 ease-in-out"
+       class="fixed inset-0 bg-black/50 z-30 lg:hidden transition-opacity duration-300 ease-in-out"
        [ngClass]="{'opacity-100': isFilterOpen, 'opacity-0 pointer-events-none': !isFilterOpen}">
   </div>
 
   <!-- 🎯 Filter Sidebar -->
   <aside
     *ngIf="isFilterOpen" 
-    class="fixed top-0 left-0 h-full w-full max-w-[280px] sm:max-w-[320px] z-40 <!-- Mobile: Fixed width, drawer from left -->
-           bg-white dark:bg-gray-900 rounded-r-lg lg:rounded-2xl shadow-xl p-6 border-r lg:border border-gray-200 dark:border-gray-700 dark:lg:border-gray-800
+    class="fixed top-0 left-0 h-full w-full max-w-[290px] sm:max-w-[330px] z-40
+           bg-white dark:bg-gray-800 rounded-r-xl lg:rounded-xl shadow-2xl p-6 space-y-6 border-r lg:border border-gray-200 dark:border-gray-700
            overflow-y-auto
-           transition-transform duration-300 ease-in-out transform translate-x-0 <!-- Slides in when *ngIf makes it appear -->
-           lg:static lg:w-1/4 lg:h-auto lg:max-w-none lg:translate-x-0 lg:shadow-2xl <!-- Desktop: static, part of layout -->
+           transition-transform duration-300 ease-in-out transform 
+           lg:sticky lg:top-6 lg:w-1/4 lg:max-w-xs lg:h-[calc(100vh-3rem)] lg:translate-x-0 
+           translate-x-0 <!-- This should be handled by animation class if sliding from off-screen -->
           "
+    
   >
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl lg:text-2xl font-semibold text-gray-800 dark:text-gray-200">Filter Products</h2>
-      <!-- Close button for mobile filter -->
-      <button (click)="toggleFilter()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 lg:hidden p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl lg:text-2xl font-semibold text-gray-800 dark:text-gray-100">Filters</h2>
+      <button (click)="toggleFilter()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 lg:hidden p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
       </button>
     </div>
 
-    <hr class="my-4 border-gray-200 dark:border-gray-700" />
-
     <!-- Category Filter -->
-    <div class="mb-4">
-      <label for="category-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+    <div>
+      <label for="category-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Category</label>
       <select
         id="category-filter"
         [(ngModel)]="selectedCategory"
         (change)="applyFilters()"
-        class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:ring-blue-500 focus:border-blue-500 p-2.5 text-sm"
+        class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/60 text-gray-800 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2.5 text-sm appearance-none dark:focus:ring-blue-400 dark:focus:border-blue-400"
       >
         <option value="">All Categories</option>
-        <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.name }}</option>
+        <option *ngFor="let cat of categories" [value]="cat._id">
+          {{ cat.name }} </option>
       </select>
     </div>
 
     <!-- Price Filter -->
-    <div class="mb-6"> <!-- Increased margin-bottom -->
-      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price Range</label>
-      <div class="flex gap-2">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Price Range</label>
+      <div class="flex gap-3">
         <input
           type="number"
           [(ngModel)]="minPrice"
           placeholder="Min"
-          class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2.5 text-sm"
+          class="w-1/2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/60 text-gray-800 dark:text-gray-200 p-2.5 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
         />
         <input
           type="number"
           [(ngModel)]="maxPrice"
           placeholder="Max"
-          class="w-1/2 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2.5 text-sm"
+          class="w-1/2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/60 text-gray-800 dark:text-gray-200 p-2.5 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
         />
       </div>
     </div>
 
     <!-- Filter Buttons -->
-    <div class="flex flex-col gap-3 mt-6"> <!-- Increased gap and margin-top -->
+    <div class="flex flex-col gap-3 pt-2">
       <button
         (click)="applyFilters()"
-        class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 shadow hover:shadow-md"
       >
         Apply Filters
       </button>
       <button
         (click)="resetFilters()"
-        class="w-full text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 py-2.5 px-4 rounded-lg font-medium hover:bg-blue-50 dark:hover:bg-gray-800 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-500 py-2.5 px-4 rounded-lg font-medium hover:bg-blue-50 dark:hover:bg-blue-900/30 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-        Reset
+        Reset Filters
       </button>
     </div>
   </aside>
 
   <!-- ✅ Product Grid Section -->
   <section class="flex-1 mt-8 lg:mt-0">
-    <!-- ✅ Product Grid Container -->
-    <div *ngIf="product.length > 0; else noProduct" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <!-- Adjusted grid columns for better spacing, especially when filter is open on lg -->
-  
-      <!-- Product Card (Example) -->
-      <div *ngFor="let item of product" class="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-700/50 overflow-hidden hover:shadow-xl dark:hover:shadow-gray-700/70 transition-shadow duration-300 flex flex-col h-full relative group">
-        <!-- Image Container with Hover Overlay -->
-        <div (click)="productInfo(item)" class="relative pt-[100%] bg-gray-50 dark:bg-gray-700 overflow-hidden cursor-pointer">
+    <div *ngIf="product.length > 0; else noProduct" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-x-6 gap-y-8">
+      <!-- If filter is open on lg/xl, 3 columns might be better than 4 for space -->
+      <!-- Product Card -->
+      <div *ngFor="let item of product" 
+           class="bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-700/50 overflow-hidden hover:shadow-2xl dark:hover:shadow-gray-700/70 transition-all duration-300 flex flex-col h-full relative group transform hover:-translate-y-1.5">
+        
+        <span *ngIf="item.isNew || item.onSale" 
+              class="absolute top-3 right-3 text-white text-xs font-semibold px-2.5 py-1 rounded-full z-10"
+              [ngClass]="{'bg-green-500': item.isNew, 'bg-red-500': item.onSale}">
+          {{ item.isNew ? 'NEW' : (item.onSale ? 'SALE' : '') }}
+        </span>
+
+        <div (click)="productInfo(item)" class="relative pt-[100%] bg-gray-100 dark:bg-gray-700/50 overflow-hidden cursor-pointer">
           <img 
             [src]="item.image" 
             [alt]="item.name"
-            class="absolute top-0 left-0 w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+            class="absolute top-0 left-0 w-full h-full object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-110"
             loading="lazy"
           >
-          
-          <!-- Hover Overlay with Add to Cart Button -->
-          <div class="absolute inset-0 bg-black/10 dark:bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-3 justify-center">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 justify-center">
             <button 
-              (click)=" addtocart(item)" 
-              class="bg-white text-blue-600 hover:bg-blue-600 hover:text-white rounded-full py-2 px-4 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+              (click)="addtocart(item); $event.stopPropagation()"
+              class="bg-white text-blue-600 hover:bg-blue-600 hover:text-white font-semibold rounded-lg py-2.5 px-5 shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 ease-out flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black/50"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
               </svg>
-              <span class="ml-2 text-sm font-medium">Add to Cart</span>
+              <span class="text-sm">Add to Cart</span>
             </button>
           </div>
         </div>
 
-        <!-- Product Info -->
-        <div class="p-4 flex flex-col flex-grow"> <!-- ✅ Corrected typo: flex-grow -->
-          <h3 class="font-semibold text-md lg:text-lg mb-1 text-gray-900 dark:text-gray-100 truncate">{{item.name}}</h3> <!-- ✅ truncate, adjusted text size -->
-          <p class="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2 min-h-[2.5em]">{{item.description}}</p> <!-- ✅ line-clamp with min-height -->
+        <div class="p-5 flex flex-col flex-grow">
+          <h3 (click)="productInfo(item)" class="cursor-pointer font-semibold text-lg lg:text-xl mb-1.5 text-gray-800 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {{item.name}}
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2 min-h-[2.5em]">{{item.description}}</p>
           
           <div class="flex items-center mb-3">
             <div class="flex text-yellow-400">
-              <!-- Basic star display, replace with your actual rating logic if needed -->
               <ng-container *ngFor="let i of [1,2,3,4,5]">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                </svg>
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
               </ng-container>
             </div>
-            <span class="text-gray-500 dark:text-gray-400 text-xs ml-1.5">({{item.reviewCount || 0}})</span>
+            <span class="text-gray-500 dark:text-gray-400 text-xs ml-2">({{item.reviewCount || '0 Reviews'}})</span>
           </div>
           
-          <div class="mt-auto pt-3 border-t border-gray-200 dark:border-gray-700/50"> <!-- ✅ Pushed to bottom, added separator -->
+          <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700/70">
             <div class="flex items-center justify-between">
-              <span class="font-bold text-lg xl:text-xl text-gray-900 dark:text-white">${{item.price | currency:'INR'}}</span>
+              <span class="font-bold text-xl xl:text-2xl text-gray-900 dark:text-white">${{item.price | currency:'INR'}}</span>
               <button 
-                (click)="addtocart(item)" 
-                class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition duration-150 ease-in-out whitespace-nowrap flex-shrink-0 hidden sm:block focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                (click)="addtocart(item); $event.stopPropagation()"
+                class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
               >
                 Buy Now
               </button>
@@ -181,18 +225,296 @@
       </div>
     </div>
 
-    <!-- ❌ No Products -->
     <ng-template #noProduct>
-      <div class="text-center text-gray-500 dark:text-gray-400 py-12">
-        <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+      <div class="text-center text-gray-500 dark:text-gray-400 py-16">
+        <svg class="w-20 h-20 mx-auto mb-6 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4m12 8V10M8 21V10"></path>
         </svg>
-        <p class="text-lg font-medium">No products found.</p>
-        <p class="text-sm mt-1">Try adjusting your filters or check back later.</p>
-        <button (click)="resetFilters()" class="mt-4 text-blue-600 hover:text-blue-700 underline font-medium">
-          Clear all filters
+        <p class="text-xl font-semibold mb-2">No Products Found</p>
+        <p class="text-sm max-w-sm mx-auto mb-6">We couldn't find any products matching your current filters. Try adjusting them or check back later for new arrivals!</p>
+        <button (click)="resetFilters()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors">
+          Clear All Filters
         </button>
       </div>
     </ng-template>
   </section>
 </div>
+
+<!-- ✅ Why Choose Us Section -->
+<section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800/50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12 lg:mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Why Choose Us?</h2>
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">We provide top-quality products and an unparalleled shopping experience.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="text-center p-6 bg-white dark:bg-gray-900/70 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 group">
+        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-600/30 rounded-full flex items-center justify-center mx-auto mb-5 transition-all duration-300 group-hover:bg-blue-500 dark:group-hover:bg-blue-500 group-hover:scale-110">
+          <svg class="w-8 h-8 text-blue-600 dark:text-blue-300 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5v-2.25C3.375 16.5 4.375 15 5.625 15h12.75c1.25 0 2.25 1.5 2.25 2.25v2.25"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18V4.5a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 4.5V18M6 12h12"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Free Shipping</h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">On orders over $75. Fast, reliable delivery right to your doorstep.</p>
+      </div>
+      
+      <div class="text-center p-6 bg-white dark:bg-gray-900/70 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 group">
+        <div class="w-16 h-16 bg-green-100 dark:bg-green-600/30 rounded-full flex items-center justify-center mx-auto mb-5 transition-all duration-300 group-hover:bg-green-500 dark:group-hover:bg-green-500 group-hover:scale-110">
+          <svg class="w-8 h-8 text-green-600 dark:text-green-300 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Quality Guarantee</h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">30-day money-back. Premium products you can absolutely trust.</p>
+      </div>
+
+      <div class="text-center p-6 bg-white dark:bg-gray-900/70 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 group">
+        <div class="w-16 h-16 bg-purple-100 dark:bg-purple-600/30 rounded-full flex items-center justify-center mx-auto mb-5 transition-all duration-300 group-hover:bg-purple-500 dark:group-hover:bg-purple-500 group-hover:scale-110">
+          <svg class="w-8 h-8 text-purple-600 dark:text-purple-300 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Secure Payment</h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">Your payment information is processed securely with SSL encryption.</p>
+      </div>
+
+      <div class="text-center p-6 bg-white dark:bg-gray-900/70 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 group">
+        <div class="w-16 h-16 bg-orange-100 dark:bg-orange-600/30 rounded-full flex items-center justify-center mx-auto mb-5 transition-all duration-300 group-hover:bg-orange-500 dark:group-hover:bg-orange-500 group-hover:scale-110">
+          <svg class="w-8 h-8 text-orange-600 dark:text-orange-300 group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.018-.991-.174-1.452l-.46-1.948a2.25 2.25 0 00-2.121-1.618l-1.968-.246a2.25 2.25 0 01-1.81-.327l-.945-.63a2.25 2.25 0 00-2.814 0l-.945.63a2.25 2.25 0 01-1.81.327l-1.968.246a2.25 2.25 0 00-2.121 1.618l-.46 1.948A12.052 12.052 0 002.25 17.628V6.75z"/>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">24/7 Support</h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">Round-the-clock customer support to assist you anytime.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ Featured Products Section -->
+<section class="py-16 lg:py-24 bg-white dark:bg-gray-900">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12 lg:mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Featured Products</h2>
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Handpicked selections that our customers love.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Assuming 'product' array is available, slice to show a few featured items -->
+      <div *ngFor="let item of product.slice(0,3)" 
+           class="bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-700/40 overflow-hidden hover:shadow-2xl dark:hover:shadow-gray-700/60 transition-all duration-300 group transform hover:-translate-y-1.5">
+        <div class="relative overflow-hidden aspect-w-4 aspect-h-3">
+          <img [src]="item.image" [alt]="item.name" 
+               class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110">
+          <div class="absolute top-4 left-4">
+            <span class="bg-red-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider shadow">Featured</span>
+          </div>
+          <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-3">
+            <button (click)="productInfo(item); $event.stopPropagation()" class="bg-white/90 text-gray-800 hover:bg-white py-2.5 px-4 rounded-lg text-sm font-semibold shadow-md transform scale-90 group-hover:scale-100 transition-transform duration-200 delay-100 focus:outline-none focus:ring-2 focus:ring-blue-500">Quick View</button>
+            <button (click)="addtocart(item); $event.stopPropagation()" class="bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg text-sm font-semibold shadow-md transform scale-90 group-hover:scale-100 transition-transform duration-200 delay-150 focus:outline-none focus:ring-2 focus:ring-blue-500">Add to Cart</button>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 (click)="productInfo(item); $event.stopPropagation()" class="cursor-pointer font-semibold text-xl text-gray-900 dark:text-white mb-2 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{item.name}}</h3>
+          <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 min-h-[2.5em]">{{item.description}}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">${{item.price | currency:'INR'}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ Customer Testimonials Section -->
+<section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800/50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12 lg:mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">What Our Customers Say</h2>
+      <p class="text-lg text-gray-600 dark:text-gray-300">Real feedback from our valued shoppers.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Testimonial Card 1 -->
+      <div class="bg-white dark:bg-gray-900/70 rounded-xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1.5">
+        <div class="flex items-center mb-5">
+          <img src="https://randomuser.me/api/portraits/women/68.jpg" 
+               alt="Customer Sarah J." class="w-14 h-14 rounded-full object-cover mr-4 border-2 border-blue-200 dark:border-blue-700 shadow-sm">
+          <div>
+            <h4 class="font-semibold text-lg text-gray-800 dark:text-white">Sarah Johnson</h4>
+            <div class="flex text-yellow-400 mt-0.5">
+              <svg *ngFor="let i of [1,2,3,4,5]" class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+            </div>
+          </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 italic relative pl-6 before:content-['“'] before:absolute before:left-0 before:top-0 before:text-4xl before:text-blue-400 dark:before:text-blue-500 before:font-serif leading-relaxed">
+          Absolutely amazing quality! The products exceeded my expectations and the customer service is outstanding. Will definitely shop here again!
+        </p>
+      </div>
+      <!-- Testimonial Card 2 -->
+      <div class="bg-white dark:bg-gray-900/70 rounded-xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1.5">
+        <div class="flex items-center mb-5">
+          <img src="https://randomuser.me/api/portraits/men/32.jpg" 
+               alt="Customer Michael C." class="w-14 h-14 rounded-full object-cover mr-4 border-2 border-green-200 dark:border-green-700 shadow-sm">
+          <div>
+            <h4 class="font-semibold text-lg text-gray-800 dark:text-white">Michael Chen</h4>
+            <div class="flex text-yellow-400 mt-0.5">
+              <svg *ngFor="let i of [1,2,3,4,5]" class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+            </div>
+          </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 italic relative pl-6 before:content-['“'] before:absolute before:left-0 before:top-0 before:text-4xl before:text-green-400 dark:before:text-green-500 before:font-serif leading-relaxed">
+          Fast shipping, great prices, and top-notch quality. This has become my go-to store for all my shopping needs. Highly recommended!
+        </p>
+      </div>
+      <!-- Testimonial Card 3 -->
+       <div class="bg-white dark:bg-gray-900/70 rounded-xl shadow-lg p-6 md:p-8 hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1.5">
+        <div class="flex items-center mb-5">
+          <img src="https://randomuser.me/api/portraits/women/44.jpg" 
+               alt="Customer Emma D." class="w-14 h-14 rounded-full object-cover mr-4 border-2 border-purple-200 dark:border-purple-700 shadow-sm">
+          <div>
+            <h4 class="font-semibold text-lg text-gray-800 dark:text-white">Emma Davis</h4>
+            <div class="flex text-yellow-400 mt-0.5">
+              <svg *ngFor="let i of [1,2,3,4]" class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+              <svg class="w-4 h-4 fill-current text-gray-300 dark:text-gray-600" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+            </div>
+          </div>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 italic relative pl-6 before:content-['“'] before:absolute before:left-0 before:top-0 before:text-4xl before:text-purple-400 dark:before:text-purple-500 before:font-serif leading-relaxed">
+          The return policy is fantastic and the product quality is consistently excellent. Customer support was very helpful with my query.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ Newsletter Subscription Section -->
+<section class="py-16 lg:py-24 bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-900">
+  <div class="max-w-3xl mx-auto px-6 text-center">
+    <div class="bg-white/10 dark:bg-black/20 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-2xl">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-3">Stay in the Loop!</h2>
+      <p class="text-lg text-blue-100 dark:text-indigo-200 mb-8">Subscribe to our newsletter for exclusive deals, new arrivals, and insider tips.</p>
+      
+      <form (ngSubmit)="subscribeNewsletter()" class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+        <input 
+          type="email" 
+          [(ngModel)]="newsletterEmail"
+          name="email"
+          placeholder="Enter your email address" 
+          required
+          class="flex-1 px-5 py-3 rounded-lg border-0 text-gray-700 dark:text-gray-200 bg-white/90 dark:bg-gray-700/80 focus:ring-4 focus:ring-blue-300 dark:focus:ring-indigo-400 focus:outline-none placeholder-gray-500 dark:placeholder-gray-400 shadow-sm text-sm transition-all">
+        <button 
+          type="submit"
+          class="bg-white text-blue-600 dark:bg-indigo-400 dark:hover:bg-indigo-300 dark:text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/70 dark:focus:ring-indigo-300/70 shadow-sm hover:shadow-md">
+          Subscribe
+        </button>
+      </form>
+      <p class="text-blue-100 dark:text-indigo-200 text-xs mt-4 opacity-80">We respect your privacy. No spam, ever.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ Statistics Section -->
+<section class="py-16 lg:py-24 bg-gray-800 dark:bg-black text-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 text-center">
+      <div class="p-4">
+        <div class="text-4xl md:text-5xl font-extrabold text-blue-400 mb-2">10K+</div>
+        <p class="text-gray-300 text-sm uppercase tracking-wider font-medium">Happy Customers</p>
+      </div>
+      <div class="p-4">
+        <div class="text-4xl md:text-5xl font-extrabold text-green-400 mb-2">5K+</div>
+        <p class="text-gray-300 text-sm uppercase tracking-wider font-medium">Products Sold</p>
+      </div>
+      <div class="p-4">
+        <div class="text-4xl md:text-5xl font-extrabold text-purple-400 mb-2">99%</div>
+        <p class="text-gray-300 text-sm uppercase tracking-wider font-medium">Satisfaction Rate</p>
+      </div>
+      <div class="p-4">
+        <div class="text-4xl md:text-5xl font-extrabold text-orange-400 mb-2">24/7</div>
+        <p class="text-gray-300 text-sm uppercase tracking-wider font-medium">Support Online</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ Footer Section -->
+<footer class="bg-gray-900 dark:bg-black text-gray-400 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+      <!-- Company Info -->
+      <div>
+        <div class="flex items-center mb-5">
+          <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+             <!-- Replace with a proper logo SVG -->
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"></path></svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white">YourStore</h3>
+        </div>
+        <p class="text-sm mb-5 leading-relaxed">Your trusted partner for premium quality products and an exceptional shopping experience.</p>
+        <div class="flex space-x-3">
+          <a href="#" aria-label="Twitter" class="w-9 h-9 bg-gray-700/50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-500 transition-all duration-200">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+          </a>
+          <!-- Add Facebook, Instagram, etc. similarly -->
+           <a href="#" aria-label="Facebook" class="w-9 h-9 bg-gray-700/50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-blue-600 transition-all duration-200">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
+          </a>
+        </div>
+      </div>
+      
+      <div>
+        <h4 class="text-lg font-semibold text-white mb-5">Quick Links</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="#" class="hover:text-blue-400 transition-colors duration-200">About Us</a></li>
+          <li><a href="#" class="hover:text-blue-400 transition-colors duration-200">Contact Us</a></li>
+          <li><a href="#" class="hover:text-blue-400 transition-colors duration-200">FAQs</a></li>
+          <li><a href="#" class="hover:text-blue-400 transition-colors duration-200">Shipping & Returns</a></li>
+          <li><a href="#" class="hover:text-blue-400 transition-colors duration-200">Track Your Order</a></li>
+        </ul>
+      </div>
+      
+      <div>
+        <h4 class="text-lg font-semibold text-white mb-5">Shop Categories</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li *ngFor="let category of categories?.slice(0, 5)">
+            <a href="#" class="hover:text-blue-400 transition-colors duration-200">{{category.name}}</a>
+          </li>
+           <li *ngIf="!categories || categories.length === 0"><a href="#" class="hover:text-blue-400 transition-colors duration-200">Electronics</a></li> <!-- Fallback -->
+           <li *ngIf="!categories || categories.length === 0"><a href="#" class="hover:text-blue-400 transition-colors duration-200">Fashion</a></li> <!-- Fallback -->
+        </ul>
+      </div>
+      
+      <div>
+        <h4 class="text-lg font-semibold text-white mb-5">Get In Touch</h4>
+        <div class="space-y-3.5 text-sm">
+          <div class="flex items-start">
+            <svg class="w-5 h-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>123 Shopping Ave, Commerce City, CS 12345, USA</span>
+          </div>
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            <a href="mailto:info@yourstore.com" class="hover:text-blue-400">infoyourstore.com</a>
+          </div>
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            <a href="tel:+15551234567" class="hover:text-blue-400">+1 (555) 123-4567</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <hr class="border-gray-700/50 dark:border-gray-800 mb-8">
+    
+    <div class="flex flex-col md:flex-row justify-between items-center text-xs">
+      <p class="text-gray-500 mb-4 md:mb-0">© {{currentYear}} YourStore. All Rights Reserved. </p>
+      <div class="flex space-x-4">
+        <a href="#" class="hover:text-blue-400 transition-colors duration-200">Privacy Policy</a>
+        <a href="#" class="hover:text-blue-400 transition-colors duration-200">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>

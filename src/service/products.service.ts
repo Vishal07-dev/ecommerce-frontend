@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environment/environment';
@@ -8,6 +8,7 @@ import { environment } from '../environment/environment';
 })
 export class ProductsService {
   private apiUrl = environment.apiUrl;
+  public searchResults = signal<any[]>([]);
 
   private productCreate = new BehaviorSubject<boolean>(false);
   productCreate$ = this.productCreate.asObservable();
@@ -64,4 +65,17 @@ export class ProductsService {
   getProductById(id: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/product/single/${id}`);
   }
+
+  //Filter Product for home component
+
+   handleSearch(term: string) {
+    const params: any = {};
+    if (term) params.name = term;
+
+    this.fetchProduct(params).subscribe((res: any) => {
+      this.searchResults.set(res.products ?? res); // Set signal value
+    });
+  }
+
+
 }

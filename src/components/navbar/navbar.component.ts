@@ -1,9 +1,10 @@
-import { Component, OnInit, computed, signal } from "@angular/core";
+import { Component, OnInit, computed, effect, inject, signal } from "@angular/core";
 import { AuthService } from "../../service/auth.service";
 import { CartService } from "../../service/cartService/cart.service";
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AsyncPipe, CommonModule, NgIf } from '@angular/common';
 import { debouncingSignal } from '../../../debounce-util';
+import { ProductsService } from '../../service/products.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,19 +14,24 @@ import { debouncingSignal } from '../../../debounce-util';
 })
 export class NavbarComponent implements OnInit {
   mobileMenuOpen: boolean = false;
-
+ showSearch = signal(false); // Toggle visibility
+  searchTerm = signal('');    // Search input value
+  productService=inject(ProductsService)
   auth: AuthService;
   cartService: CartService;
   showSearchInput = signal(false);
-  searchTerm = signal('');
   searchQuery = debouncingSignal(this.searchTerm, 500, '');
   // Signal to track cart item count
   cartItemCount = signal<number>(0);
 
-  constructor(authService: AuthService, cartService: CartService,) {
+  constructor(authService: AuthService, cartService: CartService) {
     this.auth = authService;
     this.cartService = cartService;
     this.updateCartCount()
+ effect(() => {
+      // if(this.showForm == true) this.productForm.reset()
+     this.productService.handleSearch(this.searchQuery());
+    });
 
 
     
@@ -39,7 +45,14 @@ export class NavbarComponent implements OnInit {
     });
     
   }
+toggleSearch() {
+    this.showSearch.set(!this.showSearch());
+  }
 
+  onSearchInput(event: any) {
+    this.searchTerm.set(event.target.value);
+console.log(this.searchTerm());
+  }
   private updateCartCount(): void {
     // Get cart items from localStorage
     const storedProducts = localStorage.getItem('Product');
@@ -69,4 +82,5 @@ export class NavbarComponent implements OnInit {
       this.cartItemCount.set(0);
     }
   }
+  
 }

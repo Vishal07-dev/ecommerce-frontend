@@ -1,0 +1,4 @@
+.open {
+  max-height: 100px; /* or auto using JS workaround */
+  opacity: 1 !important;
+}

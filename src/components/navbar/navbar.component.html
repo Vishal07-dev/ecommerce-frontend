@@ -1,16 +1,17 @@
 <!-- Modern Responsive Navbar -->
-<nav class="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+<nav class="sticky top-0 z-30 bg-background/95 bg-slate-100 -z-10 backdrop-blur supports-[backdrop-filter]:bg-background/60">
   <div class="container flex h-16 items-center justify-between px-4 mx-auto"> <!-- Added mx-auto to container for centering -->
     <!-- Logo -->
-    <div class="flex items-center gap-2">
+     <div>    <div class="flex items-center gap-2">
       <svg class="h-6 w-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
       </svg>
       <a routerLink="/" class="text-lg font-bold tracking-tight">Acme Store</a> <!-- Made logo text a link -->
     </div>
-
+</div>
+<div class="flex px-3 items-center">
     <!-- Desktop Nav -->
-    <div class="hidden md:flex items-center gap-6">
+    <div class="hidden md:flex px-3 items-center gap-6">
       <a routerLink="/" routerLinkActive="text-primary" [routerLinkActiveOptions]="{exact: true}" class="text-sm font-medium transition-colors hover:text-primary">Home</a>
       <a routerLink="/products" routerLinkActive="text-primary" class="text-sm font-medium transition-colors hover:text-primary">Shop</a>
       <a routerLink="/about" routerLinkActive="text-primary" class="text-sm font-medium transition-colors hover:text-primary">About</a>
@@ -18,14 +19,55 @@
     </div>
 
     <!-- Right side actions -->
-    <div class="flex items-center gap-3 sm:gap-4">
+    <div class="flex items-center gap-3">
       <!-- Search -->
-      <button aria-label="Search" class="p-2 rounded-full hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-      </button>
+  <!-- Search -->
+<!-- Search -->
+<!-- Inline Search -->
+<div class="flex items-center gap-2">
+  <!-- Search Toggle Button -->
+  <button 
+    aria-label="Search" 
+    (click)="toggleSearch()" 
+    class="p-2 rounded-full hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+  >
+    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+  </button>
 
+  <!-- Input shows inline when toggled -->
+  <input
+    *ngIf="showSearch()"
+    type="text"
+    placeholder="Search..."
+    (input)="onSearchInput($event)"
+    
+    [ngClass]="{
+      'opacity-100 scale-100 w-40 sm:w-64 transition-all duration-300 ease-in-out duration-200': showSearch(),
+      'opacity-0 scale-95 w-0': !showSearch()
+    }"
+    class="transition-all duration-300 ease-in-out transform border border-gray-300 rounded px-3 py-1 bg-white focus:outline-none"
+  />
+</div>
+
+
+
+        <!-- Cart -->
+         
+              <a routerLink="/cart" aria-label="View Cart" class="relative p-2 rounded-full hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <span *ngIf="cartItemCount() > 0"
+          class="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center">
+          {{ cartItemCount() > 99 ? '99+' : cartItemCount() }}
+        </span>
+      </a>
+  
+</div>
       <!-- Profile / Login -->
       <ng-container *ngIf="auth.isLoggedIn(); else loginLink">
         <a routerLink="/profile" aria-label="Profile" class="p-2 rounded-full hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
@@ -36,21 +78,12 @@
         <!-- Logout visible on larger screens if needed, or handled by profile page -->
         <button (click)="auth.logout()" class="hidden sm:block text-sm font-medium transition-colors hover:text-primary focus:outline-none focus:underline">Logout</button>
       </ng-container>
+
       <ng-template #loginLink>
         <a routerLink="/login" class="text-sm font-medium transition-colors hover:text-primary focus:outline-none focus:underline">Login</a>
       </ng-template>
 
-      <!-- Cart -->
-      <a routerLink="/cart" aria-label="View Cart" class="relative p-2 rounded-full hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-        <span *ngIf="cartItemCount() > 0"
-          class="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center">
-          {{ cartItemCount() > 99 ? '99+' : cartItemCount() }}
-        </span>
-      </a>
+    
 
       <!-- Mobile Hamburger -->
       <button (click)="mobileMenuOpen = !mobileMenuOpen" 
