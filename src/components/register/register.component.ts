@@ -29,7 +29,7 @@ onSubmit() {
       const productData = this.productForm.value;
       console.log('Submitting product:', productData);
 
-      this.http.post('http://localhost:2000/api/user/create', productData)
+      this.http.post('https://ecommerce-backend-n4tk.onrender.com/api/user/create', productData)
 .subscribe({
         next: () => {
           alert('user created successfully!');
