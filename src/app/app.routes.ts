@@ -17,6 +17,7 @@ import { adminGuard } from '../guard/admin.guard';
 import { CategoryComponent } from '../admin/category/category.component';
 import { CartPageComponent } from '../components/cart-page/cart-page.component';
 import { ProductInformationComponent } from '../components/product-information/product-information.component';
+import { ShopPageComponent } from '../components/shop-page/shop-page.component';
 
 export const routes: Routes = [
   // Public routes
@@ -29,7 +30,8 @@ export const routes: Routes = [
       { path: 'register', component: RegisterComponent },
       { path: 'profile', component: UserprofileComponent },
       { path: 'cart', component: CartPageComponent },
-      { path: 'product/:id', component: ProductInformationComponent }
+      { path: 'product/:id', component: ProductInformationComponent },
+      { path: 'shop', component: ShopPageComponent }
     ]
   },
 

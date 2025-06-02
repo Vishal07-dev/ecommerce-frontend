@@ -1,0 +1,236 @@
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Breadcrumbs & Page Title -->
+    <header class="mb-8">
+      <nav class="text-sm mb-2" aria-label="Breadcrumb">
+        <ol class="list-none p-0 inline-flex space-x-2">
+          <li class="flex items-center">
+            <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">Home</a>
+            <svg class="fill-current w-3 h-3 mx-2 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg>
+          </li>
+          <li class="flex items-center">
+            <span class="text-gray-700 dark:text-gray-200 font-medium">Shop</span>
+          </li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Explore Our Products</h1>
+    </header>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Filters Sidebar -->
+      <!-- Mobile Filter Toggle Button -->
+      <div class="lg:hidden mb-6 flex justify-between items-center">
+        <span class="text-gray-700 dark:text-gray-300">{{ products.length }} Products</span>
+        <button 
+          (click)="toggleMobileFilters()"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L13 10.414V16a1 1 0 01-1.447.894l-3-2A1 1 0 018 14.188V10.414L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+          </svg>
+          Filters
+        </button>
+      </div>
+
+      <!-- Sidebar -->
+      <aside 
+        [ngClass]="{'block': showMobileFilters, 'hidden lg:block': !showMobileFilters}"
+        class="lg:w-1/4 xl:w-1/5 space-y-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:sticky lg:top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto">
+        
+        <!-- Close button for mobile filters -->
+        <div class="lg:hidden flex justify-end">
+          <button (click)="toggleMobileFilters()" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <!-- Categories Filter -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 border-b pb-2 dark:border-gray-700">Categories</h3>
+          <ul class="space-y-2">
+            <li *ngFor="let category of categories">
+              <label class="flex items-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
+                <input type="checkbox" (change)="toggleCategory(category)" class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800">
+                <span class="ml-2 text-sm">{{ category.name }}</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Price Range Filter -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 border-b pb-2 dark:border-gray-700">Price Range</h3>
+          <div class="space-y-3">
+            <!-- This is a visual placeholder for a slider. Implement with a library or custom. -->
+            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
+              <span>${{ priceRange.min }}</span>
+              <span>${{ priceRange.max }}</span>
+            </div>
+            <input type="range" min="0" max="1000" [(ngModel)]="priceRange.min" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
+             <input type="range" min="0" max="1000" [(ngModel)]="priceRange.max" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
+            <button (click)="applyPriceRange()" class="w-full mt-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+              Apply Price
+            </button>
+          </div>
+        </div>
+
+        <!-- Rating Filter -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 border-b pb-2 dark:border-gray-700">Average Rating</h3>
+          <div class="space-y-1">
+            <button *ngFor="let rating of [5, 4, 3, 2, 1]" (click)="selectRating(rating)" 
+                    [ngClass]="{'bg-blue-100 dark:bg-blue-900/50 border-blue-500': selectedRating === rating, 'border-transparent': selectedRating !== rating}"
+                    class="w-full flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 border transition-colors">
+              <span class="flex">
+                <svg *ngFor="let i of [1,2,3,4,5]" class="w-4 h-4" 
+                     [ngClass]="{'text-yellow-400': i <= rating, 'text-gray-300 dark:text-gray-600': i > rating}" 
+                     fill="currentColor" viewBox="0 0 20 20">
+                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.959a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.364 1.118l1.287 3.959c.3.921-.755 1.688-1.54 1.118l-3.368-2.446a1 1 0 00-1.175 0l-3.368 2.446c-.784.57-1.838-.197-1.539-1.118l1.287-3.959a1 1 0 00-.364-1.118L2.24 9.386c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/>
+                </svg>
+              </span>
+              <span *ngIf="rating < 5" class="ml-2 text-sm text-gray-600 dark:text-gray-300">& Up</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Clear Filters Button -->
+        <button (click)="clearFilters()" class="w-full mt-6 px-4 py-2 border border-red-500 text-red-500 text-sm font-medium rounded-md hover:bg-red-50 dark:hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+          Clear All Filters
+        </button>
+      </aside>
+
+      <!-- Main Product Listing -->
+      <main class="w-full lg:w-3/4 xl:w-4/5">
+        <!-- Sort and Count -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <span class="text-sm text-gray-600 dark:text-gray-300 mb-2 sm:mb-0">
+            
+          </span>
+          <div class="flex items-center">
+            <label for="sort-by" class="mr-2 text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</label>
+            <select id="sort-by" (change)="changeSort($event)" [(ngModel)]="sortBy"
+                    class="form-select block w-full sm:w-auto pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-gray-200">
+              <option value="popularity">Popularity</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating">Average Rating</option>
+              <option value="newest">Newest Arrivals</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div *ngIf="getPaginatedProducts().length > 0; else noProducts" 
+             class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+          <div *ngFor="let product of getPaginatedProducts()" 
+               (click)="viewProductDetails(product)"
+               class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden group transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col">
+            
+            <div class="relative overflow-hidden aspect-[4/3]">
+              <img [src]="product.image" [alt]="product.name" 
+                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+              
+              <div class="absolute top-3 left-3 flex flex-col space-y-1">
+                <span *ngIf="product.isNew" class="bg-green-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow">NEW</span>
+                <span *ngIf="product.onSale" class="bg-red-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow">SALE</span>
+              </div>
+
+              <!-- Quick Actions on Hover -->
+              <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-3">
+                <button (click)="addToWishlist(product, $event)" title="Add to Wishlist"
+                        class="p-2.5 bg-white/80 dark:bg-gray-700/80 rounded-full text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-600 hover:text-pink-500 dark:hover:text-pink-400 transition-colors shadow-md transform scale-90 group-hover:scale-100 duration-200 delay-100">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                </button>
+                <button (click)="addToCart(product, $event)" title="Add to Cart"
+                        class="p-2.5 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors shadow-md transform scale-90 group-hover:scale-100 duration-200 delay-150">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="p-5 flex flex-col flex-grow">
+              <h3 class="font-semibold text-lg text-gray-900 dark:text-white mb-1 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{product.name}}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{product.category.name}}</p>
+              
+              <div class="flex items-center mb-3">
+                <span class="flex">
+                  <svg *ngFor="let i of [1,2,3,4,5]" class="w-4 h-4" 
+                       [ngClass]="{'text-yellow-400': i <= product.ratings, 'text-gray-300 dark:text-gray-500': i > product.ratings}" 
+                       fill="currentColor" viewBox="0 0 20 20">
+                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.959a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.364 1.118l1.287 3.959c.3.921-.755 1.688-1.54 1.118l-3.368-2.446a1 1 0 00-1.175 0l-3.368 2.446c-.784.57-1.838-.197-1.539-1.118l1.287-3.959a1 1 0 00-.364-1.118L2.24 9.386c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/>
+                  </svg>
+                </span>
+                <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">({{product.reviews}} reviews)</span>
+              </div>
+
+              <div class="mt-auto"> <!-- Pushes price to bottom -->
+                <div class="flex items-baseline gap-2">
+                  <span class="text-xl font-bold text-blue-600 dark:text-blue-400">${{product.price.toFixed(2)}}</span>
+                  <span *ngIf="product.onSale && product.originalPrice" class="text-sm text-gray-500 dark:text-gray-400 line-through">${{product.originalPrice.toFixed(2)}}</span>
+                </div>
+                <!-- Optional: Color/Size swatches -->
+                <div *ngIf="product.colors && product.colors.length > 0" class="mt-2 flex space-x-1">
+                    <span *ngFor="let color of product.colors" 
+                          [style.background-color]="color"
+                          class="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm"
+                          [title]="color">
+                    </span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <ng-template #noProducts>
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            </svg>
+            <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">No products found</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or check back later.</p>
+          </div>
+        </ng-template>
+
+        <!-- Pagination -->
+        <nav *ngIf="getTotalPages() > 1" class="mt-12 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:px-0">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+              Previous
+            </button>
+            <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === getTotalPages()"
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+              Next
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center">
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                  <span class="sr-only">Previous</span>
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+                
+                <ng-container *ngFor="let pageNum of getPageNumbers()">
+                   <button (click)="changePage(pageNum)"
+                          [ngClass]="{'z-10 bg-blue-50 border-blue-500 text-blue-600 dark:bg-blue-600/30 dark:border-blue-500 dark:text-blue-300': currentPage === pageNum, 
+                                      'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700': currentPage !== pageNum}"
+                          class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                    {{ pageNum }}
+                  </button>
+                </ng-container>
+                
+                <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === getTotalPages()"
+                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                  <span class="sr-only">Next</span>
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+</div>
