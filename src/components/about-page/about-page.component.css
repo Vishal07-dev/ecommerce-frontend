@@ -1,0 +1,222 @@
+/* Global styles for the page (add to styles.css or here if specific to component) */
+:host {
+  display: block; /* Important for component styling */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Ensure smooth scrolling on the whole page */
+/* You might want to put this in your global styles.css */
+/* html {
+  scroll-behavior: smooth;
+} */
+
+.about-us-container {
+  width: 100%;
+  overflow-x: hidden; /* Prevents horizontal scrollbars */
+}
+
+/* Basic Section Styling */
+.parallax-section, .content-section {
+  min-height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  position: relative; /* For overlay positioning */
+}
+
+/* Parallax Specific Styling */
+.parallax-section {
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed; /* This creates the parallax effect */
+  color: #fff; /* Default text color for parallax sections */
+}
+
+/* Content Overlay for Parallax Sections (for text readability) */
+.content-overlay {
+  background-color: rgba(0, 0, 0, 0.6); /* Dark semi-transparent overlay */
+  padding: 30px 40px;
+  border-radius: 10px;
+  max-width: 800px; /* Control content width */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+.content-overlay h1, .content-overlay h2 {
+  margin-bottom: 20px;
+  font-size: 2.8rem;
+  font-weight: bold;
+}
+.content-overlay .subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  font-weight: 300;
+}
+.content-overlay p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+/* Regular Content Section Styling */
+.content-section {
+  background-color: #f9f9f9; /* Light background for contrast */
+}
+.content-section:nth-of-type(even) { /* Alternate background for visual rhythm */
+   background-color: #ffffff;
+}
+
+.content-wrapper {
+  max-width: 900px;
+  padding: 20px;
+  animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.content-section h2 {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  position: relative;
+  padding-bottom: 10px;
+}
+.content-section h2::after { /* Simple underline accent */
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background-color: #3498db; /* Your brand color */
+}
+
+.content-section p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+/* Specific Section Backgrounds (REPLACE WITH YOUR IMAGES) */
+.hero-section {
+  background-image: url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'); /* Example image */
+}
+
+.mission-vision-section {
+  background-image: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'); /* Example image */
+}
+
+.team-section { /* Optional */
+  background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c7da?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'); /* Example image */
+}
+
+/* Values Grid */
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.value-item {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.value-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+.value-item .value-icon {
+  font-size: 2.5rem; /* Placeholder for icons */
+  color: #3498db; /* Your brand color */
+  margin-bottom: 15px;
+  display: block;
+}
+.value-item h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+/* Call to Action Section */
+.cta-section {
+  background-color: #2c3e50; /* Darker background for CTA */
+  color: #fff;
+}
+.cta-section h2 {
+  color: #fff;
+}
+.cta-section h2::after {
+  background-color: #3498db; /* Accent color */
+}
+.cta-section p {
+  color: #ecf0f1;
+  margin-bottom: 30px;
+}
+.cta-button {
+  display: inline-block;
+  background-color: #3498db; /* Your brand color */
+  color: #fff;
+  padding: 12px 25px;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.cta-button:hover {
+  background-color: #2980b9; /* Darker shade on hover */
+  transform: translateY(-2px);
+}
+.cta-button.secondary {
+  background-color: transparent;
+  border: 2px solid #3498db;
+  color: #3498db;
+}
+.cta-button.secondary:hover {
+  background-color: #3498db;
+  color: #fff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .content-overlay h1, .content-overlay h2 {
+    font-size: 2rem;
+  }
+  .content-overlay .subtitle {
+    font-size: 1.2rem;
+  }
+  .content-overlay p {
+    font-size: 1rem;
+  }
+  .content-section h2 {
+    font-size: 2rem;
+  }
+  .parallax-section, .content-section {
+    min-height: auto; /* Allow sections to shrink on mobile if needed */
+    padding: 60px 20px; /* More padding on mobile */
+  }
+  .values-grid {
+    grid-template-columns: 1fr; /* Stack items on smaller screens */
+  }
+}

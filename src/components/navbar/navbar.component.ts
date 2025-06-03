@@ -36,7 +36,15 @@ export class NavbarComponent implements OnInit {
 
     
   }
+toggleDarkMode(): void {
+    const html = document.documentElement;
+    html.classList.toggle('dark');
 
+    const isDark = html.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    console.log(isDark);
+    
+  }
   ngOnInit(): void {
       this.cartService.getUserCart()
     this.updateCartCount();
@@ -82,5 +90,8 @@ console.log(this.searchTerm());
       this.cartItemCount.set(0);
     }
   }
+  
+
+  
   
 }

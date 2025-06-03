@@ -8,3 +8,12 @@
 .animate-marquee {
   animation: marquee 25s linear infinite;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0; /* Remove default body margin */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Default font */
+}
