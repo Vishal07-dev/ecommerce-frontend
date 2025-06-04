@@ -19,6 +19,7 @@ import { CartPageComponent } from '../components/cart-page/cart-page.component';
 import { ProductInformationComponent } from '../components/product-information/product-information.component';
 import { ShopPageComponent } from '../components/shop-page/shop-page.component';
 import { AboutPageComponent } from '../components/about-page/about-page.component';
+import { ContactComponent } from '../components/contact/contact.component';
 
 export const routes: Routes = [
   // Public routes
@@ -33,7 +34,8 @@ export const routes: Routes = [
       { path: 'cart', component: CartPageComponent },
       { path: 'product/:id', component: ProductInformationComponent },
       { path: 'shop', component: ShopPageComponent },
-      { path: 'about', component: AboutPageComponent }
+      { path: 'about', component: AboutPageComponent },
+      { path: 'contact', component: ContactComponent }
     ]
   },
 
