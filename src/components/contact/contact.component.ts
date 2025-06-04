@@ -67,7 +67,7 @@ export class ContactComponent {
 
   onSubmit() {
     console.log('Form submitted:', this.formData);
-  this.http.post(`http://localhost:2000/api/contact/send-email`, this.formData).subscribe({
+  this.http.post(`https://ecommerce-backend-n4tk.onrender.com/api/contact/send-email`, this.formData).subscribe({
       next: () => {
         alert('Product created successfully!');
         
