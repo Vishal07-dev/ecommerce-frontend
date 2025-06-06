@@ -5,10 +5,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AsyncPipe, CommonModule, NgIf } from '@angular/common';
 import { debouncingSignal } from '../../../debounce-util';
 import { ProductsService } from '../../service/products.service';
+import { ThemeService } from "../../service/theme/theme.service";
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink,NgIf,AsyncPipe,RouterLinkActive,CommonModule],
+  imports: [RouterLink,NgIf,RouterLinkActive,CommonModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
@@ -24,7 +25,7 @@ export class NavbarComponent implements OnInit {
   // Signal to track cart item count
   cartItemCount = signal<number>(0);
 
-  constructor(authService: AuthService, cartService: CartService) {
+  constructor(authService: AuthService, cartService: CartService,private themeService: ThemeService) {
     this.auth = authService;
     this.cartService = cartService;
     this.updateCartCount()
@@ -92,6 +93,8 @@ console.log(this.searchTerm());
   }
   
 
-  
+   toggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
   
 }

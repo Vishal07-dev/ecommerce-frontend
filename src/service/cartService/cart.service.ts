@@ -3,6 +3,9 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../environment/environment';
+import { ToastrService } from 'ngx-toastr';
+import { HotToastService } from '@ngxpert/hot-toast';
+import { ConfettiToastComponent } from '../../components/confetti-toast/confetti-toast.component'; // adjust the path
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +17,7 @@ export class CartService {
 
   productcart: any[] = [];
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private toastr: ToastrService,private toast: HotToastService) { }
 
   get token(): string | null {
     return localStorage.getItem('accessToken');
@@ -55,7 +58,15 @@ export class CartService {
     
     this.http.post(`${this.apiUrl}/cart/add`, product).subscribe({
       next: () => {
-        alert('Added to cart successfully!');
+ this.toast.show(ConfettiToastComponent, {
+  duration: 3000,
+  style: {
+    background: '#1f2937',
+    color: '#fff',
+    borderRadius: '12px',
+    padding: '14px 20px',
+  },
+});
         this.refreshCart();
       },
       error: (err) => {
@@ -88,7 +99,7 @@ export class CartService {
       } else {
         this.productcart.push({ ...product, quantity: 1 });
       }
-
+      this.toast.success('Product added to cart successfully!')
       localStorage.setItem('Product', JSON.stringify(this.productcart));
       this.addedToCart.next(true);
     }
@@ -106,6 +117,7 @@ export class CartService {
     this.http.delete(`${this.apiUrl}/cart/delete/${itemId}`, {
       body: { userId: decoded.id }
     }).subscribe({
+      
       next: () => this.refreshCart(),
       error: (err) => {
         console.error('Error deleting item:', err);

@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }

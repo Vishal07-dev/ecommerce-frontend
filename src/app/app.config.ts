@@ -2,11 +2,14 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideToastr } from 'ngx-toastr';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
 import { authInterceptor } from '../interceptor/auth.interceptor';
 import { provideStore } from '@ngrx/store'; // adjust path as needed
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { provideHotToastConfig } from '@ngxpert/hot-toast';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +17,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
      provideStore(),
-    provideStoreDevtools({ maxAge: 25 })
+    provideStoreDevtools({ maxAge: 25 }),
+    provideToastr(),
+    provideAnimations(), 
+    provideHotToastConfig() // required animations providers
+
 ],
 };
