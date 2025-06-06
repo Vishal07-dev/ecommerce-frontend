@@ -1,62 +1,321 @@
-<div *ngIf="user" class="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
-  <div class="flex flex-col items-center space-y-4">
-    <!-- Avatar Upload -->
-    <!-- <label class="relative w-32 h-32">
-      <input type="file" class="hidden" (change)="onFileSelected($event)" />
-      <div
-        class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:opacity-80 border border-dashed border-gray-300 cursor-pointer">
-        <span class="text-sm text-center">Upload<br />Image</span>
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 mb-8 text-white shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-6">
+          <!-- Avatar Section -->
+          <div class="relative group">
+            <div class="w-24 h-24 rounded-full bg-white/20 border-4 border-white/30 flex items-center justify-center cursor-pointer overflow-hidden transition-transform hover:scale-105">
+              <img *ngIf="user?.avatar" [src]="user.avatar" alt="Profile" class="w-full h-full object-cover rounded-full">
+              <i *ngIf="!user?.avatar" class="fas fa-user text-3xl text-white/70"></i>
+            </div>
+            <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg cursor-pointer hover:bg-gray-50 transition-colors">
+              <i class="fas fa-camera text-indigo-600 text-sm"></i>
+              <input type="file" class="absolute inset-0 opacity-0 cursor-pointer" (change)="onFileSelected($event)" accept="image/*">
+            </div>
+          </div>
+          
+          <div>
+            <h1 class="text-3xl font-bold">{{user?.user?.name || 'Welcome'}}</h1>
+            <p class="text-white/80">{{user?.user?.email}}</p>
+            <div class="flex items-center mt-2">
+              <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Premium Member</span>
+              <i class="fas fa-star text-yellow-300 ml-2"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-right">
+          <p class="text-white/80">Member since</p>
+          <p class="text-xl font-semibold">January 2024</p>
+        </div>
       </div>
-    </label> -->
-
-    <!-- Name -->
-    <div class="w-full">
-      <label class="block text-sm font-medium text-gray-700">Name</label>
-      <input
-        [(ngModel)]="user.user.name"
-        class="mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-700"
-        type="text"
-        placeholder="Enter name"
-      />
     </div>
 
-    <!-- Email -->
-    <div class="w-full">
-      <label class="block text-sm font-medium text-gray-700">Email</label>
-      <input
-        [(ngModel)]="user.user.email"
-        class="mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-700"
-        type="email"
-        placeholder="Enter email"
-      />
+    <!-- Main Content Grid -->
+    <div class="grid lg:grid-cols-3 gap-8">
+      
+      <!-- Left Column - Profile Form -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Personal Information Card -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+              <i class="fas fa-user-edit text-indigo-600 mr-3"></i>
+              Personal Information
+            </h2>
+            <button class="text-indigo-600 hover:text-indigo-700 font-medium" (click)="toggleEdit()">
+              <i class="fas fa-edit mr-1"></i>
+              {{isEditing ? 'Cancel' : 'Edit'}}
+            </button>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Name -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-700">Full Name</label>
+              <div class="relative">
+                <input
+                  [(ngModel)]="user.user.name"
+                  [readonly]="!isEditing"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                  [class.bg-gray-50]="!isEditing"
+                  type="text"
+                  placeholder="Enter your full name"
+                />
+                <i class="fas fa-user absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-700">Email Address</label>
+              <div class="relative">
+                <input
+                  [(ngModel)]="user.user.email"
+                  [readonly]="!isEditing"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                  [class.bg-gray-50]="!isEditing"
+                  type="email"
+                  placeholder="Enter your email"
+                />
+                <i class="fas fa-envelope absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-700">Phone Number</label>
+              <div class="relative">
+                <input
+                  [(ngModel)]="user.user.phone"
+                  [readonly]="!isEditing"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                  [class.bg-gray-50]="!isEditing"
+                  type="tel"
+                  placeholder="Enter your phone number"
+                />
+                <i class="fas fa-phone absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+
+            <!-- Date of Birth -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-gray-700">Date of Birth</label>
+              <div class="relative">
+                <input
+                  [(ngModel)]="user.user.dateOfBirth"
+                  [readonly]="!isEditing"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                  [class.bg-gray-50]="!isEditing"
+                  type="date"
+                />
+                <i class="fas fa-calendar absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Address Section -->
+          <div class="mt-8 pt-6 border-t border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>
+              Address Information
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+              <!-- Street Address -->
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-semibold text-gray-700">Street Address</label>
+                <input
+                  [(ngModel)]="user.user.address"
+                  [readonly]="!isEditing"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                  [class.bg-gray-50]="!isEditing"
+                  type="text"
+                  placeholder="Enter your street address"
+                />
+              </div>
+
+              <!-- City -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-700">City</label>
+                <input
+                  [(ngModel)]="user.user.city"
+                  [readonly]="!isEditing"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                  [class.bg-gray-50]="!isEditing"
+                  type="text"
+                  placeholder="Enter your city"
+                />
+              </div>
+
+              <!-- ZIP Code -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-700">ZIP Code</label>
+                <input
+                  [(ngModel)]="user.user.zipCode"
+                  [readonly]="!isEditing"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                  [class.bg-gray-50]="!isEditing"
+                  type="text"
+                  placeholder="Enter ZIP code"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div *ngIf="isEditing" class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
+            <button
+              (click)="cancelEdit()"
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors duration-200">
+              Cancel
+            </button>
+            <button
+              (click)="updateProfile()"
+              class="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium hover:from-indigo-700 hover:to-purple-700 shadow-lg transition-all duration-200">
+              <i class="fas fa-save mr-2"></i>
+              Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- Order History Card -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <i class="fas fa-shopping-bag text-indigo-600 mr-3"></i>
+            Recent Orders
+          </h2>
+          
+          <div class="space-y-4">
+            <div *ngFor="let order of recentOrders" class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+              <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-box text-indigo-600"></i>
+                </div>
+                <div>
+                  <p class="font-semibold text-gray-800">Order #{{order.id}}</p>
+                  <p class="text-sm text-gray-600">{{order.date}} • {{order.items}} items</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-gray-800">${{order.total}}</p>
+                <span class="inline-block px-3 py-1 text-xs rounded-full" 
+                      [class.bg-green-100]="order.status === 'Delivered'"
+                      [class.text-green-800]="order.status === 'Delivered'"
+                      [class.bg-yellow-100]="order.status === 'Processing'"
+                      [class.text-yellow-800]="order.status === 'Processing'">
+                  {{order.status}}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <button class="w-full mt-6 py-3 border border-indigo-200 text-indigo-600 rounded-xl hover:bg-indigo-50 font-medium transition-colors">
+            View All Orders
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column - Stats & Quick Actions -->
+      <div class="space-y-6">
+        
+        <!-- Stats Card -->
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <h3 class="text-lg font-bold text-gray-800 mb-4">Account Stats</h3>
+          
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-shopping-cart text-blue-600"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Total Orders</p>
+                  <p class="font-bold text-gray-800">127</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-dollar-sign text-green-600"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Total Spent</p>
+                  <p class="font-bold text-gray-800">$2,847</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-star text-purple-600"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Reward Points</p>
+                  <p class="font-bold text-gray-800">1,250</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <h3 class="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
+          
+          <div class="space-y-3">
+            <button class="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+              <i class="fas fa-heart text-red-500"></i>
+              <span class="font-medium text-gray-700">Wishlist</span>
+            </button>
+            
+            <button class="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+              <i class="fas fa-credit-card text-blue-500"></i>
+              <span class="font-medium text-gray-700">Payment Methods</span>
+            </button>
+            
+            <button class="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+              <i class="fas fa-cog text-gray-500"></i>
+              <span class="font-medium text-gray-700">Account Settings</span>
+            </button>
+            
+            <button class="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+              <i class="fas fa-question-circle text-green-500"></i>
+              <span class="font-medium text-gray-700">Help & Support</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Security Card -->
+        <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+          <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+            Security
+          </h3>
+          
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">Two-Factor Auth</span>
+              <span class="text-green-600 font-medium">Enabled</span>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">Last Password Change</span>
+              <span class="text-gray-800 text-sm">2 months ago</span>
+            </div>
+            
+            <button class="w-full mt-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+              Change Password
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- Address -->
-    <div class="w-full">
-      <label class="block text-sm font-medium text-gray-700">Address</label>
-      <input
-        [(ngModel)]="user.user.address"
-        class="mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-700"
-        type="text"
-        placeholder="Enter address"
-      />
-    </div>
-
-    <!-- Role (Readonly) -->
-    <!-- <div class="w-full">
-      <label class="block text-sm font-medium text-gray-700">Role</label>
-      <input
-        [value]="user.userProfile.role"
-        readonly
-        class="mt-1 w-full rounded-lg bg-gray-100 border-gray-300 text-gray-500 shadow-sm"
-      />
-    </div> -->
-
-    <!-- Update Button -->
-    <button
-      (click)="updateProfile()"
-      class="mt-4 px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md">
-      Update Profile
-    </button>
   </div>
 </div>

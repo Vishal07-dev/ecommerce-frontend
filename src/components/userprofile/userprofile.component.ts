@@ -1,17 +1,26 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { AuthService } from '../../service/auth.service';
-import { NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-userprofile',
-  imports: [NgIf,FormsModule],
+  imports: [NgIf,FormsModule,NgFor],
   templateUrl: './userprofile.component.html',
   styleUrl: './userprofile.component.css'
 })
 export class UserprofileComponent implements OnInit{
+recentOrders: any;
+order: any;
+toggleEdit() {
+throw new Error('Method not implemented.');
+}
+cancelEdit() {
+throw new Error('Method not implemented.');
+}
 auth = inject(AuthService)
 user:any;
+isEditing: any;
 ngOnInit(): void {
   console.log(this.auth.getprofile());
   

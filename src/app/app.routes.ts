@@ -20,6 +20,7 @@ import { ProductInformationComponent } from '../components/product-information/p
 import { ShopPageComponent } from '../components/shop-page/shop-page.component';
 import { AboutPageComponent } from '../components/about-page/about-page.component';
 import { ContactComponent } from '../components/contact/contact.component';
+import { WishlistPageComponent } from '../components/wishlist-page/wishlist-page.component';
 
 export const routes: Routes = [
   // Public routes
@@ -35,7 +36,9 @@ export const routes: Routes = [
       { path: 'product/:id', component: ProductInformationComponent },
       { path: 'shop', component: ShopPageComponent },
       { path: 'about', component: AboutPageComponent },
-      { path: 'contact', component: ContactComponent }
+      { path: 'contact', component: ContactComponent },
+            { path: 'wish', component: WishlistPageComponent }
+
     ]
   },
 

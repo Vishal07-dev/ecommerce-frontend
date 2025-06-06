@@ -10,7 +10,7 @@ interface CartItem {
   quantity: number;
   image: string;
   category: { name:''};
-  productId: string;
+  productId: string; 
   originalPrice?: number;
 }
 

@@ -5,12 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CategoryService } from '../../service/category.service';
 import { CartService } from '../../service/cartService/cart.service';
-import { Router } from '@angular/router'; // Corrected: Route to Router
+import { Router, RouterLink } from '@angular/router'; // Corrected: Route to Router
 
 @Component({
   selector: 'app-home',
   standalone: true, // Assuming standalone, add CommonModule or NgClass to imports if not
-  imports: [NgFor, FormsModule, NgIf, NgClass, CommonModule], // Added NgClass and CommonModule
+  imports: [NgFor, FormsModule, NgIf, NgClass, CommonModule,RouterLink], // Added NgClass and CommonModule
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
