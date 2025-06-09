@@ -55,7 +55,7 @@ export class ChatbotComponent implements AfterViewChecked {
 
     // Simulate typing delay for better UX
     setTimeout(() => {
-      this.http.post<any>('https://fjdhhqtq-2000.inc1.devtunnels.ms/api/chat', { message: text }).subscribe(
+      this.http.post<any>('https://ecommerce-backend-n4tk.onrender.com/api/chat', { message: text }).subscribe(
         (res) => {
           this.isTyping = false;
           this.messages.push({ 

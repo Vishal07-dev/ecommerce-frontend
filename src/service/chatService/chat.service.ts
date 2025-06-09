@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ChatService {
-  private baseUrl = 'http://localhost:2000/api/chat'; // adjust as needed
+  private baseUrl = 'https://ecommerce-backend-n4tk.onrender.com/api/chat'; // adjust as needed
 
   constructor(private http: HttpClient) {}
 
