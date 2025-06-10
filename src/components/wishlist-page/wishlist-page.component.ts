@@ -39,7 +39,7 @@ interface Product extends ApiProduct {
 @Component({
   selector: 'app-wishlist',
   standalone: true,
-  imports: [CommonModule, FormsModule,RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './wishlist-page.component.html',
   styleUrl: './wishlist-page.component.css',
 })
