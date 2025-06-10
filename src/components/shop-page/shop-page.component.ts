@@ -5,6 +5,8 @@ import { ProductsService } from '../../service/products.service';
 import { CategoryService } from '../../service/category.service';
 import { CartService } from '../../service/cartService/cart.service';
 import { Router } from '@angular/router';
+import { WishlistService } from '../../service/wishList\'/wishlist.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 interface Product {
   id: number | string;
@@ -35,6 +37,8 @@ interface ApiCategory {
   styleUrl: './shop-page.component.css'
 })
 export class ShopPageComponent implements OnInit {
+  constructor(private toast: HotToastService){}
+  
   private productService = inject(ProductsService);
   private categoryService = inject(CategoryService);
   private cartService = inject(CartService);
@@ -49,6 +53,7 @@ export class ShopPageComponent implements OnInit {
   priceRange = { min: null as number | null, max: null as number | null };
   currentMinPriceInput: number | null = null;
   currentMaxPriceInput: number | null = null;
+  wishlistService = inject(WishlistService);
 
   selectedRating: number = 0;
 
@@ -185,9 +190,16 @@ export class ShopPageComponent implements OnInit {
     console.log("Added to cart:", product.name);
   }
 
-  addToWishlist(product: Product, event: MouseEvent) {
-    event.stopPropagation();
-    console.log("Added to wishlist:", product.name);
+ addtowishlist(product: any) {
+    this.wishlistService.addItemToWishList(product).subscribe({
+      next: (res) => {
+       this.toast.success('Product added to wish successfully!')
+      },
+      error: (err) => {
+        this.router.navigateByUrl('/login');
+      this.toast.error('pleaso login to add product to wishlist')
+      }
+    });
   }
 
   viewProductDetails(product: Product) {

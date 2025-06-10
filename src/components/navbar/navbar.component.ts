@@ -6,6 +6,7 @@ import { AsyncPipe, CommonModule, NgIf } from '@angular/common';
 import { debouncingSignal } from '../../../debounce-util';
 import { ProductsService } from '../../service/products.service';
 import { ThemeService } from "../../service/theme/theme.service";
+import { WishlistService } from "../../service/wishList'/wishlist.service";
 
 @Component({
   selector: 'app-navbar',
@@ -14,10 +15,13 @@ import { ThemeService } from "../../service/theme/theme.service";
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent implements OnInit {
+  
+  wishlistItemCount = signal(0); // ✅
   mobileMenuOpen: boolean = false;
  showSearch = signal(false); // Toggle visibility
   searchTerm = signal('');    // Search input value
   productService=inject(ProductsService)
+  wishListService = inject(WishlistService);
   auth: AuthService;
   cartService: CartService;
   showSearchInput = signal(false);
@@ -29,6 +33,7 @@ export class NavbarComponent implements OnInit {
     this.auth = authService;
     this.cartService = cartService;
     this.updateCartCount()
+    this.updateWishCount()
  effect(() => {
       // if(this.showForm == true) this.productForm.reset()
      this.productService.handleSearch(this.searchQuery());
@@ -49,6 +54,16 @@ toggleDarkMode(): void {
   ngOnInit(): void {
       this.cartService.getUserCart()
     this.updateCartCount();
+    this.updateWishCount();
+    this.wishListService.getUserWishList().subscribe({
+      next: (res) => {
+        this.wishListService.wishlist = res.products;
+        this.updateWishCount();
+      },
+      error: (err) => {
+        console.error('Failed to fetch wishlist:', err);
+      }
+    });
     this.cartService.addedToCart$.subscribe(() => {
       this.updateCartCount();
     });
@@ -89,6 +104,35 @@ console.log(this.searchTerm());
       }
     } else {
       this.cartItemCount.set(0);
+    }
+  }
+  private updateWishCount(): void {
+    // Get cart items from localStorage
+    const storedProducts = localStorage.getItem('wishList');
+    if (storedProducts) {
+      try {
+        const products = JSON.parse(storedProducts);
+        
+        // Get quantities from localStorage
+        const storedQuantities = localStorage.getItem('ProductQuantities');
+        let totalCount = 0;
+        
+        if (storedQuantities) {
+          const quantities = JSON.parse(storedQuantities);
+          // Sum up all quantities
+          totalCount = Object.values(quantities).reduce((sum: number, qty: any) => sum + qty, 0);
+        } else {
+          // If no quantities stored, count unique products
+          totalCount = this.wishListService.wishlist.length;
+        }
+        
+        this.wishlistItemCount.set(totalCount);
+      } catch (error) {
+        console.error('Error reading cart data:', error);
+        this.wishlistItemCount.set(0);
+      }
+    } else {
+      this.wishlistItemCount.set(0);
     }
   }
   
