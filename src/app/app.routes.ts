@@ -21,6 +21,8 @@ import { ShopPageComponent } from '../components/shop-page/shop-page.component';
 import { AboutPageComponent } from '../components/about-page/about-page.component';
 import { ContactComponent } from '../components/contact/contact.component';
 import { WishlistPageComponent } from '../components/wishlist-page/wishlist-page.component';
+import { PaymentSuccessComponent } from '../components/payment-success/payment-success.component';
+import { PaymentCancelComponent } from '../components/payment-cancel/payment-cancel.component';
 
 export const routes: Routes = [
   // Public routes
@@ -37,8 +39,9 @@ export const routes: Routes = [
       { path: 'shop', component: ShopPageComponent },
       { path: 'about', component: AboutPageComponent },
       { path: 'contact', component: ContactComponent },
-            { path: 'wish', component: WishlistPageComponent }
-
+      { path: 'wish', component: WishlistPageComponent },
+      { path: 'success', component: PaymentSuccessComponent },
+      { path: 'cancel', component: PaymentCancelComponent }
     ]
   },
 

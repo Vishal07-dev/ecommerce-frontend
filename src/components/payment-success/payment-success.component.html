@@ -1,0 +1,52 @@
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
+      <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+        <!-- Success Icon -->
+        <div class="mx-auto mb-6 w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+          <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+
+        <!-- Success Message -->
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
+        <p class="text-gray-600 mb-6">
+          Thank you for your purchase. Your payment has been processed successfully.
+        </p>
+
+        <!-- Payment Details (if available) -->
+        <div *ngIf="paymentDetails" class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+          <h3 class="font-semibold text-gray-800 mb-2">Payment Details</h3>
+          <div class="space-y-1 text-sm text-gray-600">
+            <div *ngIf="paymentDetails.sessionId">
+              <span class="font-medium">Session ID:</span> {{paymentDetails.sessionId}}
+            </div>
+            <div *ngIf="paymentDetails.amount">
+              <span class="font-medium">Amount:</span> ${{paymentDetails.amount}}
+            </div>
+            <div *ngIf="paymentDetails.email">
+              <span class="font-medium">Email:</span> {{paymentDetails.email}}
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-3">
+          <button 
+            (click)="goToHome()"
+            class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-200">
+            Continue Shopping
+          </button>
+          
+          <button 
+            (click)="downloadReceipt()"
+            class="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-200 transition-colors duration-200">
+            Download Receipt
+          </button>
+        </div>
+
+        <!-- Additional Info -->
+        <p class="text-xs text-gray-500 mt-6">
+          A confirmation email has been sent to your registered email address.
+        </p>
+      </div>
+    </div>

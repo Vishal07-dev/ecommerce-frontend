@@ -7,6 +7,8 @@ import { CartService } from '../../service/cartService/cart.service';
 import { Router } from '@angular/router';
 import { WishlistService } from '../../service/wishList\'/wishlist.service';
 import { HotToastService } from '@ngxpert/hot-toast';
+import { LoaderService } from '../../service/loader/loader.service';
+import { LoaderComponent } from "../loader/loader.component";
 
 interface Product {
   id: number | string;
@@ -32,7 +34,7 @@ interface ApiCategory {
 @Component({
   selector: 'app-shop-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoaderComponent],
   templateUrl: './shop-page.component.html',
   styleUrl: './shop-page.component.css'
 })
@@ -46,6 +48,7 @@ export class ShopPageComponent implements OnInit {
 
   products: Product[] = [];
   allProducts: Product[] = [];
+  loaderService = inject(LoaderService)
 
   categories: ApiCategory[] = [];
   selectedCategories: string[] = [];
@@ -86,10 +89,12 @@ export class ShopPageComponent implements OnInit {
   }
 
   loadInitialProducts() {
+    this.loaderService.show()
     this.isLoadingProducts = true;
     this.productService.fetchProduct().subscribe({
       next: (res: any) => {
         const productList = res.products ?? res;
+        this.loaderService.hide()
         this.allProducts = productList.map((p: any) => ({ ...p, id: p._id || p.id }));
         this.applyFiltersAndSort();
         this.isLoadingProducts = false;

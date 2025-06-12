@@ -6,11 +6,13 @@ import { HttpClient } from '@angular/common/http';
 import { CategoryService } from '../../service/category.service';
 import { CartService } from '../../service/cartService/cart.service';
 import { Router, RouterLink } from '@angular/router'; // Corrected: Route to Router
+import { LoaderService } from '../../service/loader/loader.service';
+import { LoaderComponent } from "../loader/loader.component";
 
 @Component({
   selector: 'app-home',
   standalone: true, // Assuming standalone, add CommonModule or NgClass to imports if not
-  imports: [NgFor, FormsModule, NgIf, NgClass, CommonModule,RouterLink], // Added NgClass and CommonModule
+  imports: [NgFor, FormsModule, NgIf, NgClass, CommonModule, RouterLink, LoaderComponent], // Added NgClass and CommonModule
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -38,7 +40,7 @@ throw new Error('Method not implemented.');
   selectedCategory = '';
   minPrice: number | null = null;
   maxPrice: number | null = null;
-
+  loaderService = inject(LoaderService)
   // Properties for new Carousel
   public currentImageIndex: number = 0;
   private carouselInterval: ReturnType<typeof setInterval> | undefined;
@@ -107,9 +109,11 @@ newsletterEmail: any;
   // --- End of New Filter Toggle Method ---
 
   fetchCategories() {
+    this.loaderService.show();
     this.categoryService.getCategory().subscribe({
       next: (categories: any) => {
         this.categories = categories;
+         this.loaderService.hide();
       },
       error: (err) => {
         console.error('Failed to fetch categories:', err);
@@ -133,8 +137,12 @@ newsletterEmail: any;
   }
 
   loadProducts() {
+    this.loaderService.show();
+
     this.productService.fetchProduct().subscribe((res: any) => {
       this.product = res.products ?? res;
+          this.loaderService.hide();
+
     });
   }
 

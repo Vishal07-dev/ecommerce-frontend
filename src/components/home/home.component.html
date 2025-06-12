@@ -116,7 +116,9 @@
   </aside>
 
   <!-- ✅ Product Grid Section -->
+   
   <section class="flex-1 mt-8 lg:mt-0">
+    
     <div *ngIf="product.length > 0; else noProduct" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 lg:gap-8">
       
       <!-- ⭐⭐⭐ NEW & IMPROVED Product Card Start ⭐⭐⭐ -->
@@ -193,9 +195,11 @@
 
     <ng-template #noProduct>
       <div class="text-center text-gray-500 dark:text-gray-400 py-16">
-        <svg class="w-20 h-20 mx-auto mb-6 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4m12 8V10M8 21V10"></path></svg>
-        <p class="text-xl font-semibold mb-2">No Products Found</p>
-        <p class="text-sm max-w-sm mx-auto mb-6">We couldn't find any products matching your current filters. Try adjusting them or check back later!</p>
+
+       <div >
+        <p class=" text-sm max-w-sm mx-auto mt-10 mb-10"><app-loader></app-loader></p>
+       </div>
+       
         <button (click)="resetFilters()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors">
           Clear All Filters
         </button>
@@ -248,15 +252,15 @@
 <!-- Other sections are unchanged but included for completeness -->
 <section class="py-16 lg:py-24 bg-white dark:bg-gray-900">
   <!-- Featured Products Section... -->
-     <div class="max-w-7xl mx-auto px-6">
+     <div  class="max-w-7xl mx-auto px-6">
     <div class="text-center mb-12 lg:mb-16">
       <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Featured Products</h2>
       <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Handpicked selections that our customers love.</p>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div *ngIf="product.length > 0; else noProduct" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <!-- Assuming 'product' array is available, slice to show a few featured items -->
-      <div *ngFor="let item of product.slice(0,3)" 
+      <div  *ngFor="let item of product.slice(0,3)" 
            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-700/40 overflow-hidden hover:shadow-2xl dark:hover:shadow-gray-700/60 transition-all duration-300 group transform hover:-translate-y-1.5">
         <div class="relative overflow-hidden aspect-[4/3]"> <!-- Changed to aspect-[4/3] -->
           <img [src]="item.image" [alt]="item.name" 

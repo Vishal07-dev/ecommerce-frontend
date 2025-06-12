@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, signal, computed, effect, inject, OnInit } from '@angular/core';
 import { CartService } from '../../service/cartService/cart.service';
 import { RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 interface CartItem {
   _id: string;
@@ -24,6 +25,7 @@ interface CartItem {
 export class CartPageComponent implements OnInit {
   cartService = inject(CartService);
   cartItems = signal<CartItem[]>([]);
+  http=inject(HttpClient);
 
   ngOnInit() {
     this.cartService.getUserCart();
@@ -85,4 +87,13 @@ export class CartPageComponent implements OnInit {
     { _id: '6', name: 'Laptop Stand', price: 49.99, image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=200&h=200&fit=crop&crop=center' },
     { _id: '7', name: 'USB Cable', price: 14.99, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&crop=center' }
   ];
+  checkout(items: any) {
+    
+  
+
+  this.http.post<{ url: string }>('http://localhost:2000/api/payment/create-checkout-session', { items })
+    .subscribe(res => {
+      window.location.href = res.url; // redirect to Stripe
+    });
+}
 }
