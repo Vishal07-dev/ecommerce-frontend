@@ -175,62 +175,148 @@
     </div>
 
 
-    <div *ngIf="showForm || updateForm" class="fixed inset-0 bg-black/75   bg-opacity-50 flex items-center justify-center z-50">
-    <!-- Modal Content -->
-    <div class="bg-white w-full max-w-lg p-6 rounded shadow-lg relative">
-        <button (click)="closeForm()" class="cursor-pointer absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl">&times;</button>
 
-      <h3 class="text-xl font-bold mb-4">Create New Product</h3>
 
-      <form (ngSubmit)="onSubmit()" [formGroup]="productForm" class="space-y-4">
-        <div>
-          <label class="block font-semibold">Name</label>
-          <input type="text" formControlName="name" class="w-full border border-gray-300 p-2 rounded" />
+<div *ngIf="showForm || updateForm" class="fixed inset-0 bg-gradient-to-br bg-white/5 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+
+
+  <div class="bg-white/95 backdrop-blur-xl w-full max-w-4xl max-h-[95vh] flex flex-col rounded-3xl shadow-2xl relative transform transition-all border border-white/20 overflow-hidden animate-in zoom-in-95 duration-500">
+    
+    <!-- Decorative elements are unchanged -->
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-pink-50/20 pointer-events-none"></div>
+    <div class="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-pink-400/20 to-orange-400/20 rounded-full blur-3xl"></div>
+
+    <!-- Modal Header (Sticky) -->
+    <div class="relative flex-shrink-0 flex items-start justify-between p-6 border-b border-gray-200/50">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <div class="p-2 rounded-xl bg-gradient-to-br {{ updateForm ? 'from-emerald-500 to-teal-600' : 'from-blue-500 to-indigo-600' }} text-white shadow-lg">
+            <svg *ngIf="!updateForm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            <svg *ngIf="updateForm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
+          </div>
+          <h3 class="text-2xl font-bold bg-gradient-to-r {{ updateForm ? 'from-emerald-600 to-teal-700' : 'from-blue-600 to-indigo-700' }} bg-clip-text text-transparent">
+            {{ updateForm ? 'Update Product' : 'Create New Product' }}
+          </h3>
         </div>
+        <p class="text-gray-600 ml-12 font-medium text-sm">
+          {{ updateForm ? 'Transform your existing product with fresh details.' : 'Bring your vision to life with a stunning new product.' }}
+        </p>
+      </div>
+      <button (click)="closeForm()" class="p-3 text-gray-400 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-100 group">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
 
-        <div>
-          <label class="block font-semibold">Price</label>
-          <input type="number" formControlName="price" class="w-full border border-gray-300 p-2 rounded" />
+    <!-- 
+      KEY CHANGE 2:
+      - The <form> is now a flex container that will hold the scrollable body and the footer.
+    -->
+    <form (ngSubmit)="onSubmit()" [formGroup]="productForm" class="flex-1 flex flex-col min-h-0">
+      
+      <!-- 
+        KEY CHANGE 3:
+        - Added flex-1 to make this div fill the available space.
+        - Added overflow-y-auto to enable scrolling ONLY for this section.
+      -->
+      <div class="relative flex-1 p-6 space-y-6 overflow-y-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          
+          <!-- Name Input -->
+          <div class="group">
+            <label for="name" class=" mb-2 text-sm font-semibold text-gray-700 flex items-center gap-2"><span class="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></span>Product Name</label>
+            <div class="relative">
+              <input type="text" id="name" formControlName="name" placeholder="e.g. Wireless Mouse" class="w-full p-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 text-gray-900 rounded-2xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-300 shadow-lg hover:shadow-xl group-hover:border-blue-300">
+            </div>
+          </div>
+          
+          <!-- Category Select -->
+          <div class="group">
+            <label for="category" class=" mb-2 text-sm font-semibold text-gray-700 flex items-center gap-2"><span class="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></span>Category</label>
+            <div class="relative">
+              <select id="category" formControlName="category" class="w-full p-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 text-gray-900 rounded-2xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-300 shadow-lg hover:shadow-xl group-hover:border-purple-300 appearance-none cursor-pointer">
+                <option value="">Select a category</option>
+                <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.name }}</option>
+              </select>
+              <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-gray-500"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Price Input -->
+          <div class="group">
+            <label for="price" class=" mb-2 text-sm font-semibold text-gray-700 flex items-center gap-2"><span class="w-2 h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></span>Price</label>
+            <div class="relative">
+              <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</div>
+              <input type="number" id="price" formControlName="price" placeholder="0" class="w-full pl-8 pr-4 py-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 text-gray-900 rounded-2xl focus:outline-none focus:border-green-500 focus:bg-white transition-all duration-300 shadow-lg hover:shadow-xl group-hover:border-green-300">
+            </div>
+          </div>
+
+          <!-- Stock Input -->
+          <div class="group">
+            <label for="stock" class=" mb-2 text-sm font-semibold text-gray-700 flex items-center gap-2"><span class="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></span>Stock Quantity</label>
+            <div class="relative">
+              <input type="number" id="stock" formControlName="stock" placeholder="0" class="w-full p-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 text-gray-900 rounded-2xl focus:outline-none focus:border-orange-500 focus:bg-white transition-all duration-300 shadow-lg hover:shadow-xl group-hover:border-orange-300">
+              <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm font-medium">units</div>
+            </div>
+          </div>
+
+          <!-- Description Textarea -->
+          <div class="md:col-span-2 group">
+            <label for="description" class=" mb-2 text-sm font-semibold text-gray-700 flex items-center gap-2"><span class="w-2 h-2 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full"></span>Description</label>
+            <textarea id="description" formControlName="description" rows="4" placeholder="Description" class="w-full p-4 bg-white/80 backdrop-blur-sm border-2 border-gray-200 text-gray-900 rounded-2xl focus:outline-none focus:border-indigo-500 focus:bg-white transition-all duration-300 resize-y shadow-lg hover:shadow-xl group-hover:border-indigo-300"></textarea>
+          </div>
+          
+          <!-- Image Upload Section -->
+          <div class="md:col-span-2 group">
+            <label class=" mb-2 text-sm font-semibold text-gray-700 flex items-center gap-2"><span class="w-2 h-2 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full"></span>Product Image</label>
+            <div class="flex flex-col md:flex-row items-start gap-6">
+              <!-- Image Preview (Increased size) -->
+              <div  class="flex-shrink-0 relative ">
+                <img [src]="imagePreviewUrl()" alt="Image Preview" class="w-32 h-32 rounded-2xl object-cover border-3 border-white shadow-xl group-hover/preview:shadow-2xl transition-all duration-300">
+                <div class="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-lg"></div>
+              </div>
+              
+              <!-- Upload Area -->
+              <div class="flex-1 w-full">
+                <label for="file-upload" class="relative cursor-pointer w-full flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-2xl bg-gradient-to-br from-gray-50/80 to-blue-50/40 hover:from-blue-50/80 hover:to-purple-50/60 transition-all duration-500 group/upload overflow-hidden">
+                  <div class="text-center relative z-10">
+                    <div class="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 group-hover/upload:scale-110 group-hover/upload:rotate-3 transition-transform duration-300 shadow-lg">
+                      <svg class="w-6 h-6 text-white" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </div>
+                    <p class="text-base font-semibold text-gray-700 mb-1"><span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{{ updateForm ? 'Change your masterpiece' : 'Upload your masterpiece' }}</span></p>
+                    <p class="text-xs text-gray-500 mb-1">Drag and drop, or click to browse</p>
+                    <p class="text-xs text-gray-400 flex items-center justify-center gap-1"><span class="w-1 h-1 bg-green-500 rounded-full"></span>PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                  <input id="file-upload" type="file" (change)="onFileSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div>
-  <label class="block font-semibold mb-1">Category</label>
-  <select 
-    formControlName="category"
-    class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-  >
-    <option value="">Select Category</option>
-    <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.name }}</option>
-  </select>
+      <!-- Modal Footer (Sticky) -->
+      <div class="relative flex-shrink-0 flex items-center justify-end p-6 bg-gray-50/80 border-t border-gray-200/50">
+        @if (updateForm) {
+          <button type="submit" [disabled]="productForm.invalid" class="relative group w-full sm:w-auto flex items-center justify-center gap-x-2 px-6 py-3 font-bold text-white bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 rounded-xl hover:from-emerald-600 hover:via-teal-700 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 group-hover:rotate-12 transition-transform duration-300"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg>
+            <span class="relative z-10">Update Product</span>
+          </button>
+        } @else {
+          <button type="submit" [disabled]="productForm.invalid" class="relative group w-full sm:w-auto flex items-center justify-center gap-x-2 px-6 py-3 font-bold text-white bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 rounded-xl hover:from-blue-600 hover:via-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 group-hover:rotate-12 transition-transform duration-300"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z" clip-rule="evenodd" /></svg>
+            <span class="relative z-10">Save Product</span>
+          </button>
+        }
+      </div>
+    </form>
+
+  </div>
 </div>
 
-        <div>
-          <label class="block font-semibold">Description</label>
-          <textarea formControlName="description" class="w-full border border-gray-300 p-2 rounded"></textarea>
-        </div>
 
-        <div>
-          <label class="block font-semibold">Stock</label>
-          <input type="number" formControlName="stock" class="w-full border border-gray-300 p-2 rounded" />
-        </div>
 
-        <div>
-          <label class="block font-semibold">Image URL</label>
-          <input type="text" formControlName="image" class="w-full border border-gray-300 p-2 rounded" />
-        </div>
-
-        @if (updateForm) {
-          <button type="submit" [disabled]="productForm.invalid"
-          class="cursor-pointer bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-          update Product
-        </button>
-        }@else {
-          <button type="submit" [disabled]="productForm.invalid"
-          class="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          Save Product
-        </button>
-        }
-
-      </form>
-    </div>
-  </div>

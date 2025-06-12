@@ -22,7 +22,7 @@ export class AuthService {
   private tokenKey = 'accessToken';
   private refreshInProgress = false;
   private loggedInSubject = new BehaviorSubject<boolean>(this.hasValidToken());
-  public loggedIn$ = this.loggedInSubject.asObservable();
+  // public loggedIn$ = this.loggedInSubject.asObservable();
   constructor(private http: HttpClient, private router: Router, private cartService:CartService) {}
 private userProfile: any = null; // store profile
 

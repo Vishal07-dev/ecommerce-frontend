@@ -27,6 +27,8 @@ interface Product {
   styleUrl: './product.component.css',
 })
 export class ProductComponent {
+  selectedImage: File | null = null;
+
   showForm = false;
   updateForm=false
   productForm: FormGroup;
@@ -39,7 +41,7 @@ categoryService = inject(CategoryService)
   selectedCategory = '';
   selectedStatus = '';
   categories: any[] = [];
-
+  imagePreviewUrl=signal<string>('');
    productService = inject(ProductsService);
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
@@ -61,14 +63,26 @@ categoryService = inject(CategoryService)
 
     this.loadProducts();
   }
+onFileSelected(event: any): void {
+  const file = event.target.files[0];
+  if (file) {
+    this.selectedImage = file;
 
+    // Create a preview for the newly selected file
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreviewUrl.set(reader.result as string) ;
+    };
+    reader.readAsDataURL(file);
+  }
+}
   private initForm(): FormGroup {
     return this.fb.group({
       name: ['', Validators.required],
       price: ['', [Validators.required, Validators.min(0)]],
       description: ['', Validators.required],
       stock: [0, [Validators.required, Validators.min(0)]],
-      image: [''],
+      // image: [''],
       category: ['', Validators.required],
     });
   }
@@ -107,40 +121,59 @@ fetchCategories() {
     });
   }
 showform(data?: Product): void {
- 
+  console.log(data);
+
   if (data) {
-    this.updateForm = true
-     this.id = data?._id
+    this.updateForm = true;
+    this.id = data?._id;
+    this.imagePreviewUrl.set(data.image)  // <-- ADD THIS: Set the preview URL
     this.productForm.patchValue({
       name: data.name,
       price: data.price,
       description: data.description,
       stock: data.stock,
-      image: data.image,
+      // image: data.image, // <-- REMOVE THIS LINE
       category: data.category._id
     });
+ console.log(this.imagePreviewUrl(),'sefw');
   } else {
-    this.productForm.reset(); // Prepare blank form for creating a new product
+       
+
+    // This is for the "Create New" case
+    this.productForm.reset();
+    this.imagePreviewUrl.set(''); // Reset the preview URL
+    
   }
 }
-  onSubmit(): void {
-    if (this.productForm.valid) {
-      const productData = this.productForm.value;
-      if (this.updateForm) {
-      this.productService.updateProduct(productData,this.id);
-    } else {
-      this.productService.createProduct(productData);
+onSubmit(): void {
+  if (this.productForm.valid) {
+    const formData = new FormData();
+
+    Object.entries(this.productForm.value).forEach(([key, value]) => {
+      formData.append(key, value as string);
+    });
+
+    if (this.selectedImage) {
+      formData.append('image', this.selectedImage);
     }
 
-    
+    if (this.updateForm) {
+      this.productService.updateProduct(formData, this.id);  // Ensure updateProduct handles FormData
+    } else {
+      this.productService.createProduct(formData);
+    }
+
     this.showForm = false;
     this.updateForm = false;
-
     this.productForm.reset();
-    }
+    this.selectedImage = null;
   }
+}
+
   createbutton()
   {
+    this.imagePreviewUrl.set(''); // Reset the preview URL
+   
     this.fetchCategories()
     console.log(this.showForm);
     
