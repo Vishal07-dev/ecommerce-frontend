@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environment/environment';
 
 
 @Component({
@@ -11,7 +13,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class PaymentSuccessComponent {
 paymentDetails: any = {};
+  apiUrl = environment.apiUrl;
 
+http=inject(HttpClient)
   constructor(
     private router: Router,
     private route: ActivatedRoute
@@ -20,12 +24,13 @@ paymentDetails: any = {};
   ngOnInit() {
     // Extract query parameters from Stripe redirect
     this.route.queryParams.subscribe(params => {
-      this.paymentDetails = {
-        sessionId: params['session_id'],
-        amount: params['amount'],
-        email: params['email']
-      };
+    const sessionId = params['session_id'];
+    this.http.post(`${this.apiUrl}/payment/store-order`, { sessionId }).subscribe((res: any) => {
+      this.paymentDetails = res;
+      console.log(res);
+      
     });
+  });
   }
 
   goToHome() {
@@ -33,8 +38,18 @@ paymentDetails: any = {};
   }
 
   downloadReceipt() {
-    // Implement receipt download logic
-    console.log('Downloading receipt...');
-    // You can call your API to generate and download receipt
-  }
+  const orderId = this.paymentDetails?.orderId;
+  if (!orderId) return;
+
+  this.http.get(`${this.apiUrl}/receipet/download-receipt/${orderId}`, {
+    responseType: 'blob'
+  }).subscribe(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receipt-${orderId}.pdf`;
+    a.click();
+  });
+}
+
 }

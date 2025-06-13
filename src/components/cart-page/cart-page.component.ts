@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal, computed, effect, inject, OnInit } from '@angular/core';
 import { CartService } from '../../service/cartService/cart.service';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environment/environment';
+import { AuthService } from '../../service/auth.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 interface CartItem {
   _id: string;
@@ -26,7 +29,10 @@ export class CartPageComponent implements OnInit {
   cartService = inject(CartService);
   cartItems = signal<CartItem[]>([]);
   http=inject(HttpClient);
-
+  apiUrl = environment.apiUrl;
+  authService = inject(AuthService);
+   toast =inject(HotToastService) 
+router = inject(Router);
   ngOnInit() {
     this.cartService.getUserCart();
     // Update cart when notified
@@ -88,12 +94,18 @@ export class CartPageComponent implements OnInit {
     { _id: '7', name: 'USB Cable', price: 14.99, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&crop=center' }
   ];
   checkout(items: any) {
-    
-  
-
-  this.http.post<{ url: string }>('http://localhost:2000/api/payment/create-checkout-session', { items })
+   if(this.authService.isLoggedIn()){
+    this.http.post<{ url: string }>(`${this.apiUrl}/payment/create-checkout-session`, { items })
     .subscribe(res => {
       window.location.href = res.url; // redirect to Stripe
     });
+   }
+    else{
+      this.toast.error('pleaso login First to checkout')
+
+     this.router.navigateByUrl('/login')
+     
+    }
+  
 }
 }
