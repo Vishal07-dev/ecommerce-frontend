@@ -8,7 +8,6 @@ import { routes } from './app.routes';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideHotToastConfig } from '@ngxpert/hot-toast';
-import { AuthInterceptor } from '../../auth.interceptor';
 import { authInterceptor } from '../interceptor/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
