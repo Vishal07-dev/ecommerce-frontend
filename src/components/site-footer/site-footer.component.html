@@ -1,0 +1,56 @@
+<footer class="mt-auto border-t border-line bg-canvas">
+  <div class="page pt-16 pb-28">
+    <div class="grid gap-12 md:grid-cols-12">
+      <div class="md:col-span-5">
+        <p class="font-display text-[clamp(3.5rem,2rem+6vw,8rem)] leading-none tracking-[0.12em]" aria-hidden="true">KŌRA</p>
+        <p class="type-label mt-3 text-fg-3">Everyday Garments</p>
+        <p class="mt-6 max-w-sm type-body-sm text-fg-2">
+          Kōra is cloth as it leaves the loom, unbleached and untouched. We make fewer things, in heavy cotton and honest wool, and cut them to last.
+        </p>
+      </div>
+
+      <nav aria-label="Editions" class="md:col-span-2 md:col-start-7">
+        <h2 class="type-label text-fg-3">Shop</h2>
+        <ul class="mt-4 flex flex-col gap-2 type-body-sm">
+          <li><a routerLink="/shop" class="hover:underline">Everything</a></li>
+          @for (edition of editions(); track edition._id) {
+            <li><a routerLink="/shop" [queryParams]="{ edition: edition.slug }" class="hover:underline">{{ edition.name }}</a></li>
+          }
+          <li><a routerLink="/lookbook" class="hover:underline">Lookbook</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Help" class="md:col-span-2">
+        <h2 class="type-label text-fg-3">Help</h2>
+        <ul class="mt-4 flex flex-col gap-2 type-body-sm">
+          <li><a routerLink="/contact" class="hover:underline">Contact</a></li>
+          <li><a routerLink="/profile" class="hover:underline">Your account</a></li>
+          <li><a routerLink="/cart" class="hover:underline">Your bag</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Company" class="md:col-span-2">
+        <h2 class="type-label text-fg-3">KŌRA</h2>
+        <ul class="mt-4 flex flex-col gap-2 type-body-sm">
+          <li><a routerLink="/about" class="hover:underline">About</a></li>
+          <li><a routerLink="/lookbook" class="hover:underline">The lookbook</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="mt-16 flex flex-col gap-6 border-t border-line pt-6 md:flex-row md:items-start md:justify-between">
+      <p class="type-body-sm text-fg-3">© {{ year }} KŌRA. Prices in Indian rupees, GST included.</p>
+      @if (credits().length) {
+        <details class="max-w-2xl type-body-sm text-fg-3">
+          <summary class="cursor-pointer select-none hover:text-fg">Photography credits</summary>
+          <p class="mt-3">
+            Photographs used under the Unsplash License:
+            @for (credit of credits(); track credit.name; let last = $last) {
+              <a [href]="credit.url" target="_blank" rel="noopener" class="link-underline">{{ credit.name }}</a>{{ last ? '.' : ', ' }}
+            }
+          </p>
+        </details>
+      }
+    </div>
+  </div>
+</footer>

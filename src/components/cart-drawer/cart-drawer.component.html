@@ -1,0 +1,130 @@
+<dialog #dialog id="bag" class="sheet" aria-labelledby="bag-title" (cancel)="onCancel($event)" (click)="onClick($event)">
+  <div class="flex h-full flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between gap-4 border-b border-line px-5 py-4">
+      <h2 id="bag-title" class="type-h3">
+        Your bag <span class="type-price text-fg-3">({{ bag.count() }})</span>
+      </h2>
+      <button type="button" class="btn btn-icon -me-2" aria-label="Close bag" (click)="bag.close()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+
+    <!-- Announcements: rendered empty first so updates are spoken -->
+    <p class="visually-hidden" role="status">{{ status() }}</p>
+
+    @if (bag.lines().length) {
+      <!-- Free-delivery progress: text carries the meaning, the bar repeats it -->
+      <div class="border-b border-line px-5 py-4">
+        <p class="type-body-sm">
+          @if (bag.awayFromFreeDelivery() > 0) {
+            Add <span class="type-price">{{ bag.awayFromFreeDelivery() | inr }}</span> more for free delivery.
+          } @else {
+            Delivery is free on this order.
+          }
+        </p>
+        <div class="mt-2 h-1 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
+          <div class="h-full origin-left rounded-full bg-accent transition-[scale] duration-300 ease-out motion-reduce:transition-none"
+               [style.scale]="bag.freeDeliveryProgress() + ' 1'"></div>
+        </div>
+      </div>
+
+      <div class="sheet-scroll flex-1 px-5" data-lenis-prevent>
+        @if (bag.removed(); as removed) {
+          <div class="mt-4 flex items-center justify-between gap-3 rounded-[var(--radius-inset)] bg-sunken px-4 py-3 type-body-sm">
+            <span>Removed {{ removed.name }} ({{ removed.size }}).</span>
+            <button type="button" class="link-underline font-medium" (click)="bag.undoRemove()">Undo</button>
+          </div>
+        }
+
+        <ul class="divide-y divide-line" [@.disabled]="motion.reducedMotion()">
+          @for (line of bag.lines(); track line._id) {
+            <li class="grid grid-cols-[5.5rem_1fr] gap-4 py-5"
+                [class.bg-sunken]="line._id === bag.lastAddedId()"
+                [class.-mx-5]="line._id === bag.lastAddedId()" [class.px-5]="line._id === bag.lastAddedId()">
+              <a [routerLink]="link(line)" (click)="bag.close()" class="media aspect-[4/5]" tabindex="-1" aria-hidden="true">
+                @if (line.image) {
+                  <img [ngSrc]="thumb(line.image)" width="88" height="110" alt="" />
+                }
+              </a>
+              <div class="flex min-w-0 flex-col">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <a [routerLink]="link(line)" (click)="bag.close()" class="type-body-sm font-medium hover:underline">{{ line.name }}</a>
+                    <p class="type-body-sm text-fg-3">
+                      @if (line.colorway) { {{ line.colorway }} · } Size {{ line.size }}
+                    </p>
+                  </div>
+                  <p class="type-price type-body-sm">{{ line.price * line.quantity | inr }}</p>
+                </div>
+
+                <div class="mt-auto flex items-center justify-between pt-3">
+                  <div class="inline-flex items-center rounded-full border border-line-strong" role="group" [attr.aria-label]="'Quantity of ' + line.name + ', size ' + line.size">
+                    <button type="button" class="btn btn-icon min-h-10 min-w-10" [disabled]="line.quantity <= 1"
+                            [attr.aria-label]="'Decrease quantity'" (click)="bag.setQuantity(line, line.quantity - 1)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14" stroke-linecap="round" /></svg>
+                    </button>
+                    <span class="type-price inline-block w-6 overflow-hidden text-center type-body-sm" aria-live="polite">
+                      <span class="inline-block" [@quantity]="line.quantity">{{ line.quantity }}</span>
+                    </span>
+                    <button type="button" class="btn btn-icon min-h-10 min-w-10" [disabled]="line.quantity >= line.maxQuantity"
+                            [attr.aria-label]="'Increase quantity'" (click)="bag.setQuantity(line, line.quantity + 1)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-linecap="round" /></svg>
+                    </button>
+                  </div>
+                  <button type="button" class="type-body-sm text-fg-2 link-underline min-h-10" (click)="bag.remove(line)">
+                    Remove<span class="visually-hidden"> {{ line.name }}, size {{ line.size }}</span>
+                  </button>
+                </div>
+                @if (line.quantity >= line.maxQuantity) {
+                  <p class="mt-2 type-body-sm text-fg-3">That's all we have in {{ line.size }}.</p>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <!-- Summary + the one primary action -->
+      <div class="border-t border-line px-5 py-5">
+        @if (bag.error()) {
+          <p class="mb-3 type-body-sm text-danger" role="alert">{{ bag.error() }}</p>
+        }
+        <dl class="grid grid-cols-[1fr_auto] gap-y-1 type-body-sm">
+          <dt class="text-fg-2">Subtotal</dt>
+          <dd class="type-price text-end">{{ bag.subtotal() | inr }}</dd>
+          <dt class="text-fg-2">Delivery</dt>
+          <dd class="type-price text-end">{{ bag.delivery() ? (bag.delivery() | inr) : 'Free' }}</dd>
+          <dt class="mt-2 font-medium">Total</dt>
+          <dd class="type-price mt-2 text-end font-medium">{{ bag.total() | inr }}</dd>
+        </dl>
+        <p class="mt-1 type-body-sm text-fg-3">Prices include GST. Free delivery from {{ freeFrom }}.</p>
+
+        @if (bag.signedIn) {
+          <button type="button" class="btn btn-solid mt-4 w-full" [attr.aria-busy]="bag.busy()" [disabled]="bag.busy()" (click)="bag.checkout()">
+            {{ bag.busy() ? 'Opening checkout…' : 'Check out' }}
+          </button>
+        } @else {
+          <button type="button" class="btn btn-solid mt-4 w-full" (click)="bag.checkout()">Sign in to check out</button>
+          <p class="mt-2 text-center type-body-sm text-fg-3">Your bag stays saved while you sign in.</p>
+        }
+        <a routerLink="/cart" (click)="bag.close()" class="mt-3 block text-center type-body-sm link-underline">View full bag</a>
+      </div>
+    } @else {
+      <!-- Empty state -->
+      <div class="sheet-scroll flex flex-1 flex-col px-5 py-8" data-lenis-prevent>
+        @if (assets()['empty-bag']; as hangers) {
+          <div class="media mb-8 aspect-[4/3]">
+            <img [ngSrc]="hangers.url" fill sizes="(min-width: 448px) 30vw, 100vw" alt="" class="object-[center_30%]" />
+          </div>
+        }
+        <p class="type-h2">Your bag is empty</p>
+        <p class="mt-2 type-body text-fg-2">Coats, knits and heavy cotton, made to be worn for years.</p>
+        <a routerLink="/shop" (click)="bag.close()" class="btn btn-solid mt-6 self-start">Shop the edit</a>
+        @if (bag.error()) {
+          <p class="mt-4 type-body-sm text-danger" role="alert">{{ bag.error() }}</p>
+        }
+      </div>
+    }
+  </div>
+</dialog>

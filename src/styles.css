@@ -1,22 +1,661 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   KŌRA — "Bone & Ink" design system
+   Tailwind v4. Tokens are defined once here; components use the semantic
+   utilities (bg-canvas, text-fg, border-line, bg-solid …), never raw colours.
+   ========================================================================== */
 
 @import "tailwindcss";
+
+/* One theme mechanism: the `.dark` class set by ThemeService. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+/* --------------------------------------------------------------------------
+   1. Theme tokens (static)
+   -------------------------------------------------------------------------- */
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Bodoni Moda Variable", "Didot", "Bodoni 72", Georgia, serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --radius-surface: 14px;
+  --radius-inset: 6px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-swap: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Legacy palette remap.
+     Pages outside the storefront (login, profile, admin …) still use stock
+     Tailwind colour utilities. Repointing those ramps here lets them inherit
+     the warm neutrals and the single cobalt accent without touching their
+     templates. Purple, violet and indigo collapse into the accent ramp so the
+     old two-hue gradients become one colour. */
+  --color-gray-50: oklch(0.985 0.004 75);
+  --color-gray-100: oklch(0.967 0.006 75);
+  --color-gray-200: oklch(0.922 0.008 75);
+  --color-gray-300: oklch(0.870 0.010 75);
+  --color-gray-400: oklch(0.708 0.012 75);
+  --color-gray-500: oklch(0.556 0.012 75);
+  --color-gray-600: oklch(0.446 0.012 75);
+  --color-gray-700: oklch(0.371 0.010 75);
+  --color-gray-800: oklch(0.269 0.008 75);
+  --color-gray-900: oklch(0.205 0.006 75);
+  --color-gray-950: oklch(0.145 0.005 75);
+
+  --color-slate-50: var(--color-gray-50);
+  --color-slate-100: var(--color-gray-100);
+  --color-slate-200: var(--color-gray-200);
+  --color-slate-300: var(--color-gray-300);
+  --color-slate-400: var(--color-gray-400);
+  --color-slate-500: var(--color-gray-500);
+  --color-slate-600: var(--color-gray-600);
+  --color-slate-700: var(--color-gray-700);
+  --color-slate-800: var(--color-gray-800);
+  --color-slate-900: var(--color-gray-900);
+  --color-slate-950: var(--color-gray-950);
+  --color-zinc-50: var(--color-gray-50);
+  --color-zinc-100: var(--color-gray-100);
+  --color-zinc-200: var(--color-gray-200);
+  --color-zinc-300: var(--color-gray-300);
+  --color-zinc-400: var(--color-gray-400);
+  --color-zinc-500: var(--color-gray-500);
+  --color-zinc-600: var(--color-gray-600);
+  --color-zinc-700: var(--color-gray-700);
+  --color-zinc-800: var(--color-gray-800);
+  --color-zinc-900: var(--color-gray-900);
+  --color-zinc-950: var(--color-gray-950);
+
+  /* The lightest steps were only ever tints behind content; they become warm
+     neutrals so old pastel-blue panels and gradients read as bone. */
+  --color-blue-50: oklch(0.975 0.006 85);
+  --color-blue-100: oklch(0.955 0.008 85);
+  --color-blue-200: oklch(0.915 0.010 80);
+  --color-blue-300: oklch(0.809 0.100 264);
+  --color-blue-400: oklch(0.707 0.140 264);
+  --color-blue-500: oklch(0.600 0.180 264);
+  --color-blue-600: oklch(0.520 0.200 264);
+  --color-blue-700: oklch(0.450 0.200 264);
+  --color-blue-800: oklch(0.390 0.170 264);
+  --color-blue-900: oklch(0.330 0.130 264);
+  --color-blue-950: oklch(0.260 0.090 264);
+  --color-indigo-50: var(--color-blue-50);
+  --color-indigo-100: var(--color-blue-100);
+  --color-indigo-200: var(--color-blue-200);
+  --color-indigo-300: var(--color-blue-300);
+  --color-indigo-400: var(--color-blue-400);
+  --color-indigo-500: var(--color-blue-500);
+  --color-indigo-600: var(--color-blue-600);
+  --color-indigo-700: var(--color-blue-700);
+  --color-indigo-800: var(--color-blue-800);
+  --color-indigo-900: var(--color-blue-900);
+  --color-indigo-950: var(--color-blue-950);
+  --color-purple-50: var(--color-blue-50);
+  --color-purple-100: var(--color-blue-100);
+  --color-purple-200: var(--color-blue-200);
+  --color-purple-300: var(--color-blue-300);
+  --color-purple-400: var(--color-blue-400);
+  --color-purple-500: var(--color-blue-500);
+  --color-purple-600: var(--color-blue-600);
+  --color-purple-700: var(--color-blue-700);
+  --color-purple-800: var(--color-blue-800);
+  --color-purple-900: var(--color-blue-900);
+  --color-purple-950: var(--color-blue-950);
+  --color-violet-500: var(--color-blue-500);
+  --color-violet-600: var(--color-blue-600);
+  --color-violet-700: var(--color-blue-700);
 }
 
-.animate-marquee {
-  animation: marquee 25s linear infinite;
+/* --------------------------------------------------------------------------
+   2. Semantic colour roles (switch with theme)
+   Measured pairs (WCAG): fg/canvas 17.4 · fg-2 9.3 · fg-3 5.5 (4.96 on sunken)
+   accent 7.2 · on-accent 7.6 · danger 5.6 · line-strong 3.6 (non-text 3:1)
+   Dark: fg 16.8 · fg-2 10.4 · fg-3 6.7 · accent 7.7 · danger 6.8 · line-strong 4.0
+   -------------------------------------------------------------------------- */
+:root,
+.theme-light {
+  --canvas: oklch(0.972 0.008 85);
+  --raised: oklch(0.99 0.004 85);
+  --sunken: oklch(0.935 0.012 80);
+  --fg: oklch(0.18 0.01 60);
+  --fg-2: oklch(0.38 0.01 70);
+  --fg-3: oklch(0.50 0.012 70);
+  --line: oklch(0.86 0.012 80);
+  --line-strong: oklch(0.60 0.012 75);
+  --accent: oklch(0.45 0.20 264);
+  --on-accent: oklch(0.99 0.004 85);
+  --solid: oklch(0.18 0.01 60);
+  --on-solid: oklch(0.972 0.008 85);
+  --danger: oklch(0.52 0.19 28);
+  --image-outline: oklch(0 0 0 / 0.1);
+  --scrim: oklch(0.18 0.01 60 / 0.4);
+  color-scheme: light;
 }
 
-html {
-  scroll-behavior: smooth;
+.dark,
+.theme-dark {
+  --canvas: oklch(0.16 0.008 70);
+  --raised: oklch(0.20 0.008 70);
+  --sunken: oklch(0.13 0.008 70);
+  --fg: oklch(0.95 0.008 85);
+  --fg-2: oklch(0.80 0.01 80);
+  --fg-3: oklch(0.68 0.012 75);
+  --line: oklch(0.32 0.01 70);
+  --line-strong: oklch(0.55 0.012 75);
+  --accent: oklch(0.72 0.13 264);
+  --on-accent: oklch(0.16 0.008 70);
+  --solid: oklch(0.95 0.008 85);
+  --on-solid: oklch(0.16 0.008 70);
+  --danger: oklch(0.70 0.16 28);
+  --image-outline: oklch(1 0 0 / 0.1);
+  --scrim: oklch(0 0 0 / 0.6);
+  color-scheme: dark;
 }
 
-body {
-  margin: 0; /* Remove default body margin */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Default font */
+/* Scoped themes: a section can pin itself to one look in either site theme. */
+.dark .theme-light { color-scheme: light; }
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-raised: var(--raised);
+  --color-sunken: var(--sunken);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-solid: var(--solid);
+  --color-on-solid: var(--on-solid);
+  --color-danger: var(--danger);
+}
+
+/* --------------------------------------------------------------------------
+   3. Base
+   -------------------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-size-adjust: 100%;
+    scroll-padding-block-start: 5rem; /* sticky header height + breathing room */
+  }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  :where(h1, h2, h3, h4) { text-wrap: balance; }
+  :where(p, li, dd) { text-wrap: pretty; }
+
+  ::selection { background: var(--accent); color: var(--on-accent); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Lock the page while a modal <dialog> (bag, menu, size guide) is open. */
+  html:has(dialog[open]) { overflow: hidden; }
+
+  a, button, label, summary { -webkit-tap-highlight-color: transparent; }
+
+  input, select, textarea { font-size: max(1rem, 16px); } /* no iOS zoom */
+}
+
+/* --------------------------------------------------------------------------
+   4. Type scale. One class sets size, line-height, weight and tracking.
+   -------------------------------------------------------------------------- */
+@utility type-display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 2rem + 8vw, 11rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+@utility type-display {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 1.5rem + 4vw, 5.5rem);
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 1.4rem + 2.4vw, 3.5rem);
+  line-height: 1.1;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+@utility type-h3 {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+@utility type-body { font-size: 1rem; line-height: 1.6; }
+@utility type-body-sm { font-size: 0.875rem; line-height: 1.5; }
+@utility type-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+@utility type-price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  white-space: nowrap;
+}
+@utility measure { max-inline-size: 65ch; }
+
+/* --------------------------------------------------------------------------
+   5. Layout primitives
+   -------------------------------------------------------------------------- */
+@utility page {
+  inline-size: 100%;
+  max-inline-size: 1600px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 4rem);
+}
+@utility section-y {
+  padding-block: clamp(4rem, 2rem + 8vw, 12rem);
+}
+
+/* --------------------------------------------------------------------------
+   6. Shared surfaces and controls
+   -------------------------------------------------------------------------- */
+@layer components {
+  /* Content images: 1px inset outline in pure black/white at 10%. */
+  .media {
+    position: relative;
+    overflow: hidden;
+    background: var(--sunken);
+  }
+  .media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    outline: 1px solid var(--image-outline);
+    outline-offset: -1px;
+    pointer-events: none;
+  }
+  .media img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+
+  /* Buttons. One filled (solid) action per view; the rest are quiet. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-block-size: 3rem;
+    padding: 0 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition-property: background-color, color, border-color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+  .btn:not(:disabled):active { scale: 0.96; }
+  .btn:disabled { cursor: not-allowed; opacity: 0.5; }
+  .btn-solid { background: var(--solid); color: var(--on-solid); }
+  @media (hover: hover) { .btn-solid:not(:disabled):hover { background: color-mix(in oklab, var(--solid) 86%, var(--canvas)); } }
+  .btn-quiet { border-color: var(--line-strong); color: var(--fg); background: transparent; }
+  @media (hover: hover) { .btn-quiet:not(:disabled):hover { background: var(--sunken); } }
+  .btn-icon {
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+    padding: 0;
+    color: var(--fg);
+    background: transparent;
+  }
+  @media (hover: hover) { .btn-icon:hover { background: var(--sunken); } }
+
+  .link-underline {
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color 150ms ease-out;
+  }
+  @media (hover: hover) { .link-underline:hover { text-decoration-color: var(--accent); } }
+
+  /* Form fields that legacy pages and the shop filters share. */
+  .field {
+    inline-size: 100%;
+    min-block-size: 2.75rem;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-inset);
+    background: var(--raised);
+    color: var(--fg);
+  }
+
+  /* Size chips: native radio buttons, so arrow keys and forms work for free. */
+  .size-chip { position: relative; }
+  .size-chip input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .size-chip input:disabled { cursor: not-allowed; }
+  .size-chip span {
+    display: inline-grid;
+    place-items: center;
+    min-inline-size: 3rem;
+    min-block-size: 2.75rem;
+    padding: 0 0.875rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.875rem;
+    transition-property: background-color, color, border-color, scale;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+  .size-chip input:checked + span { background: var(--solid); color: var(--on-solid); border-color: var(--solid); }
+  .size-chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .size-chip input:disabled + span { color: var(--fg-3); border-style: dashed; text-decoration: line-through; }
+  .size-chip input:not(:disabled):active + span { scale: 0.96; }
+  @media (hover: hover) { .size-chip input:not(:disabled):not(:checked):hover + span { background: var(--sunken); } }
+
+  /* Product-card image swap: second photo cross-fades in on hover or focus. */
+  .card-swap img + img { opacity: 0; transition: opacity 300ms var(--ease-swap); }
+  @media (hover: hover) { .card:hover .card-swap img + img { opacity: 1; } }
+  .card:focus-within .card-swap img + img { opacity: 1; }
+
+  /* Quick-add sizes on product cards: always visible on touch, revealed on
+     hover or keyboard focus where a pointer can hover. */
+  @media (hover: hover) {
+    .card .quick-add { opacity: 0; transition: opacity 150ms ease-out; }
+    .card:hover .quick-add, .card:focus-within .quick-add { opacity: 1; }
+  }
+
+  /* First focusable element on every page. */
+  .skip-link {
+    position: fixed;
+    inset-block-start: 0.5rem;
+    inset-inline-start: 1rem;
+    z-index: 60;
+    padding: 0.75rem 1.25rem;
+    border-radius: 999px;
+    background: var(--solid);
+    color: var(--on-solid);
+    translate: 0 -200%;
+  }
+  .skip-link:focus-visible { translate: 0 0; }
+
+  /* Hide visually, keep for assistive tech. */
+  .visually-hidden {
+    position: absolute !important;
+    inline-size: 1px; block-size: 1px;
+    overflow: hidden; clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. Overlays: bag drawer, menu, size guide. Native <dialog> + showModal().
+   -------------------------------------------------------------------------- */
+dialog.sheet {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  inline-size: min(28rem, 100%);
+  max-inline-size: 100%;
+  block-size: 100dvh;
+  max-block-size: 100dvh;
+  background: var(--raised);
+  color: var(--fg);
+  box-shadow: 0 0 0 1px oklch(0 0 0 / 0.06), -24px 0 64px -12px oklch(0 0 0 / 0.25);
+  translate: 100% 0;
+  transition: translate 420ms var(--ease-out);
+}
+dialog.sheet.sheet-start { inset: 0 auto 0 0; translate: -100% 0; }
+dialog.sheet.is-open { translate: 0 0; }
+dialog.sheet::backdrop {
+  background: var(--scrim);
+  opacity: 0;
+  transition: opacity 420ms var(--ease-out);
+}
+dialog.sheet.is-open::backdrop { opacity: 1; }
+dialog.sheet .sheet-scroll { overflow-y: auto; overscroll-behavior: contain; }
+
+dialog.modal {
+  margin: auto;
+  padding: 0;
+  border: 0;
+  inline-size: min(40rem, calc(100% - 2rem));
+  max-block-size: calc(100dvh - 2rem);
+  border-radius: var(--radius-surface);
+  background: var(--raised);
+  color: var(--fg);
+  box-shadow: 0 24px 64px -12px oklch(0 0 0 / 0.3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  opacity: 0;
+  translate: 0 12px;
+  transition: opacity 300ms var(--ease-out), translate 300ms var(--ease-out);
+}
+dialog.modal.is-open { opacity: 1; translate: 0 0; }
+dialog.modal::backdrop { background: var(--scrim); }
+
+/* --------------------------------------------------------------------------
+   8. Motion
+   Entrances: 100ms stagger, opacity + 4px blur + 12px rise over 300ms.
+   Everything that moves is opt-in behind no-preference; reduced motion keeps
+   an opacity cross-fade only.
+   -------------------------------------------------------------------------- */
+[data-reveal] { transition: opacity 300ms ease-out; }
+[data-reveal].is-pending { opacity: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    transition-property: opacity, translate, filter;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
+  }
+  [data-reveal].is-pending { translate: 0 12px; filter: blur(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.sheet { translate: 0 0; opacity: 0; transition: opacity 200ms ease-out; }
+  dialog.sheet.is-open { opacity: 1; }
+  dialog.modal { translate: 0 0; }
+  .btn:not(:disabled):active, .size-chip input:not(:disabled):active + span { scale: 1; }
+}
+
+/* Theme switch: no colour transitions smear across the page. */
+.theme-switching, .theme-switching * { transition: none !important; }
+
+/* Lenis smooth scroll housekeeping */
+html.lenis, html.lenis body { block-size: auto; }
+.lenis.lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+
+
+/* --------------------------------------------------------------------------
+   9. Hero showcase (scroll-choreographed). See hero-showcase.component.
+   A tall track gives the scroll distance; the stage sticks for its length.
+   Hotspot positions are percentages of the photograph, so the figure box is
+   sized to the photo's exact aspect ratio (set inline from the data).
+   -------------------------------------------------------------------------- */
+.hero { --hero-m: clamp(1rem, 4vw, 4rem); position: relative; background: var(--canvas); color: var(--fg); }
+.hero-track { block-size: 360svh; }
+/* The stage is its own stacking context, so it carries the canvas colour:
+   the figure's multiply blend needs that backdrop inside the context. */
+.hero-stage { position: sticky; inset-block-start: 0; block-size: 100svh; overflow: hidden; background: var(--canvas); }
+
+.hero-layer { position: absolute; }
+.hero-copy {
+  inset-inline-start: var(--hero-m);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  max-inline-size: min(40rem, 46vw);
+}
+.hero-shop {
+  inset-inline-end: 6vw;
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  inline-size: min(24rem, 40vw);
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 1rem + 5vw, 7rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+.hero-rail { position: absolute; inset-inline-start: var(--hero-m); inset-block-end: 1.5rem; }
+.hero-cue::after {
+  content: "";
+  display: block;
+  inline-size: 1px;
+  block-size: 3rem;
+  margin-block-start: 0.75rem;
+  background: currentColor;
+}
+
+.hero-ghost {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 6svh;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 30vw;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--raised);
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero-figure-wrap {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 8vw;
+  inline-size: min(46vw, calc(92svh * var(--ar, 0.667)));
+  aspect-ratio: var(--ar, 0.667);
+}
+.hero-figure { position: absolute; inset: 0; will-change: transform; }
+/* The studio photo's white sweep multiplies into the bone canvas, so the
+   figure stands in the page rather than in a white rectangle. */
+/* The hero is shot on a black studio sweep: lighten lets that black dissolve
+   into the dark stage, so the figure stands in the page, not in a rectangle. */
+.hero-blend { mix-blend-mode: lighten; }
+.hero-photo, .hero-face {
+  object-fit: cover;
+  mask-image: linear-gradient(to right, transparent, #000 14% 86%, transparent), linear-gradient(to bottom, transparent, #000 12%);
+  mask-composite: intersect;
+}
+.hero-flip { position: absolute; inset: 0; transform-style: preserve-3d; }
+.hero-face { backface-visibility: hidden; }
+.hero-face-back { rotate: y 180deg; }
+
+.hero-lens {
+  position: absolute;
+  translate: -50% -50%;
+  inline-size: min(34vw, 42svh);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--sunken);
+  clip-path: circle(0% at 50% 50%);
+  box-shadow: 0 30px 80px -20px oklch(0 0 0 / 0.35);
+  pointer-events: none;
+}
+
+.hero-spot {
+  position: absolute;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+.hero-spot::before {
+  content: "";
+  position: absolute;
+  inset: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px oklch(1 0 0 / 0.9);
+  transition: scale 150ms ease-out;
+}
+.hero-spot > span[aria-hidden] { position: relative; color: var(--on-accent); font: 500 0.75rem/1 var(--font-mono); }
+.hero-spot[aria-pressed="true"]::before { scale: 1.15; }
+@media (hover: hover) { .hero-spot:hover::before { scale: 1.15; } }
+
+@media (max-width: 767px) {
+  .hero-track { block-size: 280svh; }
+  .hero-copy { inset-block-start: 5.25rem; translate: none; inset-inline-end: var(--hero-m); max-inline-size: none; }
+  .hero-copy .hero-title { font-size: clamp(2.75rem, 12vw, 4rem); }
+  .hero-copy .type-display { font-size: clamp(2rem, 9vw, 3rem); }
+  .hero-shop { inset-inline: var(--hero-m); inset-block: 5rem auto; translate: none; inline-size: auto; }
+  /* Keep the copy above the figure: long text moves to the product page,
+     a callout's detail shows when its hotspot is tapped. */
+  .hero-lede, .hero-cue, .hero-fit { display: none; }
+  .hero-detail { display: none; }
+  .is-active .hero-detail { display: block; }
+  .hero [data-hero-stage="details"] ol { gap: 0.75rem; }
+  .hero-figure-wrap { inset-inline: 0; margin-inline: auto; inline-size: min(92vw, calc(54svh * var(--ar, 0.667))); }
+  .hero-lens { inline-size: 58vw; }
+  .hero-rail { display: none; }
+}
+
+/* Reduced motion: no pinning or scrubbing. One composed, static layout
+   with every beat visible in reading order. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-track { block-size: auto; }
+  .hero-stage {
+    position: relative;
+    block-size: auto;
+    display: grid;
+    gap: 3rem;
+    padding: 4rem var(--hero-m);
+  }
+  .hero-layer, .hero-copy, .hero-shop {
+    position: relative;
+    inset: auto;
+    translate: none;
+    max-inline-size: 40rem;
+    inline-size: auto;
+  }
+  .hero-figure-wrap { position: relative; inset: auto; inline-size: min(100%, calc(80svh * var(--ar, 0.667))); justify-self: center; }
+  .hero-ghost, .hero-lens, .hero-rail, .hero-cue { display: none; }
+  @media (min-width: 768px) {
+    .hero-stage { grid-template-columns: 1fr 1fr; align-items: start; }
+    .hero-layer { grid-column: 1; }
+    .hero-figure-wrap { grid-column: 2; grid-row: 1 / span 4; position: sticky; inset-block-start: 5rem; }
+  }
+}
+
+/* Reduced motion stacks the hero in normal flow, so nothing can overlap:
+   show the full copy again at every width. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-lede, .hero-fit, .hero-detail { display: block; }
+  .hero-shop { inset: auto; }
 }

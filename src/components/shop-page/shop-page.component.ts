@@ -1,241 +1,100 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ProductsService } from '../../service/products.service';
-import { CategoryService } from '../../service/category.service';
-import { CartService } from '../../service/cartService/cart.service';
-import { Router } from '@angular/router';
-import { WishlistService } from '../../service/wishList\'/wishlist.service';
-import { HotToastService } from '@ngxpert/hot-toast';
-import { LoaderService } from '../../service/loader/loader.service';
-import { LoaderComponent } from "../loader/loader.component";
+import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { map } from 'rxjs';
+import { CatalogService } from '../../service/catalog.service';
+import { Product, sizesOf } from '../../ui/models';
+import { ProductCardComponent } from '../product-card/product-card.component';
+import { RevealDirective } from '../../ui/reveal.directive';
 
-interface Product {
-  id: number | string;
-  name: string;
-  category: any;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  ratings: number;
-  reviews: number;
-  isNew?: boolean;
-  onSale?: boolean;
-  colors?: string[];
-  sizes?: string[];
-  _id?: string;
-}
+type Sort = 'featured' | 'newest' | 'price-asc' | 'price-desc';
 
-interface ApiCategory {
-  _id: string;
-  name: string;
-}
+const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '28', '30', '32', '34', '36', 'One size'];
 
 @Component({
   selector: 'app-shop-page',
-  standalone: true,
-  imports: [CommonModule, FormsModule, LoaderComponent],
+  imports: [RouterLink, ProductCardComponent, RevealDirective],
   templateUrl: './shop-page.component.html',
-  styleUrl: './shop-page.component.css'
 })
-export class ShopPageComponent implements OnInit {
-  constructor(private toast: HotToastService){}
-  
-  private productService = inject(ProductsService);
-  private categoryService = inject(CategoryService);
-  private cartService = inject(CartService);
+export class ShopPageComponent {
+  private catalog = inject(CatalogService);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private title = inject(Title);
 
-  products: Product[] = [];
-  allProducts: Product[] = [];
-  loaderService = inject(LoaderService)
+  readonly all = signal<Product[]>([]);
+  readonly state = signal<'loading' | 'ready' | 'error'>('loading');
+  readonly editions = toSignal(this.catalog.editions(), { initialValue: [] });
 
-  categories: ApiCategory[] = [];
-  selectedCategories: string[] = [];
+  private params = toSignal(this.route.queryParamMap.pipe(map(p => ({
+    edition: p.get('edition') ?? '',
+    category: p.get('category') ?? '',
+    size: p.get('size') ?? '',
+    sort: (p.get('sort') as Sort) ?? 'featured',
+  }))), { requireSync: true });
 
-  priceRange = { min: null as number | null, max: null as number | null };
-  currentMinPriceInput: number | null = null;
-  currentMaxPriceInput: number | null = null;
-  wishlistService = inject(WishlistService);
+  readonly edition = computed(() => this.editions().find(e => e.slug === this.params().edition) ?? null);
+  readonly filters = computed(() => this.params());
 
-  selectedRating: number = 0;
+  readonly categories = computed(() => {
+    const names = new Set(this.all().map(p => p.category?.name).filter((n): n is string => !!n));
+    return [...names].sort();
+  });
+  readonly sizes = computed(() => {
+    const set = new Set(this.all().flatMap(p => sizesOf(p).map(v => v.size)));
+    return SIZE_ORDER.filter(s => set.has(s));
+  });
 
-  sortBy: string = 'popularity';
-  itemsPerPage: number = 12;
-  currentPage: number = 1;
+  readonly results = computed(() => {
+    const f = this.params();
+    let list = this.all().filter(p =>
+      (!f.edition || p.edition?.slug === f.edition) &&
+      (!f.category || p.category?.name === f.category) &&
+      (!f.size || sizesOf(p).some(v => v.size === f.size && v.stock > 0)));
+    switch (f.sort) {
+      case 'price-asc': list = [...list].sort((a, b) => a.price - b.price); break;
+      case 'price-desc': list = [...list].sort((a, b) => b.price - a.price); break;
+      case 'newest': list = [...list].reverse(); break;
+    }
+    return list;
+  });
 
-  showMobileFilters = false;
-  isLoadingProducts = true;
-  isLoadingCategories = true;
+  readonly hasFilters = computed(() => !!(this.params().category || this.params().size));
 
-  ngOnInit(): void {
-    this.loadInitialProducts();
-    this.fetchCategories();
+  readonly resultLabel = computed(() => {
+    const n = this.results().length;
+    return new Intl.PluralRules('en-IN').select(n) === 'one' ? `${n} piece` : `${n} pieces`;
+  });
+
+  constructor() {
+    this.catalog.products({ featured: true, limit: 100 }).subscribe({
+      next: res => { this.all.set(res.products); this.state.set('ready'); },
+      error: () => this.state.set('error'),
+    });
+    this.title.setTitle('Shop — KŌRA');
   }
 
-  fetchCategories() {
-    this.isLoadingCategories = true;
-    this.categoryService.getCategory().subscribe({
-      next: (res: any) => {
-        this.categories = res;
-        this.isLoadingCategories = false;
-      },
-      error: (err) => {
-        console.error('Failed to fetch categories:', err);
-        this.categories = [];
-        this.isLoadingCategories = false;
-      }
+  setFilter(key: 'category' | 'size' | 'sort', value: string): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { [key]: value || null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 
-  loadInitialProducts() {
-    this.loaderService.show()
-    this.isLoadingProducts = true;
-    this.productService.fetchProduct().subscribe({
-      next: (res: any) => {
-        const productList = res.products ?? res;
-        this.loaderService.hide()
-        this.allProducts = productList.map((p: any) => ({ ...p, id: p._id || p.id }));
-        this.applyFiltersAndSort();
-        this.isLoadingProducts = false;
-      },
-      error: (err: any) => {
-        console.error('Failed to load products:', err);
-        this.allProducts = [];
-        this.products = [];
-        this.isLoadingProducts = false;
-      }
+  clearFilters(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { category: null, size: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 
-  applyFiltersAndSort() {
-    let filtered = [...this.allProducts];
+  /** Editorial rhythm: every seventh card runs double width on large screens. */
+  isFeature(index: number): boolean { return index % 7 === 0; }
 
-    // Category
-    if (this.selectedCategories.length > 0) {
-      filtered = filtered.filter(product =>
-        this.selectedCategories.includes(product.category._id)
-      );
-    }
-
-    // Price
-    if (this.priceRange.min !== null) {
-      filtered = filtered.filter(p => p.price >= this.priceRange.min!);
-    }
-    if (this.priceRange.max !== null) {
-      filtered = filtered.filter(p => p.price <= this.priceRange.max!);
-    }
-
-    // Rating
-    if (this.selectedRating > 0) {
-      filtered = filtered.filter(p => p.ratings >= this.selectedRating);
-    }
-
-    // Sorting
-    switch (this.sortBy) {
-      case 'price-asc':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        filtered.sort((a, b) => (b.ratings || 0) - (a.ratings || 0));
-        break;
-      case 'newest':
-        // Optional: sort by creation date if available
-        break;
-    }
-
-    this.products = filtered;
-    this.currentPage = 1;
-  }
-
-  toggleCategory(category: ApiCategory) {
-    const index = this.selectedCategories.indexOf(category._id);
-    if (index > -1) {
-      this.selectedCategories.splice(index, 1);
-    } else {
-      this.selectedCategories.push(category._id);
-    }
-    this.applyFiltersAndSort();
-  }
-
-  applyPriceRange() {
-    this.priceRange.min = this.currentMinPriceInput;
-    this.priceRange.max = this.currentMaxPriceInput;
-    this.applyFiltersAndSort();
-  }
-
-  selectRating(rating: number) {
-    this.selectedRating = this.selectedRating === rating ? 0 : rating;
-    this.applyFiltersAndSort();
-  }
-
-  clearFilters() {
-    this.selectedCategories = [];
-    this.priceRange = { min: null, max: null };
-    this.currentMinPriceInput = null;
-    this.currentMaxPriceInput = null;
-    this.selectedRating = 0;
-    this.sortBy = 'popularity';
-    this.applyFiltersAndSort();
-  }
-
-  changeSort(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    this.sortBy = selectElement.value;
-    this.applyFiltersAndSort();
-  }
-
-  addToCart(product: Product, event: MouseEvent) {
-    event.stopPropagation();
-    this.cartService.addtocart(product);
-    this.router.navigateByUrl('cart');
-    console.log("Added to cart:", product.name);
-  }
-
- addtowishlist(product: any) {
-    this.wishlistService.addItemToWishList(product).subscribe({
-      next: (res) => {
-       this.toast.success('Product added to wish successfully!')
-      },
-      error: (err) => {
-        this.router.navigateByUrl('/login');
-      this.toast.error('pleaso login to add product to wishlist')
-      }
-    });
-  }
-
-  viewProductDetails(product: Product) {
-    this.router.navigateByUrl(`/product/${product._id ?? product.id}`).then(() => {
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    });
-  }
-
-  changePage(page: number) {
-    this.currentPage = page;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  getTotalPages(): number {
-    if (!this.products || this.products.length === 0) return 0;
-    return Math.ceil(this.products.length / this.itemsPerPage);
-  }
-
-  getPaginatedProducts(): Product[] {
-    if (!this.products) return [];
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    return this.products.slice(startIndex, endIndex);
-  }
-
-  getPageNumbers(): number[] {
-    const totalPages = this.getTotalPages();
-    return Array(totalPages).fill(0).map((_, i) => i + 1);
-  }
-
-  toggleMobileFilters() {
-    this.showMobileFilters = !this.showMobileFilters;
-  }
+  reload(): void { location.reload(); }
 }

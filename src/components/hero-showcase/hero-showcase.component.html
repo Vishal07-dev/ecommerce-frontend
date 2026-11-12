@@ -1,0 +1,124 @@
+<section class="hero theme-dark" aria-labelledby="hero-title" (focusin)="onFocusIn($event)">
+  <div #track class="hero-track">
+    <div #stage class="hero-stage">
+
+      <!-- Layer 0 · ghost wordmark, drifts slowest -->
+      <p data-hero-ghost class="hero-ghost" aria-hidden="true">KŌRA</p>
+
+      <!-- Layer 2 · beat 1: introduction -->
+      <div data-hero-stage="intro" data-focus-stage="intro" class="hero-layer hero-copy">
+        @if (product().edition; as e) {
+          <p class="type-label text-fg-3">{{ e.season ?? e.name }}</p>
+        }
+        <h1 id="hero-title" class="hero-title mt-4">Long lines, <em class="italic">plain cloth.</em></h1>
+        <p class="hero-lede mt-6 type-body text-fg-2 measure">
+          {{ product().name }} in {{ product().subtitle?.toLowerCase() }}. {{ product().description }}
+        </p>
+        <a [routerLink]="link()" class="mt-6 inline-flex min-h-11 items-center gap-2 type-body-sm font-medium link-underline">
+          See {{ product().name }}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </a>
+        <p class="hero-cue type-label mt-10 text-fg-3" aria-hidden="true">Scroll to look closer</p>
+      </div>
+
+      <!-- Beat 2: the cloth -->
+      @if (product().fabric; as f) {
+        <div data-hero-stage="fabric" data-focus-stage="fabric" class="hero-layer hero-copy">
+          <p class="type-label text-fg-3">The cloth</p>
+          <h2 class="type-display mt-4">{{ f.weave }}</h2>
+          <p class="mt-6 type-label text-fg-2">{{ composition() }}@if (f.weightGsm) { · <span class="type-price">{{ f.weightGsm }}</span> gsm }</p>
+          @if (f.origin) { <p class="mt-2 type-body text-fg-2">{{ f.origin }}.</p> }
+        </div>
+      }
+
+      <!-- Beat 3: the details, timed to the hotspots -->
+      @if (hotspots().length) {
+        <div data-hero-stage="details" data-focus-stage="details" class="hero-layer hero-copy">
+          <p class="type-label text-fg-3">The details</p>
+          <ol class="mt-6 flex flex-col gap-5">
+            @for (s of hotspots(); track s.label; let i = $index) {
+              <li data-hero-callout class="grid grid-cols-[2rem_1fr] gap-3" [class.text-accent]="activeSpot() === i" [class.is-active]="activeSpot() === i">
+                <span class="type-label pt-1" aria-hidden="true">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                <div>
+                  <p class="type-h3">{{ s.label }}</p>
+                  <p [id]="'hero-spot-' + i" class="hero-detail mt-1 type-body-sm text-fg-2 max-w-[34ch]">{{ s.detail }}</p>
+                </div>
+              </li>
+            }
+          </ol>
+          @if (product().fit; as fit) {
+            @if (fit.modelHeightCm && fit.modelWears) {
+              <p class="hero-fit mt-8 type-label text-fg-3">Model is {{ fit.modelHeightCm }} cm · wears {{ fit.modelWears }}</p>
+            }
+          }
+        </div>
+      }
+
+      <!-- Layer 1 · the garment (after the copy in the DOM so focus runs intro →
+           hotspots → quick shop; positioned independently, so the look is unchanged). This wrapper blends (lighten) into the dark
+           stage, so the studio's black sweep disappears into the canvas. -->
+      <div data-hero-figure-wrap class="hero-figure-wrap hero-blend" [style.--ar]="aspect()">
+        <div data-hero-figure class="hero-figure">
+          @switch (mode()) {
+            @case ('turntable') {
+              <img #turntableImg class="hero-photo absolute inset-0 size-full" [src]="turntableFrames()[0]" [alt]="figure().alt" />
+            }
+            @case ('flip') {
+              <div data-hero-flip class="hero-flip">
+                <img class="hero-face" [ngSrc]="figure()!.url" fill priority sizes="(min-width: 768px) 46vw, 92vw" [alt]="figure()!.alt" />
+                @if (back(); as b) {
+                  <img class="hero-face hero-face-back" [ngSrc]="b.url" fill sizes="(min-width: 768px) 46vw, 92vw" [alt]="b.alt" />
+                }
+              </div>
+            }
+            @default {
+              <img class="hero-photo" [ngSrc]="figure()!.url" fill priority sizes="(min-width: 768px) 46vw, 92vw" [alt]="figure()!.alt" />
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Layer 1b · overlay with the same geometry: hotspots and the lens
+           render normally on top of the blended photograph. -->
+      <div data-hero-figure-wrap class="hero-figure-wrap pointer-events-none" [style.--ar]="aspect()">
+        @for (s of hotspots(); track s.label; let i = $index) {
+          <button type="button" data-hero-spot data-focus-stage="details" class="hero-spot pointer-events-auto"
+                  [style.left.%]="s.x" [style.top.%]="s.y"
+                  [attr.aria-pressed]="activeSpot() === i"
+                  [attr.aria-describedby]="'hero-spot-' + i"
+                  (click)="toggleSpot(i)">
+            <span aria-hidden="true">{{ i + 1 }}</span>
+            <span class="visually-hidden">{{ s.label }}</span>
+          </button>
+        }
+
+        <!-- Lens onto the real cloth: a crop of this same photograph -->
+        @if (detail(); as d) {
+          <div data-hero-lens class="hero-lens" [style.left.%]="lensAt().x" [style.top.%]="lensAt().y" aria-hidden="true">
+            <img [ngSrc]="d.url" fill sizes="(min-width: 768px) 36vw, 70vw" alt="" class="object-cover" />
+          </div>
+        }
+      </div>
+
+      <!-- Beat 4: quick shop -->
+      <div data-hero-stage="shop" data-focus-stage="shop" class="hero-layer hero-shop">
+        <div class="rounded-[var(--radius-surface)] bg-raised p-6 shadow-[0_0_0_1px_oklch(0_0_0/0.06),0_24px_48px_-24px_oklch(0_0_0/0.25)]">
+          @if (product().edition; as e) { <p class="type-label text-fg-3">{{ e.name }}</p> }
+          <h2 class="type-h2 mt-2">{{ product().name }}</h2>
+          <p class="mt-1 type-body-sm text-fg-2">{{ product().subtitle }}</p>
+          <p class="type-price mt-3 text-lg">{{ product().price | inr }}</p>
+          <div class="mt-5">
+            <app-size-picker [product]="product()" [selected]="size()" (selectedChange)="onSizeChange($event)" [error]="sizeError()" />
+          </div>
+          <button type="button" class="btn btn-solid mt-5 w-full" [disabled]="bag.busy()" (click)="addToBag()">
+            {{ bag.busy() ? 'Adding…' : 'Add to bag' }}
+          </button>
+          <a [routerLink]="link()" class="mt-3 block text-center type-body-sm link-underline">Full details and size guide</a>
+        </div>
+      </div>
+
+      <!-- Progress rail (decorative: every beat is also in the DOM above) -->
+      <p data-hero-rail class="hero-rail type-label text-fg-3" aria-hidden="true">01 / 04 · The coat</p>
+    </div>
+  </div>
+</section>

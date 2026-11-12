@@ -6,6 +6,7 @@ import { ProductsService } from '../../service/products.service';
 import { FormsModule } from '@angular/forms';
 import { debouncingSignal } from '../../../debounce-util';
 import { CategoryService } from '../../service/category.service';
+import { HotToastService } from '@ngxpert/hot-toast';
 
 interface Product {
   _id: string;

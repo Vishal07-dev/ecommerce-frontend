@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { WishlistService } from '../../service/wishList\'/wishlist.service';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../service/auth.service';
 
 // API Response interfaces (matching your backend)
 interface ApiProduct {
@@ -50,9 +51,9 @@ export class WishlistPageComponent {
   sortBy = signal('newest');
   wishlistItems = signal<Product[]>([]);
   isDarkMode = signal(false);
-
+  authservice = inject(AuthService);
   ngOnInit(): void {
-    this.loadWishlist();
+   this.loadWishlist();
   }
 
   loadWishlist() {

@@ -1,0 +1,108 @@
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="sticky top-0 z-40 border-b border-line bg-canvas">
+  <div class="page grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4">
+    <!-- Leading: menu on small screens, primary nav from md -->
+    <div class="flex items-center gap-1">
+      <button type="button" class="btn btn-icon -ms-3 md:hidden" aria-label="Open menu"
+              [attr.aria-expanded]="menuOpen()" aria-controls="site-menu" (click)="menuOpen.set(true)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M3.5 8h17M3.5 16h17" stroke-linecap="round" />
+        </svg>
+      </button>
+      <nav aria-label="Primary" class="hidden md:block">
+        <ul class="flex items-center gap-6">
+          @for (item of nav; track item.link) {
+            <li>
+              <a [routerLink]="item.link" routerLinkActive="text-fg underline underline-offset-[0.4em] decoration-1"
+                 [routerLinkActiveOptions]="{ exact: false }"
+                 #rla="routerLinkActive" [attr.aria-current]="rla.isActive ? 'page' : null"
+                 class="type-body-sm text-fg-2 hover:text-fg">{{ item.label }}</a>
+            </li>
+          }
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Wordmark -->
+    <a routerLink="/" class="flex flex-col items-center leading-none" aria-label="KŌRA, Everyday Garments — home">
+      <span class="font-display text-[1.75rem] tracking-[0.18em] [margin-inline-end:-0.18em]" aria-hidden="true">KŌRA</span>
+      <span class="type-label mt-1 hidden text-[0.625rem] text-fg-3 sm:block" aria-hidden="true">Everyday Garments</span>
+    </a>
+
+    <!-- Trailing utilities -->
+    <div class="flex items-center justify-end gap-1">
+      <button type="button" class="btn btn-icon hidden md:inline-flex" (click)="theme.toggleTheme()"
+              [attr.aria-label]="theme.isDark() ? 'Switch to light theme' : 'Switch to dark theme'">
+        @if (theme.isDark()) {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.25" /><path d="M12 2.75v2M12 19.25v2M4.75 12h-2M21.25 12h-2M6.9 6.9 5.5 5.5M18.5 18.5l-1.4-1.4M6.9 17.1l-1.4 1.4M18.5 5.5l-1.4 1.4" stroke-linecap="round" />
+          </svg>
+        } @else {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20.25 14.5A8.25 8.25 0 0 1 9.5 3.75a8.25 8.25 0 1 0 10.75 10.75Z" stroke-linejoin="round" />
+          </svg>
+        }
+      </button>
+
+      @if (isAdmin()) {
+        <a routerLink="/admin" class="hidden px-3 type-body-sm text-fg-2 hover:text-fg lg:inline">Admin</a>
+      }
+      @if (signedIn()) {
+        <a routerLink="/profile" class="hidden px-3 type-body-sm text-fg-2 hover:text-fg md:inline">Account</a>
+      } @else {
+        <a routerLink="/login" class="hidden px-3 type-body-sm text-fg-2 hover:text-fg md:inline">Sign in</a>
+      }
+      <a routerLink="/wish" class="btn btn-icon hidden md:inline-flex" aria-label="Wishlist">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M12 20s-7.25-4.35-7.25-9.6A4.15 4.15 0 0 1 12 7.6a4.15 4.15 0 0 1 7.25 2.8C19.25 15.65 12 20 12 20Z" stroke-linejoin="round" />
+        </svg>
+      </a>
+
+      <button type="button" class="btn -me-2 min-h-11 gap-2 px-3 type-body-sm" (click)="bag.open()"
+              aria-haspopup="dialog" aria-controls="bag">
+        Bag
+        <span class="type-price inline-grid min-w-6 place-items-center rounded-full bg-solid px-1.5 py-0.5 text-xs text-on-solid">
+          {{ bag.count() }}<span class="visually-hidden"> {{ bag.count() === 1 ? 'item' : 'items' }}</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Small-screen menu -->
+<dialog #menu id="site-menu" class="sheet sheet-start" aria-label="Menu"
+        (cancel)="onMenuCancel($event)" (click)="onMenuClick($event)">
+  <div class="flex h-full flex-col">
+    <div class="flex h-16 items-center justify-between border-b border-line px-4">
+      <span class="font-display text-2xl tracking-[0.18em]">KŌRA</span>
+      <button type="button" class="btn btn-icon -me-2" aria-label="Close menu" (click)="menuOpen.set(false)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+    <nav aria-label="Primary" class="sheet-scroll flex-1 px-4 py-8" data-lenis-prevent>
+      <ul class="flex flex-col gap-2">
+        @for (item of nav; track item.link) {
+          <li><a [routerLink]="item.link" class="block py-2 type-h2">{{ item.label }}</a></li>
+        }
+        <li><a routerLink="/wish" class="block py-2 type-h2">Wishlist</a></li>
+      </ul>
+      <ul class="mt-10 flex flex-col gap-3 border-t border-line pt-6 type-body">
+        @if (signedIn()) {
+          <li><a routerLink="/profile" class="link-underline">Account</a></li>
+          @if (isAdmin()) { <li><a routerLink="/admin" class="link-underline">Admin</a></li> }
+          <li><button type="button" class="link-underline" (click)="signOut()">Sign out</button></li>
+        } @else {
+          <li><a routerLink="/login" class="link-underline">Sign in</a></li>
+          <li><a routerLink="/register" class="link-underline">Create an account</a></li>
+        }
+        <li><a routerLink="/contact" class="link-underline">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="border-t border-line px-4 py-4">
+      <button type="button" class="btn btn-quiet w-full" (click)="theme.toggleTheme()">
+        {{ theme.isDark() ? 'Switch to light theme' : 'Switch to dark theme' }}
+      </button>
+    </div>
+  </div>
+</dialog>

@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { switchMap, tap, catchError } from 'rxjs/operators';
+import { switchMap, tap, catchError, map } from 'rxjs/operators';
 import { CartService } from './cartService/cart.service';
 import { environment } from '../environment/environment';
 import { jwtDecode } from 'jwt-decode';
@@ -23,68 +23,35 @@ export class AuthService {
   private loggedInSubject = new BehaviorSubject<boolean>(this.hasValidToken());
   public loggedIn$ = this.loggedInSubject.asObservable(); // It's good practice to expose this
 
-  constructor(private http: HttpClient, private router: Router, private cartService: CartService) { }
+  constructor(private http: HttpClient, private router: Router, private cartService: CartService) { 
+    
+  }
 
   private userProfile: any = null;
 
   // No changes needed to login, register, getprofile, etc.
   // ... (keep your existing login, register, etc. methods as they are)
   login(email: string, password: string): Observable<any> {
-    let guestCart: any[] = [];
-    try {
-      const productRaw = localStorage.getItem('Product');
-      if (productRaw) {
-        guestCart = JSON.parse(productRaw);
-      }
-    } catch (error) {
-      console.error('Error parsing guest cart from localStorage:', error);
-      guestCart = [];
-    }
-  
-    // Proceed with login only after guestCart is ready
-    return this.http.post<LoginResponse>(`${this.apiUrl}/user/login`, { email, password },{ withCredentials: true } ).pipe(
+    return this.http.post<LoginResponse>(`${this.apiUrl}/user/login`, { email, password }, { withCredentials: true }).pipe(
       switchMap(res => {
         this.setToken(res.accessToken);
-        const decoded: any = jwtDecode(res.accessToken);
-  
-        // Now safely merge cart after login
-        if (guestCart.length > 0) {
-          return this.cartService.mergeGuestCartWithUser(guestCart, decoded.id).pipe(
-            switchMap(() => {
-              this.loggedInSubject.next(true);
-              this.userProfile = res;
-  
-              // Redirect by role
-              const role = this.getUserRole();
-              if (role === 'user') {
-                this.router.navigate(['/']);
-              } else if (role === 'admin') {
-                this.router.navigate(['/admin']);
-              }
-  
-              return new Observable(observer => {
-                observer.next(res);
-                observer.complete();
-              });
-            })
-          );
-        } else {
-          this.loggedInSubject.next(true);
-          this.userProfile = res;
-  
-          // Redirect by role
-          const role = this.getUserRole();
-          if (role === 'user') {
-            this.router.navigate(['/']);
-          } else if (role === 'admin') {
-            this.router.navigate(['/admin']);
-          }
-  
-          return new Observable(observer => {
-            observer.next(res);
-            observer.complete();
-          });
-        }
+        // Fold the guest bag into the account bag, then route the shopper on.
+        return this.cartService.mergeGuestBag().pipe(
+          map(() => {
+            this.loggedInSubject.next(true);
+            this.userProfile = res;
+            const role = this.getUserRole();
+            const returnUrl = this.cartService.takeReturnUrl();
+            if (role === 'admin') {
+              this.router.navigate(['/admin']);
+            } else if (returnUrl) {
+              this.router.navigateByUrl(returnUrl).then(() => this.cartService.open());
+            } else {
+              this.router.navigate(['/']);
+            }
+            return res;
+          })
+        );
       })
     );
   }
@@ -99,13 +66,28 @@ export class AuthService {
     }
   
     logout() {
-      // Clear the token from localStorage
+  this.http.post(`${this.apiUrl}/user/logout`, {}, { withCredentials: true }).subscribe({
+    next: () => {
+      // Clear access token from localStorage
       localStorage.removeItem(this.tokenKey);
-      this.cartService.clearCart();
+      this.cartService.resetLocal();
       this.loggedInSubject.next(false);
-      this.userProfile = null; // Clear user profile on logout
+      this.userProfile = null;
+      this.router.navigate(['']);
+    },
+    error: (err) => {
+      console.error('Logout failed', err);
+
+      // Still clear local data on failure to avoid stale auth state
+      localStorage.removeItem(this.tokenKey);
+      this.cartService.resetLocal();
+      this.loggedInSubject.next(false);
+      this.userProfile = null;
       this.router.navigate(['']);
     }
+  });
+}
+
 
     getToken(): string | null {
       return localStorage.getItem(this.tokenKey);
@@ -178,12 +160,15 @@ export class AuthService {
           if (res.accessToken) {
             this.setToken(res.accessToken);
             this.loggedInSubject.next(true);
+            
           } else {
             // This case should ideally not happen if the API is consistent
             this.logout();
           }
         }),
         catchError((err) => {
+                      this.loggedInSubject.next(true);
+
           this.refreshInProgress = false; // Reset flag on error
           this.logout(); // If refresh fails, the user must be logged out
           return throwError(() => err);

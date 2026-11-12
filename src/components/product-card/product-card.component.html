@@ -1,0 +1,44 @@
+<a [routerLink]="link()" class="media card-swap block" [class]="aspect()" tabindex="-1" aria-hidden="true">
+  <img [ngSrc]="first().url" fill [sizes]="sizes()" [priority]="priority()" alt="" />
+  @if (second(); as alt) {
+    <img [ngSrc]="alt.url" fill [sizes]="sizes()" alt="" />
+  }
+  @if (soldOut()) {
+    <span class="type-label absolute start-3 top-3 rounded-full bg-raised px-2.5 py-1 text-fg">Sold out</span>
+  }
+</a>
+
+<div class="flex flex-col gap-1 pt-3">
+  <div class="flex items-baseline justify-between gap-4">
+    @if (headingLevel() === 2) {
+      <h2 class="type-body-sm font-medium"><a [routerLink]="link()" class="hover:underline">{{ product().name }}</a></h2>
+    } @else {
+      <h3 class="type-body-sm font-medium"><a [routerLink]="link()" class="hover:underline">{{ product().name }}</a></h3>
+    }
+    <p class="type-price type-body-sm">
+      @if (product().compareAtPrice && product().compareAtPrice! > product().price) {
+        <span class="visually-hidden">Now </span>{{ product().price | inr }}
+        <s class="ms-1 text-fg-3"><span class="visually-hidden">was </span>{{ product().compareAtPrice | inr }}</s>
+      } @else {
+        {{ product().price | inr }}
+      }
+    </p>
+  </div>
+  @if (product().subtitle) {
+    <p class="type-body-sm text-fg-3">{{ product().subtitle }}</p>
+  }
+
+  @if (quickAdd() && !soldOut()) {
+    <div class="quick-add mt-2 flex flex-wrap gap-1.5" role="group" [attr.aria-label]="'Quick add ' + product().name">
+      @for (v of variants(); track v.size) {
+        <button type="button"
+                class="btn min-h-9 min-w-10 border-line-strong px-2.5 text-xs type-price"
+                [disabled]="v.stock < 1"
+                [attr.aria-label]="v.stock < 1 ? v.size + ', sold out' : v.size + ', add ' + product().name + ' in size ' + v.size + ' to bag'"
+                (click)="add(v.size)">
+          <span [class.line-through]="v.stock < 1">{{ v.size }}</span>
+        </button>
+      }
+    </div>
+  }
+</div>

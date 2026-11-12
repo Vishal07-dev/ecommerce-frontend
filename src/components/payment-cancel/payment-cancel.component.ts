@@ -1,46 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { CartService } from '../../service/cartService/cart.service';
 
 @Component({
   selector: 'app-payment-cancel',
-  imports: [CommonModule],
-  templateUrl: './payment-cancel.component.html',
-  styleUrl: './payment-cancel.component.css'
+  imports: [RouterLink],
+  template: `
+    <div class="page section-y max-w-3xl">
+      <p class="type-label text-fg-3">Checkout cancelled</p>
+      <h1 class="type-display mt-3">No payment was taken.</h1>
+      <p class="mt-6 type-body text-fg-2 measure">Your bag is saved exactly as you left it. Check out whenever you're ready.</p>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <button type="button" class="btn btn-solid" (click)="bag.open()">Return to your bag</button>
+        <a routerLink="/shop" class="btn btn-quiet">Keep shopping</a>
+      </div>
+    </div>
+  `,
 })
 export class PaymentCancelComponent {
- sessionId: string | null = null;
-
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
-
-  ngOnInit() {
-    // Extract session ID if available
-    this.route.queryParams.subscribe(params => {
-      this.sessionId = params['session_id'];
-    });
-  }
-
-  tryAgain() {
-    // Navigate back to checkout or payment page
-    this.router.navigate(['/checkout']);
-  }
-
-  returnToCart() {
-    // Navigate to cart page
-    this.router.navigate(['/cart']);
-  }
-
-  continueShopping() {
-    // Navigate to home or products page
-    this.router.navigate(['/']);
-  }
-
-  contactSupport() {
-    // Navigate to support page or open support modal
-    this.router.navigate(['/support']);
-    // Or you could open a support chat widget, email client, etc.
-  }
+  readonly bag = inject(CartService);
+  constructor() { inject(Title).setTitle('Checkout cancelled — KŌRA'); }
 }

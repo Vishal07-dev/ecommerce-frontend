@@ -1,7 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environment/environment';
+import { HotToastService } from '@ngxpert/hot-toast';
+import Swal from 'sweetalert2';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +11,7 @@ import { environment } from '../environment/environment';
 export class ProductsService {
   private apiUrl = environment.apiUrl;
   public searchResults = signal<any[]>([]);
+   toast =inject(HotToastService) 
 
   private productCreate = new BehaviorSubject<boolean>(false);
   productCreate$ = this.productCreate.asObservable();
@@ -18,12 +21,12 @@ export class ProductsService {
   createProduct(product: any) {
     return this.http.post(`${this.apiUrl}/product/create`, product).subscribe({
       next: () => {
-        alert('Product created successfully!');
+       this.toast.success('Product created successfully!');
         this.productCreate.next(true);
       },
       error: (err) => {
         console.error('Error creating product:', err);
-        alert('Failed to create product. Check console.');
+        this.toast.error(err.error?.message || 'Failed to create product. Check console.');
       },
     });
   }
@@ -42,18 +45,28 @@ export class ProductsService {
   }
 
   deleteProduct(id: string) {
-    if (confirm('Are you sure you want to delete?')) {
-      return this.http.delete(`${this.apiUrl}/product/delete/${id}`).subscribe({
+    Swal.fire({
+    title: 'Are you sure?',
+    text: 'This action cannot be undone!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete it!',
+  }).then((result) => {
+
+   if (result.isConfirmed) {
+       this.http.delete(`${this.apiUrl}/product/delete/${id}`).subscribe({
         next: () => {
-          alert('Product deleted successfully!');
+          this.toast.success('Product deleted'),
           this.productCreate.next(true);
         },
         error: (err) => {
           console.error('Error deleting product:', err);
-          alert('Failed to delete product. Check console.');
+          this.toast.error('Failed to delete')
         },
       });
     }
+  })
+ 
     return false;
   }
 
