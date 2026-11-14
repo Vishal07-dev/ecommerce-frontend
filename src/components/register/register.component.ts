@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';  // For *ngIf and *ngFor
 import { Router } from '@angular/router';
+import { environment } from '../../environment/environment';
 
 @Component({
   selector: 'app-register',
@@ -29,7 +30,7 @@ onSubmit() {
       const productData = this.productForm.value;
       console.log('Submitting product:', productData);
 
-      this.http.post('https://ecommerce-backend-n4tk.onrender.com/api/user/create', productData)
+      this.http.post(`${environment.apiUrl}/user/create`, productData)
 .subscribe({
         next: () => {
           alert('user created successfully!');

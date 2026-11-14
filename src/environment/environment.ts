@@ -1,4 +1,6 @@
+// Local development (`ng serve`): talks to the API running on this machine.
+// Production builds swap this file for environment.prod.ts (see angular.json).
 export const environment = {
   production: false,
-  apiUrl: 'https://ecommerce-backend-n4tk.onrender.com/api'
+  apiUrl: 'http://localhost:2000/api'
 };
