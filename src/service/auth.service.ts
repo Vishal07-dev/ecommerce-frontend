@@ -1,11 +1,12 @@
 // src/app/service/auth.service.ts
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { switchMap, tap, catchError, map } from 'rxjs/operators';
 import { CartService } from './cartService/cart.service';
+import { WishlistService } from "./wishList'/wishlist.service";
 import { environment } from '../environment/environment';
 import { jwtDecode } from 'jwt-decode';
 
@@ -28,6 +29,7 @@ export class AuthService {
   }
 
   private userProfile: any = null;
+  private wishlist = inject(WishlistService);
 
   // No changes needed to login, register, getprofile, etc.
   // ... (keep your existing login, register, etc. methods as they are)
@@ -37,13 +39,18 @@ export class AuthService {
         this.setToken(res.accessToken);
         // Fold the guest bag into the account bag, then route the shopper on.
         return this.cartService.mergeGuestBag().pipe(
+          switchMap(() => this.wishlist.mergeGuest()),
           map(() => {
             this.loggedInSubject.next(true);
             this.userProfile = res;
             const role = this.getUserRole();
             const returnUrl = this.cartService.takeReturnUrl();
-            if (role === 'admin') {
+            let accountReturn: string | null = null;
+            try { accountReturn = sessionStorage.getItem('kora.account-return'); sessionStorage.removeItem('kora.account-return'); } catch { /* storage unavailable */ }
+            if (role === 'admin' && !accountReturn) {
               this.router.navigate(['/admin']);
+            } else if (accountReturn) {
+              this.router.navigateByUrl(accountReturn);
             } else if (returnUrl) {
               this.router.navigateByUrl(returnUrl).then(() => this.cartService.open());
             } else {
@@ -71,6 +78,7 @@ export class AuthService {
       // Clear access token from localStorage
       localStorage.removeItem(this.tokenKey);
       this.cartService.resetLocal();
+      this.wishlist.resetLocal();
       this.loggedInSubject.next(false);
       this.userProfile = null;
       this.router.navigate(['']);
@@ -81,6 +89,7 @@ export class AuthService {
       // Still clear local data on failure to avoid stale auth state
       localStorage.removeItem(this.tokenKey);
       this.cartService.resetLocal();
+      this.wishlist.resetLocal();
       this.loggedInSubject.next(false);
       this.userProfile = null;
       this.router.navigate(['']);

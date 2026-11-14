@@ -1,4 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, Injector, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
+import gsap from 'gsap';
+import { Flip } from 'gsap/Flip';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -7,6 +9,12 @@ import { CatalogService } from '../../service/catalog.service';
 import { Product, sizesOf } from '../../ui/models';
 import { ProductCardComponent } from '../product-card/product-card.component';
 import { RevealDirective } from '../../ui/reveal.directive';
+import { SplitLinesDirective } from '../../ui/split-lines';
+
+gsap.registerPlugin(Flip);
+
+export type Density = 2 | 3 | 4;
+const DENSITY_KEY = 'kora.density';
 
 type Sort = 'featured' | 'newest' | 'price-asc' | 'price-desc';
 
@@ -14,7 +22,7 @@ const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '28', '30', '32', '34', '36', 'On
 
 @Component({
   selector: 'app-shop-page',
-  imports: [RouterLink, ProductCardComponent, RevealDirective],
+  imports: [RouterLink, ProductCardComponent, RevealDirective, SplitLinesDirective],
   templateUrl: './shop-page.component.html',
 })
 export class ShopPageComponent {
@@ -22,6 +30,14 @@ export class ShopPageComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private title = inject(Title);
+  private injector = inject(Injector);
+  private grid = viewChild<ElementRef<HTMLElement>>('grid');
+
+  /** Pieces per row on wide screens. Phones always show two. */
+  readonly density = signal<Density>(readDensity());
+  readonly densities: Density[] = [2, 3, 4];
+  readonly dots: Record<Density, number[]> = { 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 3, 4] };
+  readonly gridClass = computed(() => ({ 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-3 lg:grid-cols-4' })[this.density()]);
 
   readonly all = signal<Product[]>([]);
   readonly state = signal<'loading' | 'ready' | 'error'>('loading');
@@ -93,8 +109,33 @@ export class ShopPageComponent {
     });
   }
 
-  /** Editorial rhythm: every seventh card runs double width on large screens. */
-  isFeature(index: number): boolean { return index % 7 === 0; }
+  /** Editorial rhythm: every seventh card runs double width (not in the two-up view). */
+  isFeature(index: number): boolean { return this.density() !== 2 && index % 7 === 0; }
+
+  /**
+   * "Re-hang": changing the view moves every piece from its old place to its
+   * new one, like garments being re-spaced along a rail, instead of jumping.
+   */
+  setDensity(next: Density): void {
+    if (next === this.density()) return;
+    try { localStorage.setItem(DENSITY_KEY, String(next)); } catch { /* private mode */ }
+    const grid = this.grid()?.nativeElement;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!grid || reduced) { this.density.set(next); return; }
+    const state = Flip.getState(grid.querySelectorAll(':scope > li'));
+    this.density.set(next);
+    afterNextRender(() => {
+      Flip.from(state, { duration: 0.75, ease: 'expo.inOut', stagger: 0.015, scale: true, absolute: false, nested: true });
+    }, { injector: this.injector });
+  }
 
   reload(): void { location.reload(); }
+}
+
+function readDensity(): Density {
+  try {
+    const v = Number(localStorage.getItem(DENSITY_KEY));
+    if (v === 2 || v === 3 || v === 4) return v;
+  } catch { /* storage unavailable */ }
+  return 4;
 }

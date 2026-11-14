@@ -14,6 +14,9 @@
    -------------------------------------------------------------------------- */
 @theme {
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Bodoni's display optical sizes have hairlines too fine to read on screen;
+     pin a text-weight optical size so thin strokes survive at every size. */
+  --display-opsz: 24;
   --font-display: "Bodoni Moda Variable", "Didot", "Bodoni 72", Georgia, serif;
   --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
 
@@ -212,28 +215,28 @@
    4. Type scale. One class sets size, line-height, weight and tracking.
    -------------------------------------------------------------------------- */
 @utility type-display-xl {
-  font-family: var(--font-display);
-  font-size: clamp(3.5rem, 2rem + 8vw, 11rem);
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
+  font-size: clamp(3rem, 1.75rem + 5.5vw, 8rem);
   line-height: 1;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.03em;
 }
 @utility type-display {
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 1.5rem + 4vw, 5.5rem);
-  line-height: 1.05;
-  font-weight: 400;
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
+  font-size: clamp(2.25rem, 1.5rem + 3vw, 4.5rem);
+  line-height: 1.08;
+  font-weight: 500;
   letter-spacing: -0.02em;
 }
 @utility type-h1 {
-  font-family: var(--font-display);
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
   font-size: clamp(2rem, 1.4rem + 2.4vw, 3.5rem);
   line-height: 1.1;
   font-weight: 400;
   letter-spacing: -0.02em;
 }
 @utility type-h2 {
-  font-family: var(--font-display);
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
   font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
   line-height: 1.2;
   font-weight: 400;
@@ -273,7 +276,7 @@
   padding-inline: clamp(1rem, 4vw, 4rem);
 }
 @utility section-y {
-  padding-block: clamp(4rem, 2rem + 8vw, 12rem);
+  padding-block: clamp(3.5rem, 1.5rem + 5vw, 8rem);
 }
 
 /* --------------------------------------------------------------------------
@@ -524,10 +527,10 @@ html.lenis, html.lenis body { block-size: auto; }
 }
 
 .hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(3rem, 1rem + 6.2vw, 8.5rem);
-  line-height: 0.95;
-  font-weight: 400;
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
+  font-size: clamp(2.75rem, 1rem + 5vw, 7rem);
+  line-height: 0.98;
+  font-weight: 500;
   letter-spacing: -0.035em;
   text-wrap: balance;
 }
@@ -749,3 +752,282 @@ header.sticky { view-transition-name: site-header; }
 }
 @keyframes kora-crease { from { opacity: 1; } to { opacity: 0; } }
 @keyframes kora-settle-in { from { opacity: 0; translate: 10px 0; } to { opacity: 1; translate: 0 0; } }
+
+/* --------------------------------------------------------------------------
+   12. Ink & Bone. Chapters, set type, editions index, footer finale.
+   Ink chapters use .theme-dark (scoped dark tokens) and must paint their own
+   canvas, so the page reads as alternating printed sections.
+   -------------------------------------------------------------------------- */
+
+/* 12a · Set type (ui/split-lines.ts): room for descenders and macrons. */
+.split-line-mask { padding-block: 0.06em 0.14em; margin-block: -0.06em -0.14em; }
+
+/* 12b · The cloth chapter (cloth-chapter.component) */
+.cloth { position: relative; overflow: clip; background: var(--sunken); color: var(--fg); border-block: 1px solid var(--line); }
+.cloth-stage { position: relative; block-size: 100svh; min-block-size: 32rem; overflow: clip; }
+.cloth-word {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
+  font-size: clamp(6rem, 22vw, 26rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-style: italic;
+  color: var(--fg);
+  pointer-events: none;
+  user-select: none;
+}
+.cloth-aperture { position: absolute; inset: 0; overflow: hidden; z-index: 1; background: var(--sunken); }
+.cloth-aperture img { object-fit: cover; }
+.cloth-copy { position: relative; z-index: 1; padding-block: clamp(4rem, 9vw, 8rem) clamp(3rem, 6vw, 5rem); }
+@media (prefers-reduced-motion: reduce) { .cloth-word { display: none; } }
+
+/* 12c · Editions index (edition-index.component) */
+.ed-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 3rem);
+  padding-block: clamp(1.25rem, 3vw, 2.25rem);
+  transition: opacity 300ms var(--ease-swap);
+}
+.ed-row.is-dim { opacity: 0.32; }
+.ed-name {
+  flex: 1;
+  min-inline-size: 0;
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
+  font-size: clamp(2.25rem, 1rem + 4vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  transition: translate 450ms var(--ease-swap);
+}
+.ed-arrow { flex-shrink: 0; opacity: 0.45; transition: opacity 200ms ease-out, translate 300ms var(--ease-swap); }
+.ed-thumb { display: none; flex-shrink: 0; inline-size: 3.5rem; aspect-ratio: 4 / 5; border-radius: var(--radius-inset); }
+@media (max-width: 639px) { .ed-meta { display: none; } }
+@media (hover: hover) {
+  .ed-row:hover .ed-name, .ed-row:focus-visible .ed-name { translate: clamp(0.75rem, 2vw, 2rem) 0; }
+  .ed-row:hover .ed-arrow, .ed-row:focus-visible .ed-arrow { opacity: 1; translate: 6px 0; }
+}
+@media (hover: none) { .ed-thumb { display: block; } }
+
+.ed-float {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 2;
+  inline-size: clamp(12rem, 20vw, 20rem);
+  aspect-ratio: 3 / 4;
+  margin-block-start: calc(clamp(12rem, 20vw, 20rem) * -0.667);
+  margin-inline-start: calc(clamp(12rem, 20vw, 20rem) * -0.5);
+  border-radius: var(--radius-inset);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  scale: 0.86;
+  box-shadow: 0 30px 60px -24px oklch(0 0 0 / 0.4);
+  transition: opacity 260ms ease-out, scale 420ms var(--ease-swap);
+}
+.ed-float.is-shown { opacity: 1; scale: 1; }
+.ed-float img { opacity: 0; transition: opacity 260ms ease-out; object-fit: cover; }
+.ed-float img.is-on { opacity: 1; }
+@media (hover: none), (prefers-reduced-motion: reduce) { .ed-float { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ed-row, .ed-name, .ed-arrow { transition: none; } }
+
+/* 12d · Footer: an ink back cover with the wordmark finale */
+.site-footer { position: relative; overflow: clip; background: var(--canvas); color: var(--fg); }
+.footer-mark {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding-inline: clamp(1rem, 4vw, 4rem);
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
+  font-size: clamp(6rem, 27vw, 30rem);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+.footer-mark-mask { display: inline-block; overflow: clip; padding-block-start: 0.16em; }
+.footer-mark-mask > span { display: inline-block; }
+
+/* 12e · Shop view switch: radio buttons drawn as little column diagrams. */
+.density-opt { position: relative; display: inline-grid; place-items: center; inline-size: 2.5rem; block-size: 2.5rem; border-radius: var(--radius-inset); cursor: pointer; color: var(--fg-3); transition: color 150ms ease-out, background-color 150ms ease-out; }
+.density-opt input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.density-opt:has(input:checked) { color: var(--fg); background: var(--sunken); }
+.density-opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (hover: hover) { .density-opt:hover { color: var(--fg); } }
+.density-icon { display: flex; gap: 2px; block-size: 14px; }
+.density-icon i { inline-size: 4px; border-radius: 1px; background: currentColor; }
+
+/* 12f · Product page contact sheet (thumbnail strip, md and up). */
+.pdp-rail { display: none; }
+@media (min-width: 768px) {
+  .pdp-rail { display: flex; flex-direction: column; gap: 0.5rem; position: sticky; inset-block-start: 6rem; align-self: start; }
+}
+.pdp-rail-thumb { display: block; inline-size: 100%; aspect-ratio: 4 / 5; padding: 0; border: 0; border-radius: var(--radius-inset); cursor: pointer; opacity: 0.45; transition: opacity 200ms ease-out, scale 300ms var(--ease-swap); }
+.pdp-rail-thumb.is-current { opacity: 1; }
+.pdp-rail-thumb.is-current::after { outline: 1.5px solid var(--fg); outline-offset: 2px; border-radius: inherit; }
+@media (hover: hover) { .pdp-rail-thumb:hover { opacity: 0.85; } }
+@media (prefers-reduced-motion: reduce) { .pdp-rail-thumb { transition: none; } }
+
+/* 12g · Menu curtain: the small-screen menu drops over the whole page like
+   a length of cloth, then its links are set line by line. */
+dialog.sheet.sheet-curtain { inset: 0; inline-size: 100%; translate: 0 -100%; box-shadow: none; }
+dialog.sheet.sheet-curtain.is-open { translate: 0 0; }
+.curtain-item { overflow: clip; padding-block-end: 0.08em; }
+.curtain-link {
+  display: block;
+  padding-block: 0.25rem;
+  font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz);
+  font-size: clamp(2.75rem, 12vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sheet-curtain .curtain-link { translate: 0 110%; transition: translate 700ms var(--ease-out); transition-delay: calc(180ms + var(--i, 0) * 70ms); }
+  .sheet-curtain.is-open .curtain-link { translate: 0 0; }
+}
+
+/* 12h · Account page */
+.acct-nav { display: flex; gap: 0.25rem; overflow-x: auto; scrollbar-width: none; margin-inline: -1rem; padding-inline: 1rem; }
+@media (min-width: 768px) { .acct-nav { flex-direction: column; overflow: visible; margin: 0; padding: 0; border-inline-start: 1px solid var(--line); } }
+.acct-nav-link {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  min-block-size: 2.75rem; padding: 0.5rem 1rem; white-space: nowrap;
+  border-radius: 999px; color: var(--fg-2);
+  transition: color 150ms ease-out, background-color 150ms ease-out;
+}
+.acct-nav-link.is-current { color: var(--fg); background: var(--sunken); }
+@media (min-width: 768px) {
+  .acct-nav-link { border-radius: 0; margin-inline-start: -1px; border-inline-start: 2px solid transparent; padding-inline: 1.25rem 0; font-family: var(--font-display); font-variation-settings: "opsz" var(--display-opsz); font-size: 1.375rem; }
+  .acct-nav-link.is-current { background: none; border-inline-start-color: var(--fg); }
+}
+@media (hover: hover) { .acct-nav-link:hover { color: var(--fg); } }
+
+.acct-order, .acct-panel { padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid var(--line); border-radius: var(--radius-surface); background: var(--raised); }
+.acct-status {
+  display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.75rem;
+  border-radius: 999px; background: var(--sunken); color: var(--fg-2);
+  font: 500 0.6875rem/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.acct-status::before { content: ""; inline-size: 0.375rem; aspect-ratio: 1; border-radius: 50%; background: currentColor; }
+.acct-status[data-status="shipped"], .acct-status[data-status="packed"] { color: var(--accent); }
+.acct-status[data-status="cancelled"] { color: var(--danger); }
+
+/* 12i · Saved pieces: the card heart, the header count, the heart pop. */
+.card-save {
+  position: absolute; inset-block-start: 0.5rem; inset-inline-end: 0.5rem; z-index: 3;
+  display: grid; place-items: center; inline-size: 2.75rem; block-size: 2.75rem;
+  border: 0; border-radius: 50%; padding: 0; cursor: pointer;
+  background: oklch(0.99 0.004 80 / 0.82); color: oklch(0.2 0.01 70);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 0 1px oklch(0 0 0 / 0.06);
+  transition: opacity 150ms ease-out, scale 150ms ease-out;
+}
+.card-save:active { scale: 0.92; }
+.card-save.is-on { color: var(--danger); }
+@media (hover: hover) {
+  .card .card-save:not(.is-on) { opacity: 0; }
+  .card:hover .card-save, .card:focus-within .card-save, .card-save:focus-visible { opacity: 1; }
+}
+.saved-dot {
+  position: absolute; inset-block-start: 0.25rem; inset-inline-end: 0.125rem;
+  display: grid; place-items: center; min-inline-size: 1.125rem; block-size: 1.125rem; padding-inline: 0.25rem;
+  border-radius: 999px; background: var(--solid); color: var(--on-solid); font-size: 0.625rem; line-height: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .heart-icon.is-on { animation: heart-pop 420ms cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+}
+@keyframes heart-pop { 0% { scale: 0.6; } 60% { scale: 1.18; } 100% { scale: 1; } }
+
+/* 12j · Admin panel on small screens: drawer sidebar, scrollable tables,
+   comfortable tap targets in table rows. */
+.admin-sidebar { translate: -100% 0; transition: translate 300ms var(--ease-out); }
+.admin-sidebar.is-open { translate: 0 0; }
+@media (min-width: 1024px) { .admin-sidebar { translate: none; transition: none; } }
+@media (prefers-reduced-motion: reduce) { .admin-sidebar { transition: none; } }
+@media (max-width: 1023px) {
+  .admin-shell main table { display: block; overflow-x: auto; white-space: nowrap; }
+}
+.admin-shell td button, .admin-shell td a { min-block-size: 2rem; padding-inline: 0.375rem; }
+
+/* Tailwind's font-display class (used in a few templates) gets the same optical size. */
+.font-display { font-variation-settings: "opsz" var(--display-opsz); }
+
+/* 12k · Ask KŌRA (chatbot). A raised panel above the launcher on larger
+   screens; a full-screen sheet on phones. */
+.chat-dock { position: fixed; z-index: 45; inset-block-end: 6rem; inset-inline-end: 1rem; }
+@media (min-width: 768px) { .chat-dock { inset-block-end: 1.5rem; inset-inline-end: 1.5rem; } }
+
+.chat-launcher {
+  position: relative; display: grid; place-items: center; inline-size: 3rem; block-size: 3rem;
+  border: 0; border-radius: 50%; cursor: pointer; background: var(--solid); color: var(--on-solid);
+  box-shadow: 0 0 0 1px oklch(1 0 0 / 0.18), 0 8px 24px -8px oklch(0 0 0 / 0.4);
+  transition: scale 150ms ease-out;
+}
+.chat-launcher:active { scale: 0.94; }
+.chat-unread { position: absolute; inset-block-start: 0.125rem; inset-inline-end: 0.125rem; inline-size: 0.625rem; aspect-ratio: 1; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--canvas); }
+
+.chat-panel {
+  position: absolute; inset-block-end: 4rem; inset-inline-end: 0;
+  display: flex; flex-direction: column;
+  inline-size: min(24rem, calc(100vw - 2rem)); block-size: min(38rem, calc(100svh - 9rem));
+  border-radius: var(--radius-surface); background: var(--raised); color: var(--fg);
+  box-shadow: 0 0 0 1px var(--line), 0 30px 60px -20px oklch(0 0 0 / 0.35);
+  overflow: hidden; transform-origin: 100% 100%;
+}
+@media (max-width: 639px) {
+  .chat-panel { position: fixed; inset: 0; inline-size: auto; block-size: auto; border-radius: 0; box-shadow: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .chat-panel { animation: chat-in 260ms var(--ease-out); }
+}
+@media (prefers-reduced-motion: reduce) { .chat-panel { animation: chat-fade 160ms ease-out; } }
+@keyframes chat-in { from { opacity: 0; translate: 0 12px; scale: 0.97; } }
+@keyframes chat-fade { from { opacity: 0; } }
+
+.chat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; padding: 1rem 0.75rem 1rem 1.25rem; border-block-end: 1px solid var(--line); }
+.chat-log { flex: 1; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 0.875rem; padding: 1.25rem; }
+.chat-intro { margin-block: auto 0; }
+.chat-chip {
+  min-block-size: 2.5rem; padding: 0.5rem 0.875rem; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: transparent; color: var(--fg); font-size: 0.875rem; text-align: start; cursor: pointer;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
+}
+@media (hover: hover) { .chat-chip:hover { background: var(--sunken); } }
+
+.chat-msg { max-inline-size: 88%; font-size: 0.9375rem; line-height: 1.55; white-space: pre-line; overflow-wrap: anywhere; }
+.chat-msg-user { align-self: flex-end; padding: 0.625rem 0.875rem; border-radius: 1rem 1rem 0.25rem 1rem; background: var(--solid); color: var(--on-solid); }
+.chat-msg-bot { align-self: flex-start; color: var(--fg); }
+.chat-msg-bot.is-error p { color: var(--danger); }
+.chat-cards { display: flex; flex-direction: column; gap: 0.5rem; margin-block-start: 0.75rem; white-space: normal; }
+.chat-card { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; padding-inline-end: 0.75rem; border: 1px solid var(--line); border-radius: var(--radius-inset); background: var(--canvas); transition: border-color 150ms ease-out; }
+@media (hover: hover) { .chat-card:hover { border-color: var(--line-strong); } }
+.chat-card-img { display: block; flex-shrink: 0; inline-size: 3rem; aspect-ratio: 4 / 5; border-radius: 4px; }
+
+.chat-typing { display: flex; gap: 0.3rem; align-self: flex-start; padding: 0.5rem 0; }
+.chat-typing i { inline-size: 0.4rem; aspect-ratio: 1; border-radius: 50%; background: var(--fg-3); }
+@media (prefers-reduced-motion: no-preference) {
+  .chat-typing i { animation: chat-dot 1.1s ease-in-out infinite; }
+  .chat-typing i:nth-child(3) { animation-delay: 0.15s; }
+  .chat-typing i:nth-child(4) { animation-delay: 0.3s; }
+}
+@keyframes chat-dot { 0%, 60%, 100% { opacity: 0.3; translate: 0 0; } 30% { opacity: 1; translate: 0 -3px; } }
+
+.chat-compose { display: flex; align-items: flex-end; gap: 0.5rem; padding: 0.75rem; border-block-start: 1px solid var(--line); }
+.chat-input {
+  flex: 1; min-block-size: 2.75rem; max-block-size: 7.5rem; resize: none; padding: 0.625rem 0.875rem;
+  border: 1px solid var(--line-strong); border-radius: 1.375rem; background: var(--canvas); color: var(--fg);
+  font: inherit; font-size: 0.9375rem; line-height: 1.45;
+}
+.chat-input::placeholder { color: var(--fg-3); opacity: 1; }
+.chat-send {
+  display: grid; place-items: center; flex-shrink: 0; inline-size: 2.75rem; block-size: 2.75rem; border: 0; border-radius: 50%;
+  background: var(--solid); color: var(--on-solid); cursor: pointer; transition: opacity 150ms ease-out, scale 150ms ease-out;
+}
+.chat-send:disabled { opacity: 0.35; cursor: not-allowed; }
+.chat-send:not(:disabled):active { scale: 0.94; }
+/* On phones the open chat covers the screen and has its own close button. */
+@media (max-width: 639px) { .chat-panel ~ .chat-launcher { display: none; } }

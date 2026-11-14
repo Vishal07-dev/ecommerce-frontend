@@ -67,7 +67,7 @@ export class WeaveDirective {
           const tl = warpLift(el.nativeElement as HTMLElement, { threads });
           ScrollTrigger.create({
             trigger: el.nativeElement,
-            start: 'top 82%',
+            start: 'top 94%',
             once: true,
             onEnter: () => tl.play(),
           });

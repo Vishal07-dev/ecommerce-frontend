@@ -6,6 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { environment } from '../../environment/environment';
 import { DELIVERY_FEE, FREE_DELIVERY_FROM } from '../../service/cartService/cart.service';
 import { formatInr } from '../../ui/price.pipe';
+import { SplitLinesDirective } from '../../ui/split-lines';
 import { RevealDirective } from '../../ui/reveal.directive';
 
 type Field = 'firstName' | 'lastName' | 'email' | 'subject' | 'message';
@@ -17,7 +18,7 @@ const ORDER: Field[] = ['firstName', 'lastName', 'email', 'subject', 'message'];
 
 @Component({
   selector: 'app-contact',
-  imports: [ReactiveFormsModule, RouterLink, RevealDirective],
+  imports: [ReactiveFormsModule, RouterLink, RevealDirective, SplitLinesDirective],
   templateUrl: './contact.component.html',
 })
 export class ContactComponent {

@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { CartService } from '../../service/cartService/cart.service';
 import { InrPipe } from '../../ui/price.pipe';
 import { HandoffService } from '../../ui/handoff';
+import { WishlistService } from "../../service/wishList'/wishlist.service";
 import { Product, primaryImage, productLink, secondaryImage, sizesOf } from '../../ui/models';
 
 /**
@@ -28,6 +29,10 @@ export class ProductCardComponent {
 
   private bag = inject(CartService);
   private handoff = inject(HandoffService);
+  private wishlist = inject(WishlistService);
+  readonly saved = computed(() => this.wishlist.items().some(p => p._id === this.product()._id));
+
+  toggleSave(): void { this.wishlist.toggle(this.product()).subscribe(); }
   private host = inject(ElementRef<HTMLElement>);
 
   readonly first = computed(() => primaryImage(this.product()));

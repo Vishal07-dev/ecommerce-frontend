@@ -69,6 +69,22 @@ GSAP uses `expo.out`, `expo.inOut` and `power2.out` for the hero, and `none` for
 
 Concepts considered and rejected: section dividers that stitch themselves in (competes with the warp lift, and is decoration rather than meaning), cursor followers and letter-by-letter text reveals (every template has them).
 
+### 4.0b Art direction: Ink & Bone
+
+The site reads like a printed lookbook: most pages are on the bone (light) canvas, and a few **ink chapters** switch to dark tokens with `.theme-dark` (each paints its own `background: var(--canvas)`). Every home section has a different job and composition, so no two sections are the same grid.
+
+| Piece | What it does | Files |
+|---|---|---|
+| **Set type** | Display headings rise line by line out of masks the first time they scroll into view (GSAP SplitText, `mask: 'lines'`, 1.15s `expo.out`, 90ms stagger). Re-splits on resize and font load; labels the element for screen readers. Off under reduced motion. Use `splitLines` on display headings only, never on body text, and never together with `reveal`. | `src/ui/split-lines.ts`, styles.css 12a |
+| **The cloth (ink chapter, home)** | A photo opens from a small rounded window to full-bleed (`clip-path inset`, scrubbed from `top 85%` to `top 15%`). Behind it an oversized italic "Cloth first" drifts sideways (`xPercent 0 → -28`). Not pinned. | `cloth-chapter`, styles.css 12b |
+| **Editions index (home)** | Editions set as a large typographic contents list. On pointer devices, hovering a row brings that edition's cover up beside the pointer: it trails with `gsap.quickTo` (0.6s) and leans in the direction of travel (±6°). The other rows dim to 32%. Keyboard focus parks the cover beside the row. Touch screens show a small cover inline instead. | `edition-index`, styles.css 12c |
+| **Footer finale (ink)** | The footer is the back cover. The full-width KŌRA wordmark rises letter by letter out of masks, scrubbed over the last stretch of the page. | `site-footer`, styles.css 12d |
+| **Re-hang (shop)** | A 2/3/4-per-row switch (radio buttons drawn as column diagrams, saved in `localStorage` as `kora.density`). Changing it moves every card to its new place with GSAP Flip (0.75s `expo.inOut`) instead of jumping. Phones always show two per row. | `shop-page`, styles.css 12e |
+| **Contact sheet (product page)** | On md and up, a sticky strip of thumbnails beside the gallery. An IntersectionObserver marks the photo crossing the middle of the screen; clicking a thumbnail smooth-scrolls to its photo (`MotionService.scrollToElement`). | `product-information`, styles.css 12f |
+| **Curtain menu** | The small-screen menu drops over the whole screen; its large serif links rise one by one (700ms, 70ms apart). | `site-header`, styles.css 12g |
+
+WebGL was considered and left out on purpose: a shader would need a heavy 3D library, and the cloth-based motion already carries the identity.
+
 ### 4.1 Smooth scroll: `src/ui/motion.service.ts`
 - Lenis with `lerp: 0.12` and `smoothWheel`, driven by `gsap.ticker` with `lagSmoothing(0)`. Every Lenis scroll event calls `ScrollTrigger.update`.
 - Started once from `AppComponent` (`MotionService.init()`). It never starts under reduced motion, and it is destroyed or started live if that preference changes.
@@ -146,6 +162,22 @@ These replaced the old numbered markers.
 - **Contact** (`/contact`): the form posts `firstName, lastName, email, phone, subject, message` to `${environment.apiUrl}/contact/send-email`. The topic is chosen with `.size-chip` radio buttons. Errors are inline, focus moves to the first invalid field, and a failed send keeps what was written. Success replaces the form with a confirmation and moves focus to its heading. The "Before you write" column of quick answers uses `reveal`.
 - Form placeholders use `--fg-3` (`.field::placeholder`) so they never look like typed text.
 
+### 4.13 Account page (`/profile`, alias `/account`)
+- Protected by `accountGuard`: signed-out visitors go to sign in and come back here afterwards (`kora.account-return` in sessionStorage).
+- Masthead "Hello, {first name}." with set type, then a section index (vertical serif list with a rule on desktop, a sideways-scrolling pill row on phones) driven by `?tab=orders|details|addresses|password`.
+- **Orders:** cards with date, short reference, status pill (`data-status`), line items with thumbnails, total and a receipt download.
+- **Your details:** name, email, phone. Changing the email reveals a current-password field (the API requires it).
+- **Addresses:** up to 10 Indian addresses (state list, 6-digit PIN), one default; edit inline, remove with an inline "Remove this address?" confirmation.
+- **Password:** current, new (8+), confirm.
+- Every form: inline errors tied to fields, focus moves to the first problem, server errors land on the field they name.
+- API: `/api/user/me` (GET, PATCH), `/me/password`, `/me/orders`, `/me/addresses` (POST) and `/me/addresses/:id` (PATCH, DELETE), all behind `protect` and always using the signed-in user's id. Styles: styles.css 12h.
+
+### 4.14 Saved pieces (wishlist, `/wish`)
+- One signal store (`WishlistService`) drives every heart: product cards (`.card-save`, top-right of the photo; shown on hover/focus or when saved, always on touch), the product page Save toggle (`aria-pressed`), and the header count (`.saved-dot`).
+- Signed out: saves live in `localStorage` (`kora.saved`) and merge into the account at sign-in. Signed in: `/api/wishlist` (behind `protect`), optimistic updates that roll back on failure.
+- Saving pops the heart (`heart-pop`, 420ms, slight overshoot; off under reduced motion).
+- Page: "Kept for later." with set type, a summary bar (count, total, sold-out count, sort), the shop's product cards (sizes add straight to the bag), Remove under each card with an Undo.
+
 ## 5. Rules for adding new motion
 
 - Use the existing tools first: `weave` for editorial photos, `reveal` for text entrances, `parallax` for image depth, `.sheet`/`.modal` dialogs for overlays. Don't add `weave` to grids of product cards: it is for editorial moments.
@@ -159,8 +191,11 @@ These replaced the old numbered markers.
 ## 6. Key files
 
 ```
-src/styles.css                                    tokens + all component and motion CSS (sections 1–11; 11 = signature motion)
+src/styles.css                                    tokens + all component and motion CSS (sections 1–12; 11 = signature motion, 12 = Ink & Bone)
 src/ui/weave.ts                                   warp lift
+src/ui/split-lines.ts                             set type (SplitText line masks)
+src/components/cloth-chapter/                     ink chapter with the aperture
+src/components/edition-index/                     editions contents list with floating cover
 src/ui/route-transition.ts                        bolt unroll (View Transitions)
 src/ui/handoff.ts                                 pick up (card to product page)
 src/ui/motion.service.ts                          Lenis + ScrollTrigger

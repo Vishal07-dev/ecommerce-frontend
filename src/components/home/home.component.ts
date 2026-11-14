@@ -4,13 +4,16 @@ import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { CatalogService } from '../../service/catalog.service';
-import { Product } from '../../ui/models';
+import { Asset, Product } from '../../ui/models';
 import { HeroShowcaseComponent } from '../hero-showcase/hero-showcase.component';
 import { LookSpreadComponent } from '../look-spread/look-spread.component';
 import { ProductCardComponent } from '../product-card/product-card.component';
 import { RevealDirective } from '../../ui/reveal.directive';
 import { ParallaxDirective } from '../../ui/parallax.directive';
 import { WeaveDirective } from '../../ui/weave';
+import { SplitLinesDirective } from '../../ui/split-lines';
+import { ClothChapterComponent } from '../cloth-chapter/cloth-chapter.component';
+import { EditionIndexComponent } from '../edition-index/edition-index.component';
 
 /** Grid rhythm for "The Edit": column span, image ratio and a vertical offset. */
 const EDIT_LAYOUT = [
@@ -25,7 +28,7 @@ const EDIT_LAYOUT = [
 
 @Component({
   selector: 'app-home',
-  imports: [NgOptimizedImage, RouterLink, HeroShowcaseComponent, LookSpreadComponent, ProductCardComponent, RevealDirective, ParallaxDirective, WeaveDirective],
+  imports: [NgOptimizedImage, RouterLink, HeroShowcaseComponent, LookSpreadComponent, ProductCardComponent, RevealDirective, ParallaxDirective, WeaveDirective, SplitLinesDirective, ClothChapterComponent, EditionIndexComponent],
   templateUrl: './home.component.html',
 })
 export class HomeComponent {
@@ -36,7 +39,7 @@ export class HomeComponent {
   readonly edit = signal<Product[]>([]);
   readonly looks = toSignal(this.catalog.looks(), { initialValue: [] });
   readonly editions = toSignal(this.catalog.editions(), { initialValue: [] });
-  readonly assets = toSignal(this.catalog.assets(), { initialValue: {} as Record<string, never> });
+  readonly assets = toSignal(this.catalog.assets(), { initialValue: {} as Record<string, Asset> });
   readonly layout = EDIT_LAYOUT;
 
   constructor() {

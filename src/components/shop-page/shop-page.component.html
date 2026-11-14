@@ -1,7 +1,14 @@
-<div class="page pt-10 md:pt-16">
+<div class="page pt-10 md:pt-20">
   <p class="type-label text-fg-3">{{ edition()?.season ?? 'All editions' }}</p>
-  <h1 class="type-display mt-2">{{ edition()?.name ?? 'Shop' }}</h1>
-  <p class="mt-4 type-body text-fg-2 measure">
+  <div class="mt-3 flex items-start gap-3">
+    @if (edition(); as e) {
+      <h1 class="type-display-xl" splitLines>{{ e.name }}</h1>
+    } @else {
+      <h1 class="type-display-xl" splitLines>Shop</h1>
+    }
+    @if (state() === 'ready') { <span class="type-price type-body-sm mt-2 text-fg-3 md:mt-4" aria-hidden="true">({{ results().length }})</span> }
+  </div>
+  <p class="mt-6 type-body text-fg-2 measure">
     {{ edition()?.intro ?? 'Coats, knits, shirts and heavy cotton. Everything we make, in one place.' }}
   </p>
 
@@ -55,6 +62,17 @@
           <option value="price-desc" [selected]="filters().sort === 'price-desc'">Price, high to low</option>
         </select>
       </label>
+      <fieldset class="hidden items-center gap-1 md:flex" aria-label="Pieces per row">
+        @for (d of densities; track d) {
+          <label class="density-opt" [title]="d + ' per row'">
+            <input type="radio" name="density" [value]="d" [checked]="density() === d" (change)="setDensity(d)" />
+            <span class="visually-hidden">{{ d }} per row</span>
+            <span class="density-icon" aria-hidden="true">
+              @for (c of dots[d]; track $index) { <i></i> }
+            </span>
+          </label>
+        }
+      </fieldset>
       @if (hasFilters()) {
         <button type="button" class="col-span-3 justify-self-start type-body-sm link-underline min-h-10" (click)="clearFilters()">Clear filters</button>
       }
@@ -80,14 +98,14 @@
     }
     @case ('ready') {
       @if (results().length) {
-        <ul class="grid grid-cols-2 items-start gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4">
+        <ul #grid class="grid grid-cols-2 items-start gap-x-4 gap-y-12" [class]="gridClass()">
           @for (p of results(); track p._id; let i = $index) {
             <li [class]="isFeature(i) ? 'md:col-span-2' : ''" reveal [revealOrder]="i % 4">
               <app-product-card
                 [product]="p"
                 [priority]="i < 2"
                 [aspect]="isFeature(i) ? 'aspect-[4/5] md:aspect-[5/4]' : 'aspect-[4/5]'"
-                [sizes]="isFeature(i) ? '(min-width: 768px) 50vw, 50vw' : '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw'"
+                sizes="(min-width: 768px) 50vw, 50vw"
                 [headingLevel]="2" />
             </li>
           }

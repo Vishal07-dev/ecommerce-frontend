@@ -25,10 +25,10 @@
       <div class="page pt-6 md:pt-10">
         <nav aria-label="Breadcrumb" class="type-body-sm text-fg-3">
           <ol class="flex flex-wrap items-center gap-2">
-            <li><a routerLink="/shop" class="hover:text-fg hover:underline">Shop</a></li>
+            <li><a routerLink="/shop" class="inline-flex min-h-6 items-center hover:text-fg hover:underline">Shop</a></li>
             @if (p.edition) {
               <li aria-hidden="true">/</li>
-              <li><a routerLink="/shop" [queryParams]="{ edition: p.edition.slug }" class="hover:text-fg hover:underline">{{ p.edition.name }}</a></li>
+              <li><a routerLink="/shop" [queryParams]="{ edition: p.edition.slug }" class="inline-flex min-h-6 items-center hover:text-fg hover:underline">{{ p.edition.name }}</a></li>
             }
             <li aria-hidden="true">/</li>
             <li aria-current="page" class="text-fg-2">{{ p.name }}</li>
@@ -37,10 +37,23 @@
 
         <div class="mt-6 grid gap-8 md:grid-cols-12 lg:gap-16">
           <!-- Gallery: swipe row on small screens (next photo peeks in), vertical column from md -->
-          <section [attr.aria-label]="'Photos of ' + p.name" class="md:col-span-7">
-            <ul class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:flex-col md:gap-3 md:overflow-visible md:px-0">
+          <section [attr.aria-label]="'Photos of ' + p.name" class="md:col-span-7 md:grid md:grid-cols-[4rem_1fr] md:gap-4 lg:grid-cols-[4.5rem_1fr]">
+            <!-- Contact sheet: a strip of thumbnails that follows the photo in view -->
+            @if (gallery().length > 1) {
+              <nav class="pdp-rail" aria-label="Jump to photo">
+                @for (img of gallery(); track img.url; let i = $index; let count = $count) {
+                  <button type="button" class="pdp-rail-thumb media" [class.is-current]="inView() === i"
+                          [attr.aria-current]="inView() === i ? 'true' : null"
+                          [attr.aria-label]="'Photo ' + (i + 1) + ' of ' + count"
+                          (click)="jumpTo(i)">
+                    <img [ngSrc]="thumb(img.url)" width="72" height="90" alt="" />
+                  </button>
+                }
+              </nav>
+            }
+            <ul #galleryList class="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:flex-col md:gap-3 md:overflow-visible md:px-0">
               @for (img of gallery(); track img.url; let i = $index; let count = $count) {
-                <li class="w-[86%] shrink-0 snap-start md:w-full">
+                <li class="w-[86%] shrink-0 snap-start md:w-full" [attr.data-gallery-index]="i">
                   <figure>
                     <div class="media" [class]="img.role === 'detail' ? 'aspect-square' : 'aspect-[4/5]'" [attr.data-lead-photo]="i === 0 ? '' : null">
                       <img [ngSrc]="img.url" fill sizes="(min-width: 768px) 58vw, 86vw" [priority]="i === 0" [alt]="img.alt" />
@@ -96,18 +109,20 @@
                 <button #addButton type="button" class="btn btn-solid flex-1" [disabled]="soldOut() || bag.busy()" [attr.aria-busy]="bag.busy()" (click)="addToBag()">
                   {{ soldOut() ? 'Sold out' : bag.busy() ? 'Adding…' : 'Add to bag' }}
                 </button>
-                <button type="button" class="btn btn-quiet px-4" (click)="save()" [attr.aria-describedby]="saveStatus() ? 'save-status' : null">
-                  <svg width="18" height="18" viewBox="0 0 24 24" [attr.fill]="saveStatus() === 'saved' ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <button type="button" class="btn btn-quiet px-4" (click)="save()" [attr.aria-pressed]="isSaved()" [attr.aria-describedby]="saveStatus() ? 'save-status' : null">
+                  <svg class="heart-icon" [class.is-on]="isSaved()" width="18" height="18" viewBox="0 0 24 24" [attr.fill]="isSaved() ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                     <path d="M12 20s-7.25-4.35-7.25-9.6A4.15 4.15 0 0 1 12 7.6a4.15 4.15 0 0 1 7.25 2.8C19.25 15.65 12 20 12 20Z" stroke-linejoin="round" />
                   </svg>
-                  {{ saveStatus() === 'saved' ? 'Saved' : 'Save' }}
+                  {{ isSaved() ? 'Saved' : 'Save' }}
                 </button>
               </div>
               <p id="save-status" class="-mt-3 type-body-sm" role="status">
                 @switch (saveStatus()) {
-                  @case ('saved') { <span class="text-fg-2">Saved to your <a routerLink="/wish" class="link-underline">wishlist</a>.</span> }
-                  @case ('signin') { <span class="text-fg-2"><a routerLink="/login" class="link-underline">Sign in</a> to save pieces to your wishlist.</span> }
-                  @case ('error') { <span class="text-danger">We couldn't save this piece. Try again in a moment.</span> }
+                  @case ('saved') {
+                    <span class="text-fg-2">Saved. See it in <a routerLink="/wish" class="link-underline">your saved pieces</a>.@if (guest()) { <a routerLink="/login" class="link-underline">Sign in</a> to keep it on every device. }</span>
+                  }
+                  @case ('removed') { <span class="text-fg-2">Removed from your saved pieces.</span> }
+                  @case ('error') { <span class="text-danger">{{ wishlistError() }}</span> }
                 }
               </p>
               @if (bag.error() && !bag.isOpen()) {
@@ -174,7 +189,7 @@
           <div class="flex items-end justify-between gap-4">
             <h2 id="related-title" class="type-h2">Wear it with</h2>
             @if (p.edition) {
-              <a routerLink="/shop" [queryParams]="{ edition: p.edition.slug }" class="type-body-sm link-underline">All of {{ p.edition.name }}</a>
+              <a routerLink="/shop" [queryParams]="{ edition: p.edition.slug }" class="inline-flex min-h-11 items-center type-body-sm link-underline">All of {{ p.edition.name }}</a>
             }
           </div>
           <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4">

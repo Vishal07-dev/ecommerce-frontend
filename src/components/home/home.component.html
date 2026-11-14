@@ -16,7 +16,12 @@
   }
 }
 
-<!-- 2 · From the lookbook -->
+<!-- 2 · The cloth: an ink chapter with the aperture -->
+@if (assets()['fabric-flow']; as a) {
+  <app-cloth-chapter [photo]="a" />
+}
+
+<!-- 3 · From the lookbook -->
 @if (looks()[1]; as look) {
   <section class="page section-y" aria-label="From the lookbook">
     <app-look-spread [look]="look" />
@@ -34,7 +39,7 @@
       <div class="grid gap-6 md:grid-cols-12">
         <p class="type-label text-fg-3 md:col-span-3" reveal>The Edit · {{ edit().length }} pieces</p>
         <div class="md:col-span-9">
-          <h2 id="edit-title" class="type-display" reveal [revealOrder]="1">Made to be worn for years, <em>not seasons.</em></h2>
+          <h2 id="edit-title" class="type-display" splitLines>Made to be worn for years, <em>not seasons.</em></h2>
           <p class="mt-6 type-body text-fg-2 measure" reveal [revealOrder]="2">
             Heavy cottons, honest wool and knits from old frames. Fewer things, made slowly, priced for what goes into them.
           </p>
@@ -56,32 +61,9 @@
   </section>
 }
 
-<!-- 4 · Editions rail: scrolls sideways, the next card peeks in -->
+<!-- 5 · Editions as a typographic index -->
 @if (editions().length) {
-  <section class="border-t border-line py-20 md:py-32" aria-labelledby="editions-title">
-    <div class="page flex items-end justify-between gap-6">
-      <h2 id="editions-title" class="type-h1">Editions</h2>
-      <p class="hidden type-body-sm text-fg-3 sm:block">Small runs, released when they're ready.</p>
-    </div>
-    <ul class="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[clamp(1rem,4vw,4rem)] pb-4 [scroll-padding-inline:clamp(1rem,4vw,4rem)] md:gap-6">
-      @for (e of editions(); track e._id) {
-        <li class="w-[78%] shrink-0 snap-start sm:w-[44%] lg:w-[30%]">
-          <a routerLink="/shop" [queryParams]="{ edition: e.slug }" class="group block">
-            @if (e.cover; as c) {
-              <div class="media aspect-[3/4]" weave>
-                <img [ngSrc]="c.url" fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 44vw, 78vw" [alt]="c.alt"
-                     class="transition-[scale] duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none" />
-              </div>
-            }
-            <p class="type-label mt-4 text-fg-3">{{ e.season }}</p>
-            <h3 class="type-h2 mt-1 group-hover:underline">{{ e.name }}</h3>
-            <p class="mt-2 type-body-sm text-fg-2">{{ e.intro }}</p>
-            <p class="type-price mt-3 type-body-sm text-fg-3">{{ e.productCount }} {{ e.productCount === 1 ? 'piece' : 'pieces' }}</p>
-          </a>
-        </li>
-      }
-    </ul>
-  </section>
+  <div class="border-t border-line"><app-edition-index [editions]="editions()" /></div>
 }
 
 <!-- 5 · Brand note -->
@@ -101,7 +83,7 @@
     }
     <div class="md:col-span-6 md:col-start-7">
       <p class="type-label text-fg-3" reveal>A note on the name</p>
-      <h2 id="note-title" class="type-display mt-4" reveal [revealOrder]="1">Kōra <span class="text-fg-3" lang="hi">कोरा</span></h2>
+      <h2 id="note-title" class="type-display mt-4" splitLines>Kōra <span class="text-fg-3" lang="hi">कोरा</span></h2>
       <p class="mt-6 type-body text-fg-2 measure" reveal [revealOrder]="2">
         Cloth as it leaves the loom: unbleached, unwashed, untouched. It's where every garment starts, and the standard we hold the finished one to.
       </p>

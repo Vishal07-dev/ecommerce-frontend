@@ -1,10 +1,15 @@
-<div class="flex h-screen bg-gray-100">
-      <!-- Sidebar -->
-      <div class="flex-shrink-0 ">
+<div class="admin-shell flex h-screen bg-gray-100">
+      <!-- Small screens: tap outside the drawer to close it -->
+      @if (isSidebarOpen()) {
+        <button type="button" class="fixed inset-0 z-30 bg-black/40 lg:hidden" aria-label="Close menu" (click)="isSidebarOpen.set(false)"></button>
+      }
+      <!-- Sidebar: a drawer below 1024px, fixed column above -->
+      <div id="admin-sidebar" class="admin-sidebar fixed inset-y-0 start-0 z-40 flex-shrink-0 lg:static" [class.is-open]="isSidebarOpen()"
+           (click)="closeOnNavigate($event)">
         <div class="flex flex-col w-64 min-h-screen bg-white shadow-sm">
           <!-- Logo -->
-          <div class="flex items-center h-16 px-6 bg-blue-600">
-            <h1 class="text-xl font-bold text-white">E-Commerce Admin</h1>
+          <div class="flex items-center h-16 px-6 bg-gray-900">
+            <a routerLink="/" class="text-xl font-bold tracking-[0.12em] text-white">KŌRA <span class="text-sm font-normal tracking-normal opacity-70">Admin</span></a>
           </div>
           
           <!-- Navigation -->
@@ -95,9 +100,10 @@
       <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Header -->
         <header class="bg-white shadow-sm border-b border-gray-200">
-          <div class="flex items-center justify-between h-16 px-6">
+          <div class="flex items-center justify-between h-16 px-4 lg:px-6">
             <div class="flex items-center">
-              <button class="text-gray-500 hover:text-gray-600 lg:hidden">
+              <button type="button" class="grid size-11 place-items-center -ms-2 text-gray-500 hover:text-gray-600 lg:hidden"
+                      aria-label="Menu" aria-controls="admin-sidebar" [attr.aria-expanded]="isSidebarOpen()" (click)="isSidebarOpen.set(!isSidebarOpen())">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
@@ -118,7 +124,7 @@
                 <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <span class="text-white text-sm font-medium">AD</span>
                 </div>
-                <span class="text-sm font-medium text-gray-700">Admin User</span>
+                <span class="hidden text-sm font-medium text-gray-700 sm:inline">Admin User</span>
               </div>
 
               <div class="flex items-center space-x-3">
@@ -131,7 +137,7 @@ Log Out         </button>
         </header>
         
         <!-- Page Content -->
-        <main class="flex-1 overflow-auto bg-gray-50 p-6">
+        <main class="flex-1 overflow-auto bg-gray-50 p-4 lg:p-6">
           <router-outlet></router-outlet>
         </main>
       </div>

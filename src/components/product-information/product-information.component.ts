@@ -10,6 +10,8 @@ import { WishlistService } from "../../service/wishList'/wishlist.service";
 import { AuthService } from '../../service/auth.service';
 import { InrPipe, formatInr } from '../../ui/price.pipe';
 import { HandoffService } from '../../ui/handoff';
+import { MotionService } from '../../ui/motion.service';
+import { thumb } from '../../ui/image';
 import { ONE_SIZE, Product, sizesOf } from '../../ui/models';
 import { SizePickerComponent } from '../size-picker/size-picker.component';
 import { SizeGuideComponent } from '../size-guide/size-guide.component';
@@ -25,6 +27,7 @@ export class ProductInformationComponent {
   private catalog = inject(CatalogService);
   private title = inject(Title);
   private wishlist = inject(WishlistService);
+  readonly wishlistError = computed(() => this.wishlist.error() ?? 'We couldn’t save this piece. Try again in a moment.');
   private auth = inject(AuthService);
   readonly bag = inject(CartService);
   private handoff = inject(HandoffService);
@@ -41,6 +44,12 @@ export class ProductInformationComponent {
 
   private picker = viewChild<ElementRef<HTMLElement>>('picker');
   private addButton = viewChild<ElementRef<HTMLElement>>('addButton');
+  private galleryList = viewChild<ElementRef<HTMLElement>>('galleryList');
+  private motion = inject(MotionService);
+  private galleryObserver?: IntersectionObserver;
+  /** Which gallery photo is most in view (drives the thumbnail strip). */
+  readonly inView = signal(0);
+  readonly thumb = thumb;
 
   readonly gallery = computed(() => (this.product()?.images ?? []).filter(i => i.role !== 'look'));
   readonly composition = computed(() =>
@@ -62,6 +71,8 @@ export class ProductInformationComponent {
         const sizes = sizesOf(product);
         if (sizes.length === 1 && sizes[0].stock > 0) this.size.set(sizes[0].size);
         this.loadRelated(product);
+        this.inView.set(0);
+        afterNextRender(() => this.watchGallery(), { injector: this.injector });
         // Pick up: a photo carried from a product card lands on the lead photo.
         afterNextRender(() => requestAnimationFrame(() => {
           const lead = document.querySelector<HTMLElement>('[data-lead-photo]');
@@ -76,7 +87,7 @@ export class ProductInformationComponent {
       const observer = new IntersectionObserver(([entry]) => this.showStickyBar.set(!entry.isIntersecting && entry.boundingClientRect.top < 0));
       const watch = () => { const el = this.addButton()?.nativeElement; if (el) observer.observe(el); else setTimeout(watch, 200); };
       watch();
-      destroyRef.onDestroy(() => observer.disconnect());
+      destroyRef.onDestroy(() => { observer.disconnect(); this.galleryObserver?.disconnect(); });
     });
   }
 
@@ -100,17 +111,15 @@ export class ProductInformationComponent {
     if (size) this.sizeError.set(null);
   }
 
+  /** Whether this piece is in the shopper's saved list (shared with every heart on the site). */
+  readonly isSaved = computed(() => { const p = this.product(); return !!p && this.wishlist.items().some(i => i._id === p._id); });
+  readonly guest = computed(() => !this.auth.isLoggedIn());
+
   save(): void {
     const product = this.product();
     if (!product) return;
-    if (!this.auth.isLoggedIn()) {
-      this.saveStatus.set('signin');
-      return;
-    }
-    this.wishlist.addItemToWishList(product._id).subscribe({
-      next: () => this.saveStatus.set('saved'),
-      error: () => this.saveStatus.set('error'),
-    });
+    this.wishlist.toggle(product).subscribe(saved =>
+      this.saveStatus.set(this.wishlist.error() ? 'error' : saved ? 'saved' : 'removed'));
   }
 
   private loadRelated(product: Product): void {
@@ -119,5 +128,24 @@ export class ProductInformationComponent {
       next: res => this.related.set(res.products.slice(0, 4)),
       error: () => this.related.set([]),
     });
+  }
+
+  /** Desktop gallery: track the photo crossing the middle of the screen. */
+  private watchGallery(): void {
+    this.galleryObserver?.disconnect();
+    const list = this.galleryList()?.nativeElement;
+    if (!list) return;
+    this.galleryObserver = new IntersectionObserver(entries => {
+      for (const e of entries) {
+        if (e.isIntersecting) this.inView.set(Number((e.target as HTMLElement).dataset['galleryIndex']));
+      }
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    list.querySelectorAll('[data-gallery-index]').forEach(el => this.galleryObserver!.observe(el));
+  }
+
+  jumpTo(i: number): void {
+    const el = this.galleryList()?.nativeElement.querySelector<HTMLElement>('[data-gallery-index="' + i + '"]');
+    if (el) this.motion.scrollToElement(el);
+    this.inView.set(i);
   }
 }

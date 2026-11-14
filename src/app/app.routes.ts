@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { LayoutComponent } from '../components/layout/layout.component';
 import { HomeComponent } from '../components/home/home.component';
 import { adminGuard } from '../guard/admin.guard';
+import { accountGuard } from '../guard/account.guard';
 
 // The storefront shell and the homepage load up front; every other page is
 // fetched when it is first visited, so shoppers never download the admin area.
@@ -17,7 +18,8 @@ export const routes: Routes = [
       { path: 'cart', loadComponent: () => import('../components/cart-page/cart-page.component').then(m => m.CartPageComponent) },
       { path: 'login', loadComponent: () => import('../components/login/login.component').then(m => m.LoginComponent) },
       { path: 'register', loadComponent: () => import('../components/register/register.component').then(m => m.RegisterComponent) },
-      { path: 'profile', loadComponent: () => import('../components/userprofile/userprofile.component').then(m => m.UserprofileComponent) },
+      { path: 'profile', canActivate: [accountGuard], loadComponent: () => import('../components/userprofile/userprofile.component').then(m => m.UserprofileComponent) },
+      { path: 'account', redirectTo: 'profile' },
       { path: 'about', loadComponent: () => import('../components/about-page/about-page.component').then(m => m.AboutPageComponent) },
       { path: 'contact', loadComponent: () => import('../components/contact/contact.component').then(m => m.ContactComponent) },
       { path: 'wish', loadComponent: () => import('../components/wishlist-page/wishlist-page.component').then(m => m.WishlistPageComponent) },

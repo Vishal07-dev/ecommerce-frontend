@@ -6,6 +6,7 @@ import { Look, Product, primaryImage, productLink } from '../../ui/models';
 import { ParallaxDirective } from '../../ui/parallax.directive';
 import { thumb } from '../../ui/image';
 import { RevealDirective } from '../../ui/reveal.directive';
+import { SplitLinesDirective } from '../../ui/split-lines';
 import { WeaveDirective } from '../../ui/weave';
 
 /**
@@ -15,7 +16,7 @@ import { WeaveDirective } from '../../ui/weave';
  */
 @Component({
   selector: 'app-look-spread',
-  imports: [NgOptimizedImage, NgTemplateOutlet, RouterLink, InrPipe, ParallaxDirective, RevealDirective, WeaveDirective],
+  imports: [NgOptimizedImage, NgTemplateOutlet, RouterLink, InrPipe, ParallaxDirective, RevealDirective, WeaveDirective, SplitLinesDirective],
   template: `
     <article class="grid items-end gap-8 md:grid-cols-12 md:gap-12" [attr.aria-labelledby]="headingId()">
       @if (flip()) {
@@ -57,7 +58,7 @@ import { WeaveDirective } from '../../ui/weave';
 
     <ng-template #copy>
       <p class="type-label text-fg-3" reveal>Look {{ look().number.toString().padStart(2, '0') }}</p>
-      <h2 [id]="headingId()" class="type-h1 mt-3" reveal [revealOrder]="1">{{ look().title }}</h2>
+      <h2 [id]="headingId()" class="type-h1 mt-3" splitLines>{{ look().title }}</h2>
       <p class="mt-4 type-body text-fg-2 measure" reveal [revealOrder]="2">{{ look().caption }}</p>
 
       <h3 class="type-label mt-10 text-fg-3">Shop the look</h3>

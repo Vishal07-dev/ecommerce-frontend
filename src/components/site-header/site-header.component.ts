@@ -1,4 +1,5 @@
 import { Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
+import { WishlistService } from "../../service/wishList'/wishlist.service";
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
@@ -18,6 +19,7 @@ import { closeDialog, isBackdropClick, openDialog } from '../../ui/dialog';
 export class SiteHeaderComponent {
   readonly auth = inject(AuthService);
   readonly bag = inject(CartService);
+  readonly saved = inject(WishlistService);
   readonly theme = inject(ThemeService);
   private motion = inject(MotionService);
   private router = inject(Router);

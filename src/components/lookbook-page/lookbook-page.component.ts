@@ -3,15 +3,16 @@ import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { CatalogService } from '../../service/catalog.service';
 import { Look } from '../../ui/models';
+import { SplitLinesDirective } from '../../ui/split-lines';
 import { LookSpreadComponent } from '../look-spread/look-spread.component';
 
 @Component({
   selector: 'app-lookbook-page',
-  imports: [RouterLink, LookSpreadComponent],
+  imports: [RouterLink, LookSpreadComponent, SplitLinesDirective],
   template: `
     <div class="page pt-10 md:pt-16">
       <p class="type-label text-fg-3">Edition 01 · Autumn–Winter 2026</p>
-      <h1 class="type-display-xl mt-3">Lookbook</h1>
+      <h1 class="type-display-xl mt-3" splitLines>Lookbook</h1>
       <p class="mt-6 type-body text-fg-2 measure">
         Six looks from the season, each one shoppable. Tap a tag on any photograph to see that piece.
       </p>
@@ -38,7 +39,7 @@ import { LookSpreadComponent } from '../look-spread/look-spread.component';
           }
         </div>
         <div class="page pb-32 text-center">
-          <p class="type-h2">Everything in the lookbook is in the shop.</p>
+          <p class="type-display mx-auto max-w-[16ch]" splitLines>Everything in the lookbook is in the <em>shop.</em></p>
           <a routerLink="/shop" class="btn btn-solid mt-8">Shop the edition</a>
         </div>
       }

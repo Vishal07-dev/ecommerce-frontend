@@ -5,6 +5,7 @@ import { Title } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CatalogService } from '../../service/catalog.service';
 import { RevealDirective } from '../../ui/reveal.directive';
+import { SplitLinesDirective } from '../../ui/split-lines';
 import { WeaveDirective } from '../../ui/weave';
 import { ParallaxDirective } from '../../ui/parallax.directive';
 
@@ -16,7 +17,7 @@ const MILLS = [
   { place: 'Bhilwara', country: 'India', cloth: 'Heavy cotton twill for trousers' },
   { place: 'Biella', country: 'Italy', cloth: 'Brushed melton for the long coat' },
   { place: 'Prato', country: 'Italy', cloth: 'Boiled wool' },
-  { place: 'Yorkshire', country: 'England', cloth: 'Cotton gabardine for the field coat' },
+  { place: 'Yorkshire', country: 'England', cloth: 'Wool gabardine for the field coat' },
 ];
 
 const PRINCIPLES = [
@@ -27,12 +28,12 @@ const PRINCIPLES = [
 
 @Component({
   selector: 'app-about-page',
-  imports: [NgOptimizedImage, RouterLink, RevealDirective, WeaveDirective, ParallaxDirective],
+  imports: [NgOptimizedImage, RouterLink, RevealDirective, WeaveDirective, ParallaxDirective, SplitLinesDirective],
   template: `
     <!-- Opener -->
     <section class="page pt-12 md:pt-20" aria-labelledby="about-title">
       <p class="type-label text-fg-3">About KŌRA</p>
-      <h1 id="about-title" class="type-display-xl mt-4 max-w-[14ch]">Cloth, as it leaves the <em>loom.</em></h1>
+      <h1 id="about-title" class="type-display-xl mt-4 max-w-[14ch]" splitLines>Cloth, as it leaves the <em>loom.</em></h1>
       <div class="mt-10 grid gap-6 md:grid-cols-12">
         <p class="type-body text-fg-2 measure md:col-span-6 md:col-start-7">
           KŌRA makes everyday garments in heavy cotton and honest wool, designed in Ahmedabad and made with mills we know by name.
@@ -74,7 +75,7 @@ const PRINCIPLES = [
     <!-- How we work -->
     <section class="border-t border-line" aria-labelledby="work-title">
       <div class="page section-y">
-        <h2 id="work-title" class="type-h1" reveal>How we work</h2>
+        <h2 id="work-title" class="type-display" splitLines>How we work</h2>
         <div class="mt-12 grid gap-12 md:mt-16 md:grid-cols-12 md:gap-8">
           <ul class="flex flex-col divide-y divide-line border-y border-line md:col-span-6">
             @for (p of principles; track p.title; let i = $index) {
@@ -109,7 +110,7 @@ const PRINCIPLES = [
     <section class="border-t border-line" aria-labelledby="mills-title">
       <div class="page section-y grid gap-10 md:grid-cols-12">
         <div class="md:col-span-4">
-          <h2 id="mills-title" class="type-h1" reveal>Where the cloth comes from</h2>
+          <h2 id="mills-title" class="type-h1" splitLines>Where the cloth comes from</h2>
           <p class="mt-4 type-body text-fg-2 measure" reveal [revealOrder]="1">
             Every product page names the mill town behind its fabric. Most of it is made in India; a few wools come from mills in Italy and England that have done one thing well for generations.
           </p>
@@ -128,7 +129,7 @@ const PRINCIPLES = [
     <!-- Close -->
     <section class="border-t border-line" aria-labelledby="close-title">
       <div class="page section-y text-center">
-        <h2 id="close-title" class="type-display mx-auto max-w-[18ch]" reveal>See it in the cloth, <em>not the copy.</em></h2>
+        <h2 id="close-title" class="type-display mx-auto max-w-[18ch]" splitLines>See it in the cloth, <em>not the copy.</em></h2>
         <div class="mt-10 flex flex-wrap justify-center gap-3" reveal [revealOrder]="1">
           <a routerLink="/shop" class="btn btn-solid">Shop the edition</a>
           <a routerLink="/contact" class="btn btn-quiet">Ask us anything</a>

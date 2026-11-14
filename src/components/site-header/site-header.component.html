@@ -46,17 +46,18 @@
       </button>
 
       @if (isAdmin()) {
-        <a routerLink="/admin" class="hidden px-3 type-body-sm text-fg-2 hover:text-fg lg:inline">Admin</a>
+        <a routerLink="/admin" class="hidden min-h-11 items-center px-3 type-body-sm text-fg-2 hover:text-fg lg:inline-flex">Admin</a>
       }
       @if (signedIn()) {
-        <a routerLink="/profile" class="hidden px-3 type-body-sm text-fg-2 hover:text-fg md:inline">Account</a>
+        <a routerLink="/profile" class="hidden min-h-11 items-center px-3 type-body-sm text-fg-2 hover:text-fg md:inline-flex">Account</a>
       } @else {
-        <a routerLink="/login" class="hidden px-3 type-body-sm text-fg-2 hover:text-fg md:inline">Sign in</a>
+        <a routerLink="/login" class="hidden min-h-11 items-center px-3 type-body-sm text-fg-2 hover:text-fg md:inline-flex">Sign in</a>
       }
-      <a routerLink="/wish" class="btn btn-icon hidden md:inline-flex" aria-label="Wishlist">
+      <a routerLink="/wish" class="btn btn-icon relative hidden md:inline-flex" [attr.aria-label]="saved.count() ? 'Saved pieces, ' + saved.count() : 'Saved pieces'">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path d="M12 20s-7.25-4.35-7.25-9.6A4.15 4.15 0 0 1 12 7.6a4.15 4.15 0 0 1 7.25 2.8C19.25 15.65 12 20 12 20Z" stroke-linejoin="round" />
         </svg>
+        @if (saved.count()) { <span class="saved-dot type-price" aria-hidden="true">{{ saved.count() }}</span> }
       </a>
 
       <button type="button" class="btn -me-2 min-h-11 gap-2 px-3 type-body-sm" (click)="bag.open()"
@@ -71,7 +72,7 @@
 </header>
 
 <!-- Small-screen menu -->
-<dialog #menu id="site-menu" class="sheet sheet-start" aria-label="Menu"
+<dialog #menu id="site-menu" class="sheet sheet-curtain" aria-label="Menu"
         (cancel)="onMenuCancel($event)" (click)="onMenuClick($event)">
   <div class="flex h-full flex-col">
     <div class="flex h-16 items-center justify-between border-b border-line px-4">
@@ -82,10 +83,10 @@
     </div>
     <nav aria-label="Primary" class="sheet-scroll flex-1 px-4 py-8" data-lenis-prevent>
       <ul class="flex flex-col gap-2">
-        @for (item of nav; track item.link) {
-          <li><a [routerLink]="item.link" class="block py-2 type-h2">{{ item.label }}</a></li>
+        @for (item of nav; track item.link; let i = $index) {
+          <li class="curtain-item" [style.--i]="i"><a [routerLink]="item.link" class="curtain-link">{{ item.label }}</a></li>
         }
-        <li><a routerLink="/wish" class="block py-2 type-h2">Wishlist</a></li>
+        <li class="curtain-item" [style.--i]="nav.length"><a routerLink="/wish" class="curtain-link">Saved@if (saved.count()) { <sup class="type-price ms-1 text-base text-fg-3">{{ saved.count() }}</sup> }</a></li>
       </ul>
       <ul class="mt-10 flex flex-col gap-3 border-t border-line pt-6 type-body">
         @if (signedIn()) {

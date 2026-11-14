@@ -40,6 +40,12 @@ export class MotionService {
   stop(): void { this.lenis?.stop(); }
   start(): void { this.lenis?.start(); }
 
+  /** Smooth-scroll an element to just under the sticky header. */
+  scrollToElement(el: HTMLElement, offset = -96): void {
+    if (this.lenis) this.lenis.scrollTo(el, { offset, duration: 1.1 });
+    else el.scrollIntoView({ block: 'start', behavior: this.reducedMotion() ? 'auto' : 'smooth' });
+  }
+
   scrollTo(y: number): void {
     if (this.lenis) this.lenis.scrollTo(y, { immediate: true, force: true });
     else window.scrollTo({ top: y, behavior: 'instant' });

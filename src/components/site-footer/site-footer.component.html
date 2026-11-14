@@ -1,9 +1,9 @@
-<footer class="mt-auto border-t border-line bg-canvas">
-  <div class="page pt-16 pb-28">
+<footer #root class="site-footer theme-dark mt-auto">
+  <div class="page pt-20 pb-12 md:pt-28">
     <div class="grid gap-12 md:grid-cols-12">
       <div class="md:col-span-5">
-        <p class="font-display text-[clamp(3.5rem,2rem+6vw,8rem)] leading-none tracking-[0.12em]" aria-hidden="true">KŌRA</p>
-        <p class="type-label mt-3 text-fg-3">Everyday Garments</p>
+        <p class="type-label text-fg-3">Everyday Garments · Est. Ahmedabad</p>
+        <p class="mt-4 type-h1 max-w-[14ch]">Made to be worn for <em>years.</em></p>
         <p class="mt-6 max-w-sm type-body-sm text-fg-2">
           Kōra is cloth as it leaves the loom, unbleached and untouched. We make fewer things, in heavy cotton and honest wool, and cut them to last.
         </p>
@@ -53,4 +53,9 @@
       }
     </div>
   </div>
+
+  <!-- Finale: the wordmark is set letter by letter as the page runs out. -->
+  <p #mark class="footer-mark" aria-hidden="true">
+    @for (ch of letters; track $index) { <span class="footer-mark-mask"><span data-mark-char>{{ ch }}</span></span> }
+  </p>
 </footer>
