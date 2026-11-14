@@ -1,4 +1,4 @@
-<a [routerLink]="link()" class="media card-swap block" [class]="aspect()" tabindex="-1" aria-hidden="true">
+<a [routerLink]="link()" class="media card-swap block" [class]="aspect()" tabindex="-1" aria-hidden="true" (click)="pickUp($event)">
   <img [ngSrc]="first().url" fill [sizes]="sizes()" [priority]="priority()" alt="" />
   @if (second(); as alt) {
     <img [ngSrc]="alt.url" fill [sizes]="sizes()" alt="" />
@@ -11,9 +11,9 @@
 <div class="flex flex-col gap-1 pt-3">
   <div class="flex items-baseline justify-between gap-4">
     @if (headingLevel() === 2) {
-      <h2 class="type-body-sm font-medium"><a [routerLink]="link()" class="hover:underline">{{ product().name }}</a></h2>
+      <h2 class="type-body-sm font-medium"><a [routerLink]="link()" class="hover:underline" (click)="pickUp($event)">{{ product().name }}</a></h2>
     } @else {
-      <h3 class="type-body-sm font-medium"><a [routerLink]="link()" class="hover:underline">{{ product().name }}</a></h3>
+      <h3 class="type-body-sm font-medium"><a [routerLink]="link()" class="hover:underline" (click)="pickUp($event)">{{ product().name }}</a></h3>
     }
     <p class="type-price type-body-sm">
       @if (product().compareAtPrice && product().compareAtPrice! > product().price) {

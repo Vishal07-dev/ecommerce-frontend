@@ -1,92 +1,81 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { environment } from '../../environment/environment';
+import { DELIVERY_FEE, FREE_DELIVERY_FROM } from '../../service/cartService/cart.service';
+import { formatInr } from '../../ui/price.pipe';
+import { RevealDirective } from '../../ui/reveal.directive';
+
+type Field = 'firstName' | 'lastName' | 'email' | 'subject' | 'message';
+
+const SUBJECTS = ['An order or delivery', 'Sizing and fit', 'Fabric and care', 'Something else'];
+
+/** Field ids in the order they appear, for moving focus to the first problem. */
+const ORDER: Field[] = ['firstName', 'lastName', 'email', 'subject', 'message'];
 
 @Component({
   selector: 'app-contact',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [ReactiveFormsModule, RouterLink, RevealDirective],
   templateUrl: './contact.component.html',
-  styles: [`
-    .animate-fade-in {
-      animation: fadeIn 0.8s ease-out;
-    }
-    
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .shadow-3xl {
-      box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
-    }
-    
-    :host {
-      display: block;
-    }
-  `]
 })
 export class ContactComponent {
-  isDarkMode = signal(false);
-  http = inject(HttpClient)
-  formData = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
-  };
+  private http = inject(HttpClient);
+  private sentHeading = viewChild<ElementRef<HTMLElement>>('sentHeading');
 
-  constructor() {
-    // Check for saved dark mode preference or default to light mode
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      this.isDarkMode.set(true);
-      document.documentElement.classList.add('dark');
-    }
+  readonly subjects = SUBJECTS;
+  readonly freeFrom = formatInr(FREE_DELIVERY_FROM);
+  readonly fee = formatInr(DELIVERY_FEE);
+
+  readonly form = inject(FormBuilder).nonNullable.group({
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    phone: [''],
+    subject: ['', Validators.required],
+    message: ['', [Validators.required, Validators.minLength(10)]],
+  });
+
+  readonly submitted = signal(false);
+  readonly busy = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly sentTo = signal<string | null>(null);
+
+  constructor() { inject(Title).setTitle('Contact — KŌRA'); }
+
+  invalid(name: Field): boolean {
+    return this.submitted() && this.form.controls[name].invalid;
   }
 
-  toggleDarkMode() {
-    this.isDarkMode.update(current => !current);
-    if (this.isDarkMode()) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+  onSubmit(): void {
+    this.submitted.set(true);
+    this.error.set(null);
+    if (this.form.invalid) {
+      const first = ORDER.find(f => this.form.controls[f].invalid);
+      if (first) document.getElementById(`contact-${first}`)?.focus();
+      return;
     }
-  }
-
-  onSubmit() {
-    console.log('Form submitted:', this.formData);
-  this.http.post(`https://ecommerce-backend-n4tk.onrender.com/api/contact/send-email`, this.formData).subscribe({
+    this.busy.set(true);
+    const data = this.form.getRawValue();
+    this.http.post(`${environment.apiUrl}/contact/send-email`, data).subscribe({
       next: () => {
-        alert('Product created successfully!');
-        
+        this.busy.set(false);
+        this.sentTo.set(data.email);
+        this.form.reset();
+        this.submitted.set(false);
+        // The form is replaced by a confirmation; move focus to it.
+        setTimeout(() => this.sentHeading()?.nativeElement.focus());
       },
-      error: (err) => {
-        console.error('Error creating product:', err);
-        alert('Failed to create product. Check console.');
+      error: () => {
+        this.busy.set(false);
+        this.error.set('Your message didn’t send. Check your connection and try again. What you wrote is still here.');
       },
     });
-    alert('Thank you for your message! We\'ll get back to you soon.');
-    
-    // Reset form
-    this.formData = {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    };
+  }
+
+  writeAnother(): void {
+    this.sentTo.set(null);
+    setTimeout(() => document.getElementById('contact-firstName')?.focus());
   }
 }

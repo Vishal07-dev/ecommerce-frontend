@@ -1,4 +1,4 @@
-<!-- 1 · Scroll-driven centrepiece -->
+<!-- 1 · Cover -->
 @switch (heroState()) {
   @case ('ready') { <app-hero-showcase [product]="hero()!" /> }
   @case ('loading') {
@@ -68,7 +68,7 @@
         <li class="w-[78%] shrink-0 snap-start sm:w-[44%] lg:w-[30%]">
           <a routerLink="/shop" [queryParams]="{ edition: e.slug }" class="group block">
             @if (e.cover; as c) {
-              <div class="media aspect-[3/4]">
+              <div class="media aspect-[3/4]" weave>
                 <img [ngSrc]="c.url" fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 44vw, 78vw" [alt]="c.alt"
                      class="transition-[scale] duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none" />
               </div>
@@ -89,7 +89,7 @@
   <div class="page section-y grid items-center gap-12 md:grid-cols-12">
     @if (assets()['brand-note']; as a) {
       <figure class="md:col-span-5">
-        <div class="media aspect-[4/5]">
+        <div class="media aspect-[4/5]" weave>
           <div class="absolute inset-0" parallax="6">
             <img [ngSrc]="a.url" fill sizes="(min-width: 768px) 42vw, 100vw" [alt]="a.alt" />
           </div>

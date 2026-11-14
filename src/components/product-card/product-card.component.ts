@@ -1,8 +1,9 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, ElementRef, computed, inject, input } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../service/cartService/cart.service';
 import { InrPipe } from '../../ui/price.pipe';
+import { HandoffService } from '../../ui/handoff';
 import { Product, primaryImage, productLink, secondaryImage, sizesOf } from '../../ui/models';
 
 /**
@@ -26,12 +27,19 @@ export class ProductCardComponent {
   readonly quickAdd = input(true);
 
   private bag = inject(CartService);
+  private handoff = inject(HandoffService);
+  private host = inject(ElementRef<HTMLElement>);
 
   readonly first = computed(() => primaryImage(this.product()));
   readonly second = computed(() => secondaryImage(this.product()));
   readonly link = computed(() => productLink(this.product()));
   readonly variants = computed(() => sizesOf(this.product()));
   readonly soldOut = computed(() => this.variants().every(v => v.stock < 1));
+
+  /** Lift this card's photo so it can travel to the product page. */
+  pickUp(event: MouseEvent): void {
+    this.handoff.lift(event, this.host.nativeElement);
+  }
 
   add(size: string): void {
     this.bag.add(this.product(), size).subscribe();

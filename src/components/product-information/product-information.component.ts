@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, computed, inject, signal, viewChild, afterNextRender } from '@angular/core';
+import { Component, DestroyRef, ElementRef, Injector, computed, inject, signal, viewChild, afterNextRender } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -9,6 +9,7 @@ import { CartService, FREE_DELIVERY_FROM } from '../../service/cartService/cart.
 import { WishlistService } from "../../service/wishList'/wishlist.service";
 import { AuthService } from '../../service/auth.service';
 import { InrPipe, formatInr } from '../../ui/price.pipe';
+import { HandoffService } from '../../ui/handoff';
 import { ONE_SIZE, Product, sizesOf } from '../../ui/models';
 import { SizePickerComponent } from '../size-picker/size-picker.component';
 import { SizeGuideComponent } from '../size-guide/size-guide.component';
@@ -26,6 +27,8 @@ export class ProductInformationComponent {
   private wishlist = inject(WishlistService);
   private auth = inject(AuthService);
   readonly bag = inject(CartService);
+  private handoff = inject(HandoffService);
+  private injector = inject(Injector);
 
   readonly product = signal<Product | null>(null);
   readonly related = signal<Product[]>([]);
@@ -59,6 +62,11 @@ export class ProductInformationComponent {
         const sizes = sizesOf(product);
         if (sizes.length === 1 && sizes[0].stock > 0) this.size.set(sizes[0].size);
         this.loadRelated(product);
+        // Pick up: a photo carried from a product card lands on the lead photo.
+        afterNextRender(() => requestAnimationFrame(() => {
+          const lead = document.querySelector<HTMLElement>('[data-lead-photo]');
+          if (lead) this.handoff.land(lead); else this.handoff.drop(true);
+        }), { injector: this.injector });
       },
       error: () => { this.state.set('missing'); this.title.setTitle('Piece not found — KŌRA'); },
     });

@@ -10,6 +10,7 @@ import { LookSpreadComponent } from '../look-spread/look-spread.component';
 import { ProductCardComponent } from '../product-card/product-card.component';
 import { RevealDirective } from '../../ui/reveal.directive';
 import { ParallaxDirective } from '../../ui/parallax.directive';
+import { WeaveDirective } from '../../ui/weave';
 
 /** Grid rhythm for "The Edit": column span, image ratio and a vertical offset. */
 const EDIT_LAYOUT = [
@@ -24,7 +25,7 @@ const EDIT_LAYOUT = [
 
 @Component({
   selector: 'app-home',
-  imports: [NgOptimizedImage, RouterLink, HeroShowcaseComponent, LookSpreadComponent, ProductCardComponent, RevealDirective, ParallaxDirective],
+  imports: [NgOptimizedImage, RouterLink, HeroShowcaseComponent, LookSpreadComponent, ProductCardComponent, RevealDirective, ParallaxDirective, WeaveDirective],
   templateUrl: './home.component.html',
 })
 export class HomeComponent {

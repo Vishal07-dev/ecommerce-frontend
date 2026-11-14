@@ -349,6 +349,7 @@
     background: var(--raised);
     color: var(--fg);
   }
+  .field::placeholder { color: var(--fg-3); opacity: 1; }
 
   /* Size chips: native radio buttons, so arrow keys and forms work for free. */
   .size-chip { position: relative; }
@@ -492,170 +493,259 @@ html.lenis, html.lenis body { block-size: auto; }
 
 
 /* --------------------------------------------------------------------------
-   9. Hero showcase (scroll-choreographed). See hero-showcase.component.
-   A tall track gives the scroll distance; the stage sticks for its length.
-   Hotspot positions are percentages of the photograph, so the figure box is
-   sized to the photo's exact aspect ratio (set inline from the data).
+   9. Hero cover. See hero-showcase.component.
+   One screen, no pinning: a magazine cover that assembles itself on load
+   (masked headline lines, the photograph unveiled from below), then drifts
+   with a light parallax as the page scrolls away.
    -------------------------------------------------------------------------- */
-.hero { --hero-m: clamp(1rem, 4vw, 4rem); position: relative; background: var(--canvas); color: var(--fg); }
-.hero-track { block-size: 360svh; }
-/* The stage is its own stacking context, so it carries the canvas colour:
-   the figure's multiply blend needs that backdrop inside the context. */
-.hero-stage { position: sticky; inset-block-start: 0; block-size: 100svh; overflow: hidden; background: var(--canvas); }
+.hero {
+  --hero-m: clamp(1rem, 4vw, 4rem);
+  position: relative;
+  overflow: clip;
+  background: var(--canvas);
+  color: var(--fg);
+}
+.hero-grid {
+  display: grid;
+  gap: 2.5rem;
+  padding: clamp(2rem, 5vw, 4rem) var(--hero-m) 2rem;
+}
+@media (min-width: 768px) {
+  .hero-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: center;
+    gap: 2rem;
+    block-size: calc(100svh - 4rem - 3.25rem); /* header + ticker: the cover fits one screen */
+    min-block-size: 34rem;
+    padding-block: 2rem;
+  }
+  .hero-copy { grid-column: 1 / span 7; position: relative; z-index: 1; }
+  .hero-frame-col { grid-column: 8 / -1; grid-row: 1; }
+}
 
-.hero-layer { position: absolute; }
-.hero-copy {
-  inset-inline-start: var(--hero-m);
-  inset-block-start: 50%;
-  translate: 0 -50%;
-  max-inline-size: min(40rem, 46vw);
-}
-.hero-shop {
-  inset-inline-end: 6vw;
-  inset-block-start: 50%;
-  translate: 0 -50%;
-  inline-size: min(24rem, 40vw);
-}
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 1rem + 5vw, 7rem);
-  line-height: 1;
+  font-size: clamp(3rem, 1rem + 6.2vw, 8.5rem);
+  line-height: 0.95;
   font-weight: 400;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
-.hero-rail { position: absolute; inset-inline-start: var(--hero-m); inset-block-end: 1.5rem; }
-.hero-cue::after {
-  content: "";
-  display: block;
-  inline-size: 1px;
-  block-size: 3rem;
-  margin-block-start: 0.75rem;
-  background: currentColor;
+/* Each headline line rises out of its own mask. */
+.hero-line { display: block; overflow: clip; padding-block-end: 0.08em; margin-block-end: -0.08em; }
+.hero-line-inner { display: block; will-change: transform; }
+@media (min-width: 768px) {
+  /* The second line steps in under the first, like a set headline. */
+  .hero-line-indent { padding-inline-start: 1.1em; }
 }
 
-.hero-ghost {
+.hero-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-surface, 0.25rem);
+  background: var(--sunken);
+  aspect-ratio: 4 / 5;
+  max-block-size: calc(100svh - 10rem);
+  inline-size: 100%;
+  margin-inline-start: auto;
+}
+@media (min-width: 768px) {
+  .hero-frame { inline-size: auto; max-inline-size: 100%; block-size: calc(100svh - 4rem - 3.25rem - 6.5rem); min-block-size: 26rem; }
+}
+.hero-frame-inner { position: absolute; inset: -6% 0; will-change: transform; }
+.hero-frame-inner img { object-fit: cover; }
+
+/* Small facts set in the corner of the photograph, like a caption on a cover. */
+.hero-facts {
   position: absolute;
-  inset-inline: 0;
-  inset-block-start: 6svh;
-  margin: 0;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 30vw;
-  line-height: 0.85;
-  letter-spacing: -0.04em;
-  color: var(--raised);
-  pointer-events: none;
+  inset-inline: 1rem;
+  inset-block-end: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+.hero-fact {
+  padding: 0.375rem 0.625rem;
+  border-radius: 999px;
+  background: oklch(0.16 0.01 70 / 0.55);
+  color: oklch(0.97 0.005 80);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font: 500 0.6875rem/1.2 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Edition ticker along the foot of the cover. */
+.hero-ticker {
+  display: flex;
+  overflow: clip;
+  border-block: 1px solid var(--line);
+  block-size: 3.25rem;
+  align-items: center;
   user-select: none;
 }
-
-.hero-figure-wrap {
-  position: absolute;
-  inset-block-end: 0;
-  inset-inline-end: 8vw;
-  inline-size: min(46vw, calc(92svh * var(--ar, 0.667)));
-  aspect-ratio: var(--ar, 0.667);
+.hero-ticker-run {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2.5rem;
+  padding-inline-end: 2.5rem;
+  white-space: nowrap;
+  animation: hero-ticker 38s linear infinite;
 }
-.hero-figure { position: absolute; inset: 0; will-change: transform; }
-/* The studio photo's white sweep multiplies into the bone canvas, so the
-   figure stands in the page rather than in a white rectangle. */
-/* The hero is shot on a black studio sweep: lighten lets that black dissolve
-   into the dark stage, so the figure stands in the page, not in a rectangle. */
-.hero-blend { mix-blend-mode: lighten; }
-.hero-photo, .hero-face {
-  object-fit: cover;
-  mask-image: linear-gradient(to right, transparent, #000 14% 86%, transparent), linear-gradient(to bottom, transparent, #000 12%);
-  mask-composite: intersect;
-}
-.hero-flip { position: absolute; inset: 0; transform-style: preserve-3d; }
-.hero-face { backface-visibility: hidden; }
-.hero-face-back { rotate: y 180deg; }
+.hero-ticker-run > span { display: inline-flex; align-items: center; gap: 2.5rem; }
+.hero-ticker-run > span::after { content: ""; inline-size: 0.375rem; aspect-ratio: 1; border-radius: 50%; background: var(--accent); }
+@keyframes hero-ticker { to { translate: -100% 0; } }
+@media (hover: hover) { .hero-ticker:hover .hero-ticker-run { animation-play-state: paused; } }
+@media (prefers-reduced-motion: reduce) { .hero-ticker-run { animation: none; } }
 
-.hero-lens {
+/* --------------------------------------------------------------------------
+   10. Look tags. A quiet dot on each piece in a lookbook photo; pointing at it
+   (or at the piece in the list beside it) opens a name-and-price label.
+   Touch screens can't hover, so there the labels stay open.
+   -------------------------------------------------------------------------- */
+.look-tag {
   position: absolute;
-  translate: -50% -50%;
-  inline-size: min(34vw, 42svh);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 2.75rem;
+  translate: -1.375rem -50%;   /* centre the dot, not the whole tag, on the point */
+  padding-inline: 0.875rem 0;
+}
+.look-tag-left { flex-direction: row-reverse; translate: calc(-100% + 1.375rem) -50%; padding-inline: 0 0.875rem; }
+
+.look-tag-dot {
+  position: relative;
+  flex-shrink: 0;
+  inline-size: 0.75rem;
   aspect-ratio: 1;
   border-radius: 50%;
-  overflow: hidden;
-  background: var(--sunken);
-  clip-path: circle(0% at 50% 50%);
-  box-shadow: 0 30px 80px -20px oklch(0 0 0 / 0.35);
-  pointer-events: none;
+  background: oklch(0.99 0.004 80);
+  box-shadow: 0 0 0 1px oklch(0 0 0 / 0.12), 0 2px 8px oklch(0 0 0 / 0.3);
+  transition: scale 200ms cubic-bezier(0.2, 0, 0, 1);
 }
-
-.hero-spot {
-  position: absolute;
-  translate: -50% -50%;
-  display: grid;
-  place-items: center;
-  inline-size: 2.75rem;
-  block-size: 2.75rem;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  cursor: pointer;
-}
-.hero-spot::before {
+/* A slow breathing ring so the tags are findable without shouting. */
+.look-tag-dot::after {
   content: "";
   position: absolute;
-  inset: 0.5rem;
+  inset: -0.375rem;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 3px oklch(1 0 0 / 0.9);
-  transition: scale 150ms ease-out;
+  border: 1px solid oklch(0.99 0.004 80 / 0.8);
+  animation: look-tag-ring 2.4s cubic-bezier(0.2, 0, 0, 1) infinite;
 }
-.hero-spot > span[aria-hidden] { position: relative; color: var(--on-accent); font: 500 0.75rem/1 var(--font-mono); }
-.hero-spot[aria-pressed="true"]::before { scale: 1.15; }
-@media (hover: hover) { .hero-spot:hover::before { scale: 1.15; } }
-
-@media (max-width: 767px) {
-  .hero-track { block-size: 280svh; }
-  .hero-copy { inset-block-start: 5.25rem; translate: none; inset-inline-end: var(--hero-m); max-inline-size: none; }
-  .hero-copy .hero-title { font-size: clamp(2.75rem, 12vw, 4rem); }
-  .hero-copy .type-display { font-size: clamp(2rem, 9vw, 3rem); }
-  .hero-shop { inset-inline: var(--hero-m); inset-block: 5rem auto; translate: none; inline-size: auto; }
-  /* Keep the copy above the figure: long text moves to the product page,
-     a callout's detail shows when its hotspot is tapped. */
-  .hero-lede, .hero-cue, .hero-fit { display: none; }
-  .hero-detail { display: none; }
-  .is-active .hero-detail { display: block; }
-  .hero [data-hero-stage="details"] ol { gap: 0.75rem; }
-  .hero-figure-wrap { inset-inline: 0; margin-inline: auto; inline-size: min(92vw, calc(54svh * var(--ar, 0.667))); }
-  .hero-lens { inline-size: 58vw; }
-  .hero-rail { display: none; }
+@keyframes look-tag-ring {
+  0% { scale: 0.6; opacity: 0.9; }
+  100% { scale: 1.6; opacity: 0; }
 }
 
-/* Reduced motion: no pinning or scrubbing. One composed, static layout
-   with every beat visible in reading order. */
+.look-tag-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4375rem 0.75rem;
+  border-radius: 999px;
+  background: oklch(0.99 0.004 80 / 0.92);
+  color: oklch(0.2 0.01 70);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 0 1px oklch(0 0 0 / 0.06), 0 8px 24px -8px oklch(0 0 0 / 0.35);
+  font: 500 0.75rem/1.2 var(--font-sans);
+  white-space: nowrap;
+  opacity: 0;
+  translate: -0.375rem 0;
+  scale: 0.96;
+  transform-origin: left center;
+  pointer-events: none;
+  transition: opacity 180ms ease-out, translate 220ms cubic-bezier(0.2, 0, 0, 1), scale 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+.look-tag-left .look-tag-label { translate: 0.375rem 0; transform-origin: right center; }
+
+.look-tag.is-active .look-tag-label,
+.look-tag:focus-visible .look-tag-label { opacity: 1; translate: 0 0; scale: 1; pointer-events: auto; }
+.look-tag.is-active .look-tag-dot { scale: 1.25; }
+.look-tag.is-active .look-tag-dot::after { animation: none; opacity: 0; }
+
+@media (hover: none) {
+  .look-tag-label { opacity: 1; translate: 0 0; scale: 1; pointer-events: auto; }
+  .look-tag-dot::after { animation: none; opacity: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .hero-track { block-size: auto; }
-  .hero-stage {
-    position: relative;
-    block-size: auto;
-    display: grid;
-    gap: 3rem;
-    padding: 4rem var(--hero-m);
-  }
-  .hero-layer, .hero-copy, .hero-shop {
-    position: relative;
-    inset: auto;
-    translate: none;
-    max-inline-size: 40rem;
-    inline-size: auto;
-  }
-  .hero-figure-wrap { position: relative; inset: auto; inline-size: min(100%, calc(80svh * var(--ar, 0.667))); justify-self: center; }
-  .hero-ghost, .hero-lens, .hero-rail, .hero-cue { display: none; }
-  @media (min-width: 768px) {
-    .hero-stage { grid-template-columns: 1fr 1fr; align-items: start; }
-    .hero-layer { grid-column: 1; }
-    .hero-figure-wrap { grid-column: 2; grid-row: 1 / span 4; position: sticky; inset-block-start: 5rem; }
-  }
+  .look-tag-dot::after { animation: none; opacity: 0; }
+  .look-tag-dot, .look-tag-label { transition: none; }
 }
 
-/* Reduced motion stacks the hero in normal flow, so nothing can overlap:
-   show the full copy again at every width. */
-@media (prefers-reduced-motion: reduce) {
-  .hero-lede, .hero-fit, .hero-detail { display: block; }
-  .hero-shop { inset: auto; }
+/* --------------------------------------------------------------------------
+   11. KŌRA signature motion. See DESIGN-AND-MOTION.md for the concepts.
+   -------------------------------------------------------------------------- */
+
+/* 11a · Warp lift (ui/weave.ts). Threads are canvas-coloured strips laid over
+   a photograph; they overlap by a pixel so no seam shows between them. */
+.weave { position: absolute; inset: 0; z-index: 2; display: flex; pointer-events: none; }
+.weave > span { flex: 1; margin-inline-end: -1px; background: var(--canvas); will-change: transform; }
+.weave-weft {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 50%;
+  block-size: 1px;
+  background: var(--fg-3);
+  transform-origin: left center;
 }
+
+/* 11b · Bolt unroll (ui/route-transition.ts). The header keeps its own
+   transition name so it stays put while the page beneath it changes. */
+header.sticky { view-transition-name: site-header; }
+::view-transition-group(site-header),
+::view-transition-old(site-header),
+::view-transition-new(site-header) { animation: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) { animation: kora-sink 760ms var(--ease-in-out) both; }
+  ::view-transition-new(root) { animation: kora-unroll 760ms var(--ease-in-out) both; }
+}
+@keyframes kora-unroll {
+  0%   { clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
+  /* The leading edge hangs lower on one side, as cloth does when it's let fall. */
+  55%  { clip-path: polygon(0 0, 100% 0, 100% 64%, 0 50%); }
+  100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+}
+@keyframes kora-sink {
+  to { translate: 0 5vh; scale: 0.97; opacity: 0.4; }
+}
+
+/* 11c · Pick up (ui/handoff.ts): the carried photograph. */
+.handoff {
+  position: fixed;
+  z-index: 60;
+  overflow: hidden;
+  background: var(--sunken);
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+.handoff img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+
+/* 11d · Folded in (cart-drawer). The piece just added arrives folded along
+   a crease at its top edge and opens out as the bag slides in. */
+@media (prefers-reduced-motion: no-preference) {
+  .bag-line-new .bag-thumb {
+    transform-origin: 50% 0;
+    animation: kora-unfold 760ms cubic-bezier(0.2, 0.9, 0.25, 1.15) 320ms both;
+  }
+  .bag-line-new .bag-thumb::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to bottom, oklch(0 0 0 / 0.45), oklch(0 0 0 / 0) 70%);
+    animation: kora-crease 760ms ease-out 320ms both;
+    pointer-events: none;
+  }
+  .bag-line-new .bag-copy { animation: kora-settle-in 420ms var(--ease-out) 560ms both; }
+}
+@keyframes kora-unfold {
+  0%   { transform: perspective(500px) rotateX(-92deg); }
+  100% { transform: perspective(500px) rotateX(0deg); }
+}
+@keyframes kora-crease { from { opacity: 1; } to { opacity: 0; } }
+@keyframes kora-settle-in { from { opacity: 0; translate: 10px 0; } to { opacity: 1; translate: 0 0; } }

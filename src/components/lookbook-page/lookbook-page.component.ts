@@ -13,7 +13,7 @@ import { LookSpreadComponent } from '../look-spread/look-spread.component';
       <p class="type-label text-fg-3">Edition 01 · Autumn–Winter 2026</p>
       <h1 class="type-display-xl mt-3">Lookbook</h1>
       <p class="mt-6 type-body text-fg-2 measure">
-        Six looks from the season, each one shoppable. Tap a number on a photograph to see that piece.
+        Six looks from the season, each one shoppable. Tap a tag on any photograph to see that piece.
       </p>
     </div>
 

@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, signal } from '@angular/core';
 import { NgOptimizedImage, NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { InrPipe } from '../../ui/price.pipe';
@@ -6,15 +6,16 @@ import { Look, Product, primaryImage, productLink } from '../../ui/models';
 import { ParallaxDirective } from '../../ui/parallax.directive';
 import { thumb } from '../../ui/image';
 import { RevealDirective } from '../../ui/reveal.directive';
+import { WeaveDirective } from '../../ui/weave';
 
 /**
- * One lookbook frame: a large photograph with numbered markers on each piece,
+ * One lookbook frame: a large photograph with a small tag on each piece (a dot that opens into its name and price),
  * and a "Shop the look" list beside it. `flip` puts the text first, in both
  * the DOM and the layout, so reading order always matches visual order.
  */
 @Component({
   selector: 'app-look-spread',
-  imports: [NgOptimizedImage, NgTemplateOutlet, RouterLink, InrPipe, ParallaxDirective, RevealDirective],
+  imports: [NgOptimizedImage, NgTemplateOutlet, RouterLink, InrPipe, ParallaxDirective, RevealDirective, WeaveDirective],
   template: `
     <article class="grid items-end gap-8 md:grid-cols-12 md:gap-12" [attr.aria-labelledby]="headingId()">
       @if (flip()) {
@@ -28,16 +29,22 @@ import { RevealDirective } from '../../ui/reveal.directive';
 
     <ng-template #photo>
       <figure>
-        <div class="media" [style.aspect-ratio]="ratio()">
+        <div class="media" weave [style.aspect-ratio]="ratio()">
           <!-- Markers ride inside the parallax layer so they stay on the garment -->
           <div class="absolute inset-0" parallax="5">
             <img [ngSrc]="look().image.url" fill sizes="(min-width: 768px) 58vw, 100vw" [priority]="priority()" [alt]="look().image.alt" />
             @for (item of look().items; track item.product._id; let i = $index) {
-              <a [routerLink]="link(item.product)"
-                 class="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full"
+              <a [routerLink]="link(item.product)" class="look-tag"
+                 [class.is-active]="active() === i"
+                 [class.look-tag-left]="item.x > 60"
                  [style.left.%]="item.x" [style.top.%]="item.y"
-                 [attr.aria-label]="(i + 1) + '. ' + item.product.name + ', ' + (item.product.price | inr)">
-                <span class="grid size-7 place-items-center rounded-full bg-raised font-mono text-xs text-fg shadow-[0_0_0_1px_oklch(0_0_0/0.1),0_4px_12px_oklch(0_0_0/0.2)] transition-[scale] duration-150 ease-out hover:scale-110 motion-reduce:transition-none" aria-hidden="true">{{ i + 1 }}</span>
+                 (mouseenter)="active.set(i)" (mouseleave)="active.set(null)"
+                 (focus)="active.set(i)" (blur)="active.set(null)">
+                <span class="look-tag-dot" aria-hidden="true"></span>
+                <span class="look-tag-label">
+                  <span>{{ item.product.name }}</span>
+                  <span class="type-price opacity-70">{{ item.product.price | inr }}</span>
+                </span>
               </a>
             }
           </div>
@@ -54,11 +61,12 @@ import { RevealDirective } from '../../ui/reveal.directive';
       <p class="mt-4 type-body text-fg-2 measure" reveal [revealOrder]="2">{{ look().caption }}</p>
 
       <h3 class="type-label mt-10 text-fg-3">Shop the look</h3>
-      <ol class="mt-4 divide-y divide-line border-y border-line">
+      <ul class="mt-4 divide-y divide-line border-y border-line">
         @for (item of look().items; track item.product._id; let i = $index) {
           <li>
-            <a [routerLink]="link(item.product)" class="group grid grid-cols-[1.5rem_3.5rem_1fr_auto] items-center gap-4 py-3">
-              <span class="font-mono text-xs text-fg-3" aria-hidden="true">{{ i + 1 }}</span>
+            <a [routerLink]="link(item.product)" class="group grid grid-cols-[3.5rem_1fr_auto] items-center gap-4 py-3 transition-colors duration-150"
+               [class.text-accent]="active() === i"
+               (mouseenter)="active.set(i)" (mouseleave)="active.set(null)">
               <span class="media block aspect-[4/5]">
                 <img [ngSrc]="thumb(item.product)" width="56" height="70" alt="" />
               </span>
@@ -67,7 +75,7 @@ import { RevealDirective } from '../../ui/reveal.directive';
             </a>
           </li>
         }
-      </ol>
+      </ul>
     </ng-template>
   `,
 })
@@ -75,6 +83,8 @@ export class LookSpreadComponent {
   readonly look = input.required<Look>();
   readonly flip = input(false);
   readonly priority = input(false);
+  /** The piece being pointed at, in the photo or the list; lights up both. */
+  readonly active = signal<number | null>(null);
 
   readonly headingId = computed(() => `look-${this.look().slug}`);
   readonly ratio = computed(() => `${this.look().image.width} / ${this.look().image.height}`);
