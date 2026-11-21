@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>KŌRA</title>
+  <rect width="64" height="64" rx="14" fill="#14110e"/>
+  <g fill="#f4efe6">
+    <!-- Stem with hairline slab serifs -->
+    <rect x="18" y="14" width="7.5" height="36"/>
+    <rect x="13.5" y="14" width="16.5" height="1.8"/>
+    <rect x="13.5" y="48.2" width="16.5" height="1.8"/>
+    <!-- Hairline upper arm and its serif -->
+    <polygon points="25.5,34.6 43.6,15.8 46,15.8 25.5,37.3"/>
+    <rect x="38.5" y="14" width="12.5" height="1.8"/>
+    <!-- Heavy lower leg and its serif -->
+    <polygon points="28.6,32.6 34.4,26.6 50.2,48.2 42.2,48.2"/>
+    <rect x="38" y="48.2" width="14.5" height="1.8"/>
+  </g>
+</svg>
