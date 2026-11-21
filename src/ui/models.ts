@@ -94,7 +94,9 @@ export interface ProductPage {
 export const ONE_SIZE = 'One size';
 
 export function primaryImage(p: Product): ProductImage {
-  const img = p.images?.find(i => i.role === 'model') ?? p.images?.find(i => i.role === 'flat') ?? p.images?.[0];
+  // The first photo is the main one (set by order in the admin editor);
+  // lookbook shots never lead.
+  const img = p.images?.find(i => i.role !== 'look') ?? p.images?.[0];
   return img ?? { url: p.image ?? '', alt: p.name, role: 'model' };
 }
 

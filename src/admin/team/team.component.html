@@ -1,0 +1,222 @@
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="studio-h1">Team</h1>
+    <p class="mt-1 type-body-sm text-fg-3">Who can use Studio. Only owners see this page.</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <button type="button" class="btn btn-quiet min-h-10 px-4 text-sm" (click)="openInvite()">Invite by link</button>
+    <button type="button" class="btn btn-solid min-h-10 px-4 text-sm" (click)="openAdd()">Add a team member</button>
+  </div>
+</div>
+
+<!-- What each role can do -->
+<ul class="mt-5 grid gap-3 md:grid-cols-3" aria-label="Roles">
+  @for (r of roles; track r) {
+    <li class="studio-card p-4">
+      <p class="font-medium">{{ roleLabel[r] }}</p>
+      <p class="mt-1 type-body-sm text-fg-3">{{ roleHelp[r] }}</p>
+    </li>
+  }
+</ul>
+
+@if (error()) { <p class="mt-4 type-body-sm text-danger" role="alert">{{ error() }}</p> }
+
+@if (team(); as t) {
+  <!-- Members -->
+  <section class="studio-card mt-4" aria-labelledby="members-title">
+    <div class="studio-card-head pb-2"><h2 id="members-title" class="studio-card-title">Members · {{ t.members.length }}</h2></div>
+    <div class="studio-scroll">
+      <table class="studio-table">
+        <thead><tr><th>Person</th><th>Role</th><th>On the team since</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody>
+          @for (m of t.members; track m._id) {
+            <tr>
+              <td>
+                <span class="block font-medium">{{ cap(m.name) }}@if (isMe(m)) { <span class="ms-1 font-normal text-fg-3">(you)</span> }</span>
+                <span class="block text-fg-3">{{ m.email }}</span>
+              </td>
+              <td>
+                @if (isMe(m)) {
+                  <span class="studio-pill" data-tone="hero">{{ roleLabel[m.role] }}</span>
+                } @else {
+                  <label class="visually-hidden" [for]="'role-' + m._id">Role for {{ m.name }}</label>
+                  <select #sel [id]="'role-' + m._id" class="studio-input min-h-9 py-1" [value]="m.role" (change)="askRole(m, $any(sel.value), sel)">
+                    @for (r of roles; track r) { <option [value]="r" [selected]="m.role === r">{{ roleLabel[r] }}</option> }
+                  </select>
+                }
+              </td>
+              <td class="whitespace-nowrap text-fg-2">{{ m.since | date: 'd MMM y' }}</td>
+              <td class="text-end">
+                @if (!isMe(m)) {
+                  <button type="button" class="btn btn-quiet min-h-9 px-3 text-sm text-danger" (click)="askRemove(m)">Remove</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="mt-4 grid gap-4 xl:grid-cols-2">
+    <!-- Open invites -->
+    <section class="studio-card" aria-labelledby="invites-title">
+      <div class="studio-card-head"><h2 id="invites-title" class="studio-card-title">Open invites</h2></div>
+      <div class="p-4 md:p-5">
+        @if (t.invites.length) {
+          <ul class="flex flex-col divide-y divide-line">
+            @for (inv of t.invites; track inv._id) {
+              <li class="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0">
+                <span class="min-w-0">
+                  <span class="block type-body-sm font-medium">{{ roleLabel[inv.role] }}@if (inv.note) { · {{ inv.note }} }</span>
+                  <span class="block type-body-sm text-fg-3">By {{ cap(inv.createdBy) }} · expires in {{ hoursLeft(inv.expiresAt) }}</span>
+                </span>
+                <button type="button" class="type-body-sm link-underline" (click)="revoke(inv)">Cancel invite</button>
+              </li>
+            }
+          </ul>
+          <p class="mt-3 type-body-sm text-fg-3">For safety, a link is shown only once, when you create it. If it’s lost, cancel it and make a new one.</p>
+        } @else {
+          <p class="type-body-sm text-fg-3">No open invites.</p>
+        }
+      </div>
+    </section>
+
+    <!-- Activity -->
+    <section class="studio-card" aria-labelledby="activity-title">
+      <div class="studio-card-head"><h2 id="activity-title" class="studio-card-title">Access history</h2></div>
+      <div class="p-4 md:p-5">
+        @if (t.activity.length) {
+          <ol class="flex max-h-80 flex-col gap-3 overflow-y-auto" data-lenis-prevent>
+            @for (a of t.activity; track a._id) {
+              <li class="flex justify-between gap-4 type-body-sm">
+                <span>{{ activity(a) }}</span>
+                <span class="shrink-0 text-fg-3">{{ a.createdAt | date: 'd MMM, h:mm a' }}</span>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="type-body-sm text-fg-3">Nothing yet.</p>
+        }
+      </div>
+    </section>
+  </div>
+} @else if (!error()) {
+  <p class="mt-6 type-body-sm text-fg-3" role="status">Loading the team…</p>
+}
+
+<!-- Add an existing account -->
+<dialog #addDialog class="modal" aria-labelledby="add-title">
+  <form class="flex flex-col gap-4 p-6" (submit)="$event.preventDefault(); submitAdd(addPw.value)" novalidate>
+    <h2 id="add-title" class="type-h2">Add a team member</h2>
+    <p class="type-body-sm text-fg-2">They need a KŌRA account first. Don’t have one? Use <button type="button" class="link-underline" (click)="close(addDialog); openInvite()">Invite by link</button> instead.</p>
+    @if (formError(); as e) { <p class="type-body-sm text-danger" role="alert">{{ e }}</p> }
+
+    <div class="flex flex-col gap-1.5">
+      <label for="team-search" class="type-body-sm font-medium">Their account email</label>
+      <input id="team-search" type="search" class="studio-input" autocomplete="off" placeholder="Start typing an email" (input)="onSearch($any($event.target).value)" />
+    </div>
+    @if (results().length) {
+      <fieldset class="flex flex-col gap-1.5">
+        <legend class="visually-hidden">Matching accounts</legend>
+        @for (a of results(); track a._id) {
+          <label class="flex cursor-pointer items-center gap-3 rounded-[var(--radius-inset)] border p-2.5" [class.border-fg]="picked()?._id === a._id" [class.border-line]="picked()?._id !== a._id">
+            <input type="radio" name="pick" class="accent-[var(--fg)]" [checked]="picked()?._id === a._id" (change)="picked.set(a)" />
+            <span class="min-w-0"><span class="block type-body-sm font-medium">{{ cap(a.name) }}</span><span class="block truncate type-body-sm text-fg-3">{{ a.email }}</span></span>
+          </label>
+        }
+      </fieldset>
+    } @else if (searched()) {
+      <p class="type-body-sm text-fg-3">No customer account with that email. Team members already listed aren’t shown.</p>
+    }
+
+    <fieldset class="flex flex-col gap-1.5">
+      <legend class="type-body-sm font-medium">Role</legend>
+      <div class="flex flex-wrap gap-2">
+        @for (r of roles; track r) {
+          <label class="size-chip"><input type="radio" name="add-role" [checked]="addRole() === r" (change)="addRole.set(r)" /><span>{{ roleLabel[r] }}</span></label>
+        }
+      </div>
+      <p class="type-body-sm text-fg-3">{{ roleHelp[addRole()] }}</p>
+    </fieldset>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="add-pw" class="type-body-sm font-medium">Your password, to confirm</label>
+      <input #addPw id="add-pw" type="password" autocomplete="current-password" class="studio-input" />
+    </div>
+    <div class="flex justify-end gap-2">
+      <button type="button" class="btn btn-quiet" (click)="close(addDialog)">Cancel</button>
+      <button type="submit" class="btn btn-solid" [disabled]="busy()">{{ busy() ? 'Adding…' : 'Add to team' }}</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Invite by link -->
+<dialog #inviteDialog class="modal" aria-labelledby="inv-title">
+  @if (created(); as inv) {
+    <div class="flex flex-col gap-4 p-6">
+      <h2 id="inv-title" class="type-h2">Invite link ready</h2>
+      <p class="type-body-sm text-fg-2">Send this to the person you’re inviting. It works once, for 48 hours, and gives <strong>{{ roleLabel[inv.role] }}</strong> access. This is the only time it’s shown.</p>
+      <label for="inv-link" class="visually-hidden">Invite link</label>
+      <input id="inv-link" class="studio-input font-mono text-xs" readonly [value]="inv.link" (focus)="$any($event.target).select()" />
+      <div class="flex flex-wrap justify-end gap-2">
+        <a [href]="whatsapp(inv)" target="_blank" rel="noopener" class="btn btn-quiet">Send on WhatsApp</a>
+        <button type="button" class="btn btn-solid" (click)="copy(inv.link!)">Copy link</button>
+      </div>
+      <button type="button" class="self-start type-body-sm link-underline" (click)="close(inviteDialog)">Done</button>
+    </div>
+  } @else {
+    <form class="flex flex-col gap-4 p-6" (submit)="$event.preventDefault(); submitInvite(invPw.value)" novalidate>
+      <h2 id="inv-title" class="type-h2">Invite by link</h2>
+      <p class="type-body-sm text-fg-2">You’ll get a one-time link to send yourself. When they open it, they set up their account (or use one they have) and join with the role you choose.</p>
+      @if (formError(); as e) { <p class="type-body-sm text-danger" role="alert">{{ e }}</p> }
+      <fieldset class="flex flex-col gap-1.5">
+        <legend class="type-body-sm font-medium">Role</legend>
+        <div class="flex flex-wrap gap-2">
+          @for (r of roles; track r) {
+            <label class="size-chip"><input type="radio" name="inv-role" [checked]="inviteRole() === r" (change)="inviteRole.set(r)" /><span>{{ roleLabel[r] }}</span></label>
+          }
+        </div>
+        <p class="type-body-sm text-fg-3">{{ roleHelp[inviteRole()] }}</p>
+      </fieldset>
+      <div class="flex flex-col gap-1.5">
+        <label for="inv-note" class="type-body-sm font-medium">Who it’s for <span class="font-normal text-fg-3">(optional, only you see this)</span></label>
+        <input id="inv-note" class="studio-input" maxlength="120" placeholder="Priya, packing team" [value]="inviteNote()" (input)="inviteNote.set($any($event.target).value)" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label for="inv-pw" class="type-body-sm font-medium">Your password, to confirm</label>
+        <input #invPw id="inv-pw" type="password" autocomplete="current-password" class="studio-input" />
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" class="btn btn-quiet" (click)="close(inviteDialog)">Cancel</button>
+        <button type="submit" class="btn btn-solid" [disabled]="busy()">{{ busy() ? 'Creating…' : 'Create link' }}</button>
+      </div>
+    </form>
+  }
+</dialog>
+
+<!-- Confirm a role change or removal -->
+<dialog #confirmDialog class="modal" aria-labelledby="conf-title">
+  @if (pending(); as p) {
+    <form class="flex flex-col gap-4 p-6" (submit)="$event.preventDefault(); submitConfirm(confPw.value)" novalidate>
+      @if (p.kind === 'role') {
+        <h2 id="conf-title" class="type-h2">Make {{ cap(p.member.name) }} {{ roleLabel[p.role] }}?</h2>
+        <p class="type-body-sm text-fg-2">{{ roleHelp[p.role] }} It takes effect straight away.</p>
+      } @else {
+        <h2 id="conf-title" class="type-h2">Remove {{ cap(p.member.name) }} from the team?</h2>
+        <p class="type-body-sm text-fg-2">They lose Studio access straight away. Their shop account and orders stay.</p>
+      }
+      @if (formError(); as e) { <p class="type-body-sm text-danger" role="alert">{{ e }}</p> }
+      <div class="flex flex-col gap-1.5">
+        <label for="conf-pw" class="type-body-sm font-medium">Your password, to confirm</label>
+        <input #confPw id="conf-pw" type="password" autocomplete="current-password" class="studio-input" />
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" class="btn btn-quiet" (click)="close(confirmDialog)">Cancel</button>
+        <button type="submit" class="btn btn-solid" [class.!bg-danger]="p.kind === 'remove'" [class.!text-white]="p.kind === 'remove'" [disabled]="busy()">
+          {{ busy() ? 'Saving…' : p.kind === 'role' ? 'Change role' : 'Remove' }}
+        </button>
+      </div>
+    </form>
+  }
+</dialog>

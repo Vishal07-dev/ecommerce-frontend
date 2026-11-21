@@ -29,7 +29,7 @@
             <h1 class="type-display-xl mt-4 capitalize" splitLines>Hello, <em>{{ firstName() }}.</em></h1>
           </div>
           <div class="flex flex-wrap gap-3">
-            @if (m.role === 'admin') { <a routerLink="/admin" class="btn btn-quiet">Admin</a> }
+            @if (m.role === 'owner' || m.role === 'admin' || m.role === 'staff') { <a routerLink="/admin" class="btn btn-quiet">Open Studio</a> }
             <button type="button" class="btn btn-quiet" (click)="signOut()">Sign out</button>
           </div>
         </div>

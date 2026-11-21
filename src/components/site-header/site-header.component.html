@@ -46,7 +46,7 @@
       </button>
 
       @if (isAdmin()) {
-        <a routerLink="/admin" class="hidden min-h-11 items-center px-3 type-body-sm text-fg-2 hover:text-fg lg:inline-flex">Admin</a>
+        <a routerLink="/admin" class="hidden min-h-11 items-center px-3 type-body-sm text-fg-2 hover:text-fg lg:inline-flex">Studio</a>
       }
       @if (signedIn()) {
         <a routerLink="/profile" class="hidden min-h-11 items-center px-3 type-body-sm text-fg-2 hover:text-fg md:inline-flex">Account</a>
@@ -91,7 +91,7 @@
       <ul class="mt-10 flex flex-col gap-3 border-t border-line pt-6 type-body">
         @if (signedIn()) {
           <li><a routerLink="/profile" class="link-underline">Account</a></li>
-          @if (isAdmin()) { <li><a routerLink="/admin" class="link-underline">Admin</a></li> }
+          @if (isAdmin()) { <li><a routerLink="/admin" class="link-underline">Studio</a></li> }
           <li><button type="button" class="link-underline" (click)="signOut()">Sign out</button></li>
         } @else {
           <li><a routerLink="/login" class="link-underline">Sign in</a></li>

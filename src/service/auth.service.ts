@@ -47,7 +47,8 @@ export class AuthService {
             const returnUrl = this.cartService.takeReturnUrl();
             let accountReturn: string | null = null;
             try { accountReturn = sessionStorage.getItem('kora.account-return'); sessionStorage.removeItem('kora.account-return'); } catch { /* storage unavailable */ }
-            if (role === 'admin' && !accountReturn) {
+            // Team members land in Studio (unless they were heading somewhere specific).
+            if (['owner', 'admin', 'staff'].includes(role ?? '') && !accountReturn) {
               this.router.navigate(['/admin']);
             } else if (accountReturn) {
               this.router.navigateByUrl(accountReturn);

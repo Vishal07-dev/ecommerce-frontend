@@ -1,0 +1,271 @@
+<a routerLink="/admin/products" class="inline-flex min-h-10 items-center gap-1 type-body-sm text-fg-2 hover:text-fg">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6" /></svg>
+  Products
+</a>
+
+@switch (state()) {
+  @case ('loading') { <p class="mt-6 type-body-sm text-fg-3" role="status">Loading the product…</p> }
+  @case ('missing') {
+    <h1 class="studio-h1 mt-2">Product not found</h1>
+    <p class="mt-2 type-body text-fg-2">It may have been deleted. <a routerLink="/admin/products" class="link-underline">Back to products</a></p>
+  }
+  @case ('ready') {
+    @let p = d();
+    <h1 class="studio-h1 mt-2">{{ isNew ? 'New product' : (p.name || 'Untitled') }}</h1>
+
+    <form class="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]" (submit)="$event.preventDefault(); save()" novalidate>
+      <div class="flex min-w-0 flex-col gap-4">
+
+        <!-- Basics -->
+        <fieldset class="studio-card p-5">
+          <legend class="studio-card-title float-left mb-4 w-full">Basics</legend>
+          <div class="clear-both grid gap-4 sm:grid-cols-2">
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
+              <label for="pe-name" class="type-body-sm font-medium">Name</label>
+              <input id="pe-name" class="studio-input" [value]="p.name" (input)="set('name', $any($event.target).value)" placeholder="The Heavy Tee, Sage"
+                     [attr.aria-invalid]="bad('name') || null" [attr.aria-describedby]="bad('name') ? 'pe-err' : 'pe-name-hint'" />
+              <p id="pe-name-hint" class="type-body-sm text-fg-3">If the same piece comes in another colour, add the colour to the name.</p>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-subtitle" class="type-body-sm font-medium">Short line <span class="font-normal text-fg-3">(optional)</span></label>
+              <input id="pe-subtitle" class="studio-input" [value]="p.subtitle" (input)="set('subtitle', $any($event.target).value)" placeholder="Sage 260 gsm jersey" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-slug" class="type-body-sm font-medium">Web address</label>
+              <div class="flex items-center gap-1 rounded-[var(--radius-inset)] border border-line-strong bg-raised pe-1 ps-3 text-sm text-fg-3" [class.border-danger]="bad('slug')">
+                /product/<input id="pe-slug" class="min-w-0 flex-1 bg-transparent py-2 text-fg outline-none" [value]="p.slug"
+                                (input)="slugTouched.set(true); set('slug', $any($event.target).value)" [attr.aria-invalid]="bad('slug') || null" />
+              </div>
+            </div>
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
+              <label for="pe-description" class="type-body-sm font-medium">Description</label>
+              <textarea id="pe-description" rows="3" class="studio-input" [value]="p.description" (input)="set('description', $any($event.target).value)"
+                        [attr.aria-invalid]="bad('description') || null" placeholder="One or two sentences shoppers see first."></textarea>
+            </div>
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
+              <label for="pe-story" class="type-body-sm font-medium">The story <span class="font-normal text-fg-3">(optional, shown on the product page)</span></label>
+              <textarea id="pe-story" rows="3" class="studio-input" [value]="p.story" (input)="set('story', $any($event.target).value)"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Photos -->
+        <fieldset class="studio-card p-5" aria-describedby="pe-photos-hint">
+          <legend class="studio-card-title float-left mb-1 w-full">Photos</legend>
+          <div id="pe-photos-hint" class="clear-both flex flex-col gap-1 type-body-sm text-fg-3">
+            <p>The first photo is the main one everywhere: shop cards, the home page, the bag and checkout. Use the arrows to change the order.</p>
+            <p>The type tells the store how to show each photo: <strong class="font-medium text-fg-2">Close-up</strong> shows as a square on the product page, and <strong class="font-medium text-fg-2">Lookbook</strong> photos are kept out of the product gallery. JPG, PNG or WebP, up to 8 MB each.</p>
+          </div>
+          @if (p.images.length) {
+            <ol class="mt-4 grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+              @for (img of p.images; track img.url; let i = $index; let first = $first; let last = $last) {
+                <li class="flex gap-3 rounded-[var(--radius-inset)] border border-line p-2.5">
+                  <span class="studio-thumb !w-16 shrink-0"><img [src]="img.url" [alt]="img.alt" /></span>
+                  <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="type-body-sm font-medium">{{ first ? 'Main photo' : 'Photo ' + (i + 1) }}</span>
+                      <span class="flex">
+                        <button type="button" class="btn btn-icon size-8 min-h-8" [disabled]="first" (click)="moveImage(i, -1)" [attr.aria-label]="'Move photo ' + (i + 1) + ' earlier'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 6-6 6 6 6" /></svg></button>
+                        <button type="button" class="btn btn-icon size-8 min-h-8" [disabled]="last" (click)="moveImage(i, 1)" [attr.aria-label]="'Move photo ' + (i + 1) + ' later'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg></button>
+                        <button type="button" class="btn btn-icon size-8 min-h-8 text-danger" (click)="removeImage(i)" [attr.aria-label]="'Remove photo ' + (i + 1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+                      </span>
+                    </div>
+                    <label class="visually-hidden" [for]="'pe-role-' + i">Type of photo {{ i + 1 }}</label>
+                    <select [id]="'pe-role-' + i" class="studio-input min-h-8 py-0.5 text-xs" [value]="img.role" (change)="setImage(i, 'role', $any($event.target).value)">
+                      @for (r of roles; track r.id) { <option [value]="r.id" [selected]="img.role === r.id">{{ r.label }}</option> }
+                    </select>
+                    <label class="visually-hidden" [for]="'pe-alt-' + i">Description of photo {{ i + 1 }} for screen readers</label>
+                    <input [id]="'pe-alt-' + i" class="studio-input min-h-8 py-0.5 text-xs" [value]="img.alt" placeholder="Describe the photo" (input)="setImage(i, 'alt', $any($event.target).value)" />
+                  </div>
+                </li>
+              }
+            </ol>
+          }
+          <label class="mt-4 flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-[var(--radius-inset)] border border-dashed border-line-strong p-4 text-center hover:bg-sunken"
+                 [class.border-danger]="bad('images')">
+            <input id="pe-images" type="file" accept="image/jpeg,image/png,image/webp" multiple class="visually-hidden" (change)="onFiles($event)" />
+            <span class="type-body-sm font-medium">{{ uploading() ? 'Uploading ' + uploading() + '…' : 'Add photos' }}</span>
+            <span class="type-body-sm text-fg-3">Choose one or more files</span>
+          </label>
+        </fieldset>
+
+        <!-- Price -->
+        <fieldset class="studio-card p-5">
+          <legend class="studio-card-title float-left mb-4 w-full">Price</legend>
+          <div class="clear-both grid gap-4 sm:grid-cols-2">
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-price" class="type-body-sm font-medium">Price (₹, GST included)</label>
+              <input id="pe-price" type="number" min="1" step="1" inputmode="numeric" class="studio-input type-price" [value]="p.price ?? ''"
+                     (input)="set('price', num($any($event.target).value))" [attr.aria-invalid]="bad('price') || null" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-compareAtPrice" class="type-body-sm font-medium">“Was” price <span class="font-normal text-fg-3">(optional, shows a sale)</span></label>
+              <input id="pe-compareAtPrice" type="number" min="1" step="1" inputmode="numeric" class="studio-input type-price" [value]="p.compareAtPrice ?? ''"
+                     (input)="set('compareAtPrice', num($any($event.target).value))" [attr.aria-invalid]="bad('compareAtPrice') || null" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Sizes & stock -->
+        <fieldset class="studio-card p-5">
+          <legend class="studio-card-title float-left mb-1 w-full">Sizes and stock</legend>
+          <div class="clear-both flex flex-wrap items-center gap-2">
+            <span class="type-body-sm text-fg-3">Start from:</span>
+            @for (pr of presets; track pr.label) { <button type="button" class="btn btn-quiet min-h-8 px-3 text-xs" (click)="usePreset(pr.sizes)">{{ pr.label }}</button> }
+          </div>
+          @if (p.variants.length) {
+            <div class="studio-scroll mt-4">
+              <table class="studio-table">
+                <thead><tr><th>Size</th><th>SKU <span class="normal-case tracking-normal">(optional)</span></th><th class="num">In stock</th><th><span class="visually-hidden">Remove</span></th></tr></thead>
+                <tbody>
+                  @for (v of p.variants; track $index; let i = $index) {
+                    <tr>
+                      <td><label class="visually-hidden" [for]="'pe-size-' + i">Size</label><input [id]="'pe-size-' + i" class="studio-input w-24" [value]="v.size" (input)="setSize(i, 'size', $any($event.target).value)" /></td>
+                      <td><label class="visually-hidden" [for]="'pe-sku-' + i">SKU for size {{ v.size }}</label><input [id]="'pe-sku-' + i" class="studio-input w-32" [value]="v.sku ?? ''" (input)="setSize(i, 'sku', $any($event.target).value)" /></td>
+                      <td class="num"><label class="visually-hidden" [for]="'pe-stock-' + i">Stock for size {{ v.size }}</label><input [id]="'pe-stock-' + i" type="number" min="0" inputmode="numeric" class="studio-input w-24 text-end type-price" [value]="v.stock" (input)="setSize(i, 'stock', $any($event.target).value)" /></td>
+                      <td><button type="button" class="btn btn-icon size-8 min-h-8 text-danger" (click)="removeSize(i)" [attr.aria-label]="'Remove size ' + v.size"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <p class="mt-2 type-body-sm text-fg-3">Total in stock: <span class="type-price text-fg">{{ totalStock() }}</span></p>
+          } @else {
+            <p class="mt-3 type-body-sm text-fg-3">No sizes yet. Shoppers can’t choose a size until you add at least one.</p>
+          }
+          <button id="pe-variants" type="button" class="btn btn-quiet mt-3 min-h-9 px-3 text-sm" (click)="addSize()">Add a size</button>
+        </fieldset>
+
+        <!-- Details -->
+        <fieldset class="studio-card p-5">
+          <legend class="studio-card-title float-left mb-4 w-full">Details</legend>
+          <div class="clear-both grid gap-4 sm:grid-cols-2">
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-category" class="type-body-sm font-medium">Category</label>
+              <select id="pe-category" class="studio-input capitalize" [value]="p.category" (change)="set('category', $any($event.target).value)" [attr.aria-invalid]="bad('category') || null">
+                <option value="">Choose…</option>
+                @for (c of meta()?.categories ?? []; track c._id) { <option [value]="c._id" [selected]="p.category === c._id">{{ c.name }}</option> }
+              </select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-edition" class="type-body-sm font-medium">Edition <span class="font-normal text-fg-3">(optional)</span></label>
+              <select id="pe-edition" class="studio-input" [value]="p.edition" (change)="set('edition', $any($event.target).value)">
+                <option value="">None</option>
+                @for (e of meta()?.editions ?? []; track e._id) { <option [value]="e._id" [selected]="p.edition === e._id">{{ e.name }}</option> }
+              </select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-colour" class="type-body-sm font-medium">Colour name</label>
+              <input id="pe-colour" class="studio-input" [value]="p.colorway.name" (input)="setIn('colorway', 'name', $any($event.target).value)" placeholder="Sage" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-swatch" class="type-body-sm font-medium">Swatch colour</label>
+              <div class="flex items-center gap-2">
+                <input type="color" class="size-10 shrink-0 cursor-pointer rounded border border-line-strong bg-raised p-0.5" aria-label="Pick the swatch colour"
+                       [value]="p.colorway.swatch.startsWith('#') ? p.colorway.swatch : '#cccccc'" (input)="setIn('colorway', 'swatch', $any($event.target).value)" />
+                <input id="pe-swatch" class="studio-input min-w-0 flex-1" [value]="p.colorway.swatch" (input)="setIn('colorway', 'swatch', $any($event.target).value)" placeholder="#9caf88" />
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
+              <span class="type-body-sm font-medium" id="pe-fibre-label">Fabric</span>
+              <ul class="flex flex-col gap-2" aria-labelledby="pe-fibre-label">
+                @for (c of p.fabric.composition; track $index; let i = $index) {
+                  <li class="flex items-center gap-2">
+                    <label class="visually-hidden" [for]="'pe-pct-' + i">Percent</label>
+                    <input [id]="'pe-pct-' + i" type="number" min="0" max="100" class="studio-input w-20 text-end type-price" [value]="c.percent" (input)="setFiber(i, 'percent', $any($event.target).value)" />
+                    <span class="text-fg-3">%</span>
+                    <label class="visually-hidden" [for]="'pe-fiber-' + i">Fibre</label>
+                    <input [id]="'pe-fiber-' + i" class="studio-input min-w-0 flex-1" [value]="c.fiber" placeholder="Combed cotton" (input)="setFiber(i, 'fiber', $any($event.target).value)" />
+                    <button type="button" class="btn btn-icon size-8 min-h-8" (click)="removeFiber(i)" [attr.aria-label]="'Remove ' + (c.fiber || 'fibre')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+                  </li>
+                }
+              </ul>
+              <button type="button" class="btn btn-quiet min-h-8 self-start px-3 text-xs" (click)="addFiber()">Add a fibre</button>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-weave" class="type-body-sm font-medium">Weave or knit</label>
+              <input id="pe-weave" class="studio-input" [value]="p.fabric.weave" (input)="setIn('fabric', 'weave', $any($event.target).value)" placeholder="Single jersey" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-gsm" class="type-body-sm font-medium">Weight (gsm)</label>
+              <input id="pe-gsm" type="number" min="0" class="studio-input type-price" [value]="p.fabric.weightGsm ?? ''" (input)="setIn('fabric', 'weightGsm', num($any($event.target).value))" />
+            </div>
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
+              <label for="pe-origin" class="type-body-sm font-medium">Where it’s made</label>
+              <input id="pe-origin" class="studio-input" [value]="p.fabric.origin" (input)="setIn('fabric', 'origin', $any($event.target).value)" placeholder="Knitted in Tiruppur, India" />
+            </div>
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
+              <label for="pe-care" class="type-body-sm font-medium">Care <span class="font-normal text-fg-3">(one per line)</span></label>
+              <textarea id="pe-care" rows="3" class="studio-input" [value]="careText()" (input)="careText.set($any($event.target).value)" placeholder="Machine wash 30°C"></textarea>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="pe-cut" class="type-body-sm font-medium">Fit</label>
+              <select id="pe-cut" class="studio-input" [value]="p.fit.cut" (change)="setIn('fit', 'cut', $any($event.target).value)">
+                @for (c of ['slim', 'regular', 'relaxed', 'oversized']; track c) { <option [value]="c" [selected]="p.fit.cut === c" class="capitalize">{{ c.charAt(0).toUpperCase() + c.slice(1) }}</option> }
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="flex flex-col gap-1.5">
+                <label for="pe-height" class="type-body-sm font-medium">Model height (cm)</label>
+                <input id="pe-height" type="number" min="0" class="studio-input type-price" [value]="p.fit.modelHeightCm ?? ''" (input)="setIn('fit', 'modelHeightCm', num($any($event.target).value))" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label for="pe-wears" class="type-body-sm font-medium">Model wears</label>
+                <input id="pe-wears" class="studio-input" [value]="p.fit.modelWears" (input)="setIn('fit', 'modelWears', $any($event.target).value)" placeholder="M" />
+              </div>
+            </div>
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
+              <label for="pe-fitnotes" class="type-body-sm font-medium">Fit notes</label>
+              <input id="pe-fitnotes" class="studio-input" [value]="p.fit.notes" (input)="setIn('fit', 'notes', $any($event.target).value)" placeholder="True to size. Size down for a closer fit." />
+            </div>
+            <div class="flex flex-col gap-1.5 sm:col-span-2">
+              <label for="pe-tags" class="type-body-sm font-medium">Tags <span class="font-normal text-fg-3">(comma-separated)</span></label>
+              <input id="pe-tags" class="studio-input" [value]="tagText()" (input)="tagText.set($any($event.target).value)" placeholder="Everyday Cotton, Garment-dyed" />
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- Side: placement, preview, save -->
+      <aside class="flex flex-col gap-4 xl:sticky xl:top-20">
+        <fieldset class="studio-card p-5">
+          <legend class="studio-card-title float-left mb-3 w-full">Where it shows</legend>
+          <div class="clear-both flex flex-col gap-2">
+            @for (pl of placements; track pl) {
+              <label class="flex cursor-pointer gap-3 rounded-[var(--radius-inset)] border p-3"
+                     [class.border-fg]="p.placement === pl" [class.border-line]="p.placement !== pl">
+                <input type="radio" name="placement" class="mt-1 accent-[var(--fg)]" [value]="pl" [checked]="p.placement === pl" (change)="set('placement', pl)" />
+                <span>
+                  <span class="block type-body-sm font-medium">{{ placementLabel[pl] }}</span>
+                  <span class="block type-body-sm text-fg-3">{{ placementHelp[pl] }}</span>
+                </span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <div class="studio-card p-5">
+          <p class="studio-card-title">Preview</p>
+          <div class="mt-3 overflow-hidden rounded-[var(--radius-inset)] bg-sunken" style="aspect-ratio: 4/5">
+            @if (preview()) { <img [src]="preview()" alt="" class="size-full object-cover" /> }
+            @else { <span class="grid size-full place-items-center type-body-sm text-fg-3">No photo yet</span> }
+          </div>
+          <div class="mt-3 flex items-baseline justify-between gap-3">
+            <p class="truncate type-body-sm font-medium">{{ p.name || 'Product name' }}</p>
+            <p class="type-price type-body-sm">{{ price() }}</p>
+          </div>
+          @if (p.subtitle || p.colorway.name) { <p class="type-body-sm text-fg-3">{{ p.subtitle || p.colorway.name }}</p> }
+        </div>
+
+        <div class="flex flex-col gap-2">
+          @if (error(); as e) { <p id="pe-err" class="type-body-sm text-danger" role="alert">{{ e.message }}</p> }
+          <button type="submit" class="btn btn-solid w-full" [disabled]="saving() || uploading() > 0" [attr.aria-busy]="saving()">
+            {{ saving() ? 'Saving…' : uploading() ? 'Waiting for photos…' : isNew ? 'Create product' : 'Save changes' }}
+          </button>
+          @if (!isNew && p.slug) { <a [href]="'/product/' + p.slug" target="_blank" rel="noopener" class="btn btn-quiet w-full">View in the store</a> }
+        </div>
+      </aside>
+    </form>
+  }
+}

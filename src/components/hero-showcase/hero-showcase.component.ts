@@ -29,7 +29,7 @@ export class HeroShowcaseComponent {
 
   readonly figure = computed(() => {
     const imgs = this.product().images ?? [];
-    return imgs.find(i => i.role === 'model') ?? imgs.find(i => i.role === 'front') ?? imgs[0];
+    return imgs.find(i => i.role !== 'look') ?? imgs[0]; // the product's main (first) photo
   });
   readonly ratio = computed(() => {
     const f = this.figure();

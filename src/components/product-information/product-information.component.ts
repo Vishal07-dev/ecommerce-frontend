@@ -124,7 +124,7 @@ export class ProductInformationComponent {
 
   private loadRelated(product: Product): void {
     const edition = product.edition?.slug;
-    this.catalog.products({ edition, exclude: product._id, limit: 4, featured: true }).subscribe({
+    this.catalog.products({ edition, exclude: product._id, limit: 4 }).subscribe({
       next: res => this.related.set(res.products.slice(0, 4)),
       error: () => this.related.set([]),
     });

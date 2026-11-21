@@ -178,6 +178,12 @@ These replaced the old numbered markers.
 - Saving pops the heart (`heart-pop`, 420ms, slight overshoot; off under reduced motion).
 - Page: "Kept for later." with set type, a summary bar (count, total, sold-out count, sort), the shop's product cards (sizes add straight to the bag), Remove under each card with an Undo.
 
+### 4.15 KŌRA Studio (admin, `/admin`)
+- Same tokens and type as the store, set denser (`src/admin/studio.css`). Screens: Overview (KPIs, revenue/orders charts, status mix, best sellers, latest orders, home-page placement, low stock), Orders, Products + editor, Customers, Categories, Team. Live: notifications poll every 30 s (`AdminLiveService`), new orders toast.
+- Charts follow the dataviz method: single-series area/columns in `--series-1`, validated categorical palette for order status (legend + counts, table view), hover + arrow-key tooltips, "Show data" tables.
+- Product placement: **Home hero** (one only) / **Featured** ("The Edit") / **Shop only** / **Archived**. The first photo is the main photo everywhere.
+- Roles: **Owner** (everything + Team), **Admin** (catalogue, customers, orders), **Staff** (overview + orders). The server reads the role from the database on every Studio request, so removing access is immediate. Team changes need the owner's password and are logged; invite links are single-use, 48 h, stored as a hash. Public accept page: `/join/:token`.
+
 ## 5. Rules for adding new motion
 
 - Use the existing tools first: `weave` for editorial photos, `reveal` for text entrances, `parallax` for image depth, `.sheet`/`.modal` dialogs for overlays. Don't add `weave` to grids of product cards: it is for editorial moments.

@@ -1,144 +1,107 @@
-<div class="admin-shell flex h-screen bg-gray-100">
-      <!-- Small screens: tap outside the drawer to close it -->
-      @if (isSidebarOpen()) {
-        <button type="button" class="fixed inset-0 z-30 bg-black/40 lg:hidden" aria-label="Close menu" (click)="isSidebarOpen.set(false)"></button>
+<div class="studio">
+  @if (isSidebarOpen()) {
+    <button type="button" class="studio-scrim lg:hidden" aria-label="Close menu" (click)="isSidebarOpen.set(false)"></button>
+  }
+
+  <!-- Sidebar -->
+  <aside id="studio-nav" class="studio-side" [class.is-open]="isSidebarOpen()" aria-label="Studio">
+    <a routerLink="/admin/dashboard" class="studio-brand">
+      <span class="font-display text-2xl tracking-[0.14em]">KŌRA</span>
+      <span class="type-label text-fg-3">Studio</span>
+    </a>
+    @if (roleLabel) { <p class="-mt-3 mb-4 px-5 type-body-sm text-fg-3">Signed in as <span class="font-medium text-fg-2">{{ roleLabel }}</span></p> }
+
+    <nav class="studio-nav" aria-label="Admin sections">
+      @for (item of nav; track item.link) {
+        <a [routerLink]="item.link" routerLinkActive="is-current" [routerLinkActiveOptions]="{ exact: false }"
+           class="studio-nav-link" ariaCurrentWhenActive="page">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path [attr.d]="item.icon" /></svg>
+          {{ item.label }}
+        </a>
       }
-      <!-- Sidebar: a drawer below 1024px, fixed column above -->
-      <div id="admin-sidebar" class="admin-sidebar fixed inset-y-0 start-0 z-40 flex-shrink-0 lg:static" [class.is-open]="isSidebarOpen()"
-           (click)="closeOnNavigate($event)">
-        <div class="flex flex-col w-64 min-h-screen bg-white shadow-sm">
-          <!-- Logo -->
-          <div class="flex items-center h-16 px-6 bg-gray-900">
-            <a routerLink="/" class="text-xl font-bold tracking-[0.12em] text-white">KŌRA <span class="text-sm font-normal tracking-normal opacity-70">Admin</span></a>
-          </div>
-          
-          <!-- Navigation -->
-          <nav class="mt-6 flex-1  h-1">
-            <div class="px-3">
-              <a 
-                routerLink="/admin/dashboard"
-                routerLinkActive="bg-blue-50 text-blue-700 border-blue-700"
-                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 transition-colors border-l-4 border-transparent"
-              >
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                </svg>
-                Dashboard
-              </a>
-              
-              <a 
-                routerLink="/admin/products"
-                routerLinkActive="bg-blue-50 text-blue-700 border-blue-700"
-                class="flex items-center px-3 py-2 mt-1 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 transition-colors border-l-4 border-transparent"
-              >
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                </svg>
-                Products
-              </a>
-              <a 
-                routerLink="/admin/category"
-                routerLinkActive="bg-blue-50 text-blue-700 border-blue-700"
-                class="flex items-center px-3 py-2 mt-1 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 transition-colors border-l-4 border-transparent"
-              >
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                </svg>
-                category
-              </a>
-              
-              <a 
-                routerLink="/admin/orders"
-                routerLinkActive="bg-blue-50 text-blue-700 border-blue-700"
-                class="flex items-center px-3 py-2 mt-1 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 transition-colors border-l-4 border-transparent"
-              >
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-                Orders
-              </a>
-              
-              <a 
-                routerLink="/admin/customers"
-                routerLinkActive="bg-blue-50 text-blue-700 border-blue-700"
-                class="flex items-center px-3 py-2 mt-1 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 transition-colors border-l-4 border-transparent"
-              >
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                </svg>
-                Customers
-              </a>
-              
-              <a 
-                routerLink="/admin/analytics"
-                routerLinkActive="bg-blue-50 text-blue-700 border-blue-700"
-                class="flex items-center px-3 py-2 mt-1 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 transition-colors border-l-4 border-transparent"
-              >
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                </svg>
-                Analytics
-              </a>
-              
-              <a 
-                routerLink="/admin/settings"
-                routerLinkActive="bg-blue-50 text-blue-700 border-blue-700"
-                class="flex items-center px-3 py-2 mt-1 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 transition-colors border-l-4 border-transparent"
-              >
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                Settings
-              </a>
-            </div>
-          </nav>
-        </div>
-      </div>
-      
-      <!-- Main Content -->
-      <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-200">
-          <div class="flex items-center justify-between h-16 px-4 lg:px-6">
-            <div class="flex items-center">
-              <button type="button" class="grid size-11 place-items-center -ms-2 text-gray-500 hover:text-gray-600 lg:hidden"
-                      aria-label="Menu" aria-controls="admin-sidebar" [attr.aria-expanded]="isSidebarOpen()" (click)="isSidebarOpen.set(!isSidebarOpen())">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-              </button>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-              <!-- Notifications -->
-              <button class="text-gray-500 hover:text-gray-600 relative">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                </svg>
-                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-              </button>
-              
-              <!-- Profile -->
-              <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span class="text-white text-sm font-medium">AD</span>
-                </div>
-                <span class="hidden text-sm font-medium text-gray-700 sm:inline">Admin User</span>
-              </div>
+    </nav>
 
-              <div class="flex items-center space-x-3">
-               <button (click)="auth.logout()" class="px-4 py-2 bg-red-600 text-white rounded-md shadow-sm text-sm font-medium hover:bg-blue-700">
-Log Out         </button>
-              </div>
-
-            </div>
-          </div>
-        </header>
-        
-        <!-- Page Content -->
-        <main class="flex-1 overflow-auto bg-gray-50 p-4 lg:p-6">
-          <router-outlet></router-outlet>
-        </main>
-      </div>
+    <div class="studio-side-foot">
+      <a routerLink="/" class="studio-nav-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
+        View the store
+      </a>
+      <button type="button" class="studio-nav-link" (click)="theme.toggleTheme()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" /></svg>
+        {{ theme.isDark() ? 'Light theme' : 'Dark theme' }}
+      </button>
+      <button type="button" class="studio-nav-link" (click)="auth.logout()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l4-4-4-4M14 12H4" /></svg>
+        Sign out
+      </button>
     </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="studio-main">
+    <header class="studio-top">
+      <button type="button" class="btn btn-icon -ms-2 lg:hidden" aria-label="Menu" aria-controls="studio-nav"
+              [attr.aria-expanded]="isSidebarOpen()" (click)="isSidebarOpen.set(!isSidebarOpen())">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+      </button>
+      <p class="min-w-0 flex-1 truncate font-medium">{{ title() }}</p>
+
+      <!-- Live sync status -->
+      <button type="button" class="studio-live" (click)="live.refresh()" [title]="'Refresh now'"
+              [attr.aria-label]="live.offline() ? 'Offline. Refresh now' : 'Live, synced at ' + syncLabel() + '. Refresh now'">
+        <span class="studio-live-dot" [class.is-off]="live.offline()" aria-hidden="true"></span>
+        <span class="hidden sm:inline">{{ live.offline() ? 'Offline' : 'Live · ' + syncLabel() }}</span>
+      </button>
+
+      <!-- Notifications -->
+      <div #bellWrap class="relative">
+        <button type="button" class="btn btn-icon relative" (click)="toggleBell()" aria-haspopup="true"
+                [attr.aria-expanded]="bellOpen()" aria-controls="studio-bell"
+                [attr.aria-label]="live.unread() ? 'Notifications, ' + live.unread() + ' unread' : 'Notifications'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Zm4 4a2 2 0 0 0 4 0" /></svg>
+          @if (live.unread()) { <span class="studio-badge type-price" aria-hidden="true">{{ live.unread() > 9 ? '9+' : live.unread() }}</span> }
+        </button>
+
+        @if (bellOpen()) {
+          <div id="studio-bell" class="studio-pop" role="region" aria-label="Notifications">
+            <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+              <p class="font-medium">Notifications</p>
+              @if (live.unread()) {
+                <button type="button" class="type-body-sm link-underline" (click)="live.markAllRead()">Mark all as read</button>
+              }
+            </div>
+            @if (live.items().length) {
+              <ul class="max-h-[min(28rem,70vh)] overflow-y-auto" data-lenis-prevent>
+                @for (n of live.items(); track n.id) {
+                  <li>
+                    <button type="button" class="studio-note" [class.is-unread]="live.isUnread(n)" (click)="openNotification(n)">
+                      <span class="studio-note-icon" [attr.data-kind]="n.kind" aria-hidden="true">
+                        @switch (n.kind) {
+                          @case ('order') { <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Zm3 0V6a3 3 0 0 1 6 0v1" /></svg> }
+                          @case ('customer') { <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 19v-1a5 5 0 0 0-12 0v1m6-8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg> }
+                          @default { <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 3.5v.01M10.3 4.3 2.8 17.5A2 2 0 0 0 4.5 20.5h15a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z" /></svg> }
+                        }
+                      </span>
+                      <span class="min-w-0 flex-1 text-start">
+                        <span class="block truncate type-body-sm font-medium">{{ n.title }}</span>
+                        <span class="block truncate type-body-sm text-fg-3">{{ n.detail }}</span>
+                      </span>
+                      <span class="shrink-0 type-body-sm text-fg-3">{{ relative(n.at) }}</span>
+                      @if (live.isUnread(n)) { <span class="visually-hidden">Unread</span> }
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="px-4 py-8 text-center type-body-sm text-fg-3">Nothing new in the last two weeks.</p>
+            }
+          </div>
+        }
+      </div>
+    </header>
+
+    <main class="studio-page" id="studio-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

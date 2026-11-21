@@ -1,177 +1,104 @@
-import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AdminService, CustomerPage, adminError } from '../admin.service';
+import { AdminLiveService } from '../live.service';
+import { formatValue } from '../charts';
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  totalOrders: number;
-  totalSpent: number;
-  status: 'active' | 'inactive';
-  joinDate: string;
-  lastOrder: string;
-}
+/** Customers: every account with what they've bought. Read-only by design. */
 @Component({
   selector: 'app-customer',
-  imports: [CommonModule, FormsModule],
-  templateUrl: './customer.component.html',
-  styleUrl: './customer.component.css'
+  imports: [DatePipe, RouterLink],
+  template: `
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+
+        <h1 class="studio-h1">Customers</h1>
+        @if (page(); as p) { <p class="mt-1 type-body-sm text-fg-3">{{ p.total }} {{ p.total === 1 ? 'account' : 'accounts' }}</p> }
+      </div>
+      <form class="flex w-full gap-2 sm:w-auto" role="search" (submit)="$event.preventDefault(); search(q.value)">
+        <label for="cust-q" class="visually-hidden">Search customers</label>
+        <input #q id="cust-q" type="search" class="studio-input w-full sm:w-72" placeholder="Name or email" [value]="query()" />
+        <button type="submit" class="btn btn-quiet min-h-10 px-4 text-sm">Search</button>
+      </form>
+    </div>
+
+    @if (error()) { <p class="mt-4 type-body-sm text-danger" role="alert">{{ error() }}</p> }
+
+    <div class="studio-card mt-5">
+      @if (page(); as p) {
+        @if (p.customers.length) {
+          <div class="studio-scroll">
+            <table class="studio-table">
+              <thead><tr><th>Customer</th><th>City</th><th>Joined</th><th class="num">Orders</th><th class="num">Spent</th><th>Last order</th></tr></thead>
+              <tbody>
+                @for (c of p.customers; track c._id) {
+                  <tr>
+                    <td>
+                      <div class="flex items-center gap-3">
+                        <span class="grid size-9 shrink-0 place-items-center rounded-full bg-sunken text-xs font-medium uppercase text-fg-2" aria-hidden="true">{{ initials(c.name) }}</span>
+                        <span class="min-w-0">
+                          <span class="block truncate font-medium capitalize">{{ c.name }}</span>
+                          <span class="block truncate text-fg-3">{{ c.email }}@if (c.phone) { · {{ c.phone }} }</span>
+                        </span>
+                      </div>
+                    </td>
+                    <td class="text-fg-2">{{ c.city ?? '—' }}</td>
+                    <td class="whitespace-nowrap text-fg-2">{{ c.createdAt | date: 'd MMM y' }}</td>
+                    <td class="num">{{ c.orders }}</td>
+                    <td class="num font-medium">{{ inr(c.spent) }}</td>
+                    <td class="whitespace-nowrap">
+                      @if (c.lastOrder) { <a routerLink="/admin/orders" [queryParams]="{ q: c.email }" class="link-underline">{{ c.lastOrder | date: 'd MMM y' }}</a> }
+                      @else { <span class="text-fg-3">No orders yet</span> }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (p.pages > 1) {
+            <nav class="flex items-center justify-between gap-3 border-t border-line px-4 py-3 type-body-sm" aria-label="Pages">
+              <button type="button" class="btn btn-quiet min-h-9 px-3 text-sm" [disabled]="p.page <= 1" (click)="go(p.page - 1)">Previous</button>
+              <span class="text-fg-3">Page {{ p.page }} of {{ p.pages }}</span>
+              <button type="button" class="btn btn-quiet min-h-9 px-3 text-sm" [disabled]="p.page >= p.pages" (click)="go(p.page + 1)">Next</button>
+            </nav>
+          }
+        } @else {
+          <p class="p-8 text-center type-body-sm text-fg-3">@if (query()) { No customers match “{{ query() }}”. } @else { No customer accounts yet. }</p>
+        }
+      } @else {
+        <p class="p-8 text-center type-body-sm text-fg-3" role="status">Loading customers…</p>
+      }
+    </div>
+  `,
 })
 export class CustomerComponent {
- searchTerm = '';
-  selectedStatus = '';
-  sortBy = 'name';
+  private admin = inject(AdminService);
+  private live = inject(AdminLiveService);
+  private router = inject(Router);
+  private params = toSignal(inject(ActivatedRoute).queryParamMap, { requireSync: true });
 
-  customers: Customer[] = [
-    {
-      id: 'CUST-001',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '+1 (555) 123-4567',
-      address: '123 Main St, Anytown, ST 12345',
-      totalOrders: 12,
-      totalSpent: 1548.99,
-      status: 'active',
-      joinDate: '2023-03-15',
-      lastOrder: '2024-01-15'
-    },
-    {
-      id: 'CUST-002',
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      phone: '+1 (555) 234-5678',
-      address: '456 Oak Ave, Another City, ST 67890',
-      totalOrders: 8,
-      totalSpent: 967.45,
-      status: 'active',
-      joinDate: '2023-05-22',
-      lastOrder: '2024-01-14'
-    },
-    {
-      id: 'CUST-003',
-      name: 'Mike Johnson',
-      email: 'mike.johnson@example.com',
-      phone: '+1 (555) 345-6789',
-      address: '789 Pine St, Third Town, ST 11111',
-      totalOrders: 15,
-      totalSpent: 2134.67,
-      status: 'active',
-      joinDate: '2023-01-10',
-      lastOrder: '2024-01-13'
-    },
-    {
-      id: 'CUST-004',
-      name: 'Sarah Wilson',
-      email: 'sarah.wilson@example.com',
-      phone: '+1 (555) 456-7890',
-      address: '321 Elm St, Fourth City, ST 22222',
-      totalOrders: 3,
-      totalSpent: 245.88,
-      status: 'inactive',
-      joinDate: '2023-11-05',
-      lastOrder: '2023-12-20'
-    },
-    {
-      id: 'CUST-005',
-      name: 'David Brown',
-      email: 'david.brown@example.com',
-      phone: '+1 (555) 567-8901',
-      address: '654 Maple Dr, Fifth Town, ST 33333',
-      totalOrders: 7,
-      totalSpent: 892.34,
-      status: 'active',
-      joinDate: '2023-08-18',
-      lastOrder: '2024-01-10'
-    },
-    {
-      id: 'CUST-006',
-      name: 'Lisa Garcia',
-      email: 'lisa.garcia@example.com',
-      phone: '+1 (555) 678-9012',
-      address: '987 Cedar Ln, Sixth City, ST 44444',
-      totalOrders: 20,
-      totalSpent: 3456.78,
-      status: 'active',
-      joinDate: '2022-12-03',
-      lastOrder: '2024-01-16'
-    }
-  ];
+  readonly page = signal<CustomerPage | null>(null);
+  readonly error = signal<string | null>(null);
+  readonly query = computed(() => this.params().get('q') ?? '');
+  readonly pageNo = computed(() => Number(this.params().get('page')) || 1);
 
-  filteredCustomers = signal<Customer[]>([]);
-
-  ngOnInit() {
-    this.updateFilteredCustomers();
-  }
-
-  updateFilteredCustomers() {
-    let filtered = [...this.customers];
-
-    // Apply search filter
-    if (this.searchTerm) {
-      filtered = filtered.filter(customer => 
-        customer.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        customer.email.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply status filter
-    if (this.selectedStatus) {
-      filtered = filtered.filter(customer => customer.status === this.selectedStatus);
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (this.sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'totalSpent':
-          return b.totalSpent - a.totalSpent;
-        case 'totalOrders':
-          return b.totalOrders - a.totalOrders;
-        case 'joinDate':
-          return new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime();
-        default:
-          return 0;
-      }
-    });
-
-    this.filteredCustomers.set(filtered);
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+  constructor() {
+    inject(Title).setTitle('Customers — KŌRA Studio');
+    effect(() => {
+      const q = { q: this.query(), page: this.pageNo() };
+      this.live.tick();
+      untracked(() => this.admin.customers(q).subscribe({
+        next: p => { this.page.set(p); this.error.set(null); },
+        error: e => this.error.set(adminError(e, 'Couldn’t load customers.').message),
+      }));
     });
   }
 
-  getInitials(name: string): string {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  }
-
-  viewCustomer(customer: Customer) {
-    console.log('Viewing customer:', customer);
-    // Implement customer detail view
-  }
-
-  editCustomer(customer: Customer) {
-    console.log('Editing customer:', customer);
-    // Implement customer edit functionality
-  }
-
-  deleteCustomer(customer: Customer) {
-    if (confirm(`Are you sure you want to delete ${customer.name}?`)) {
-      const index = this.customers.findIndex(c => c.id === customer.id);
-      if (index !== -1) {
-        this.customers.splice(index, 1);
-        this.updateFilteredCustomers();
-      }
-    }
-  }
+  search(q: string): void { this.router.navigate([], { queryParams: { q: q.trim() || null, page: null }, queryParamsHandling: 'merge' }); }
+  go(n: number): void { this.router.navigate([], { queryParams: { page: n > 1 ? n : null }, queryParamsHandling: 'merge' }); }
+  initials(name: string): string { return name.split(/\s+/).map(w => w[0]).slice(0, 2).join(''); }
+  inr(v: number): string { return formatValue(v, 'inr'); }
 }
-

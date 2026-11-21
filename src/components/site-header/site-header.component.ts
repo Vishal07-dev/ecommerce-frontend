@@ -43,7 +43,8 @@ export class SiteHeaderComponent {
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => this.menuOpen.set(false));
   }
 
-  isAdmin(): boolean { return this.signedIn() && this.auth.getUserRole() === 'admin'; }
+  /** Any team member (owner, admin, staff) gets a link to Studio. */
+  isAdmin(): boolean { return this.signedIn() && ['owner', 'admin', 'staff'].includes(this.auth.getUserRole() ?? ''); }
 
   onMenuCancel(event: Event): void { event.preventDefault(); this.menuOpen.set(false); }
   onMenuClick(event: MouseEvent): void {

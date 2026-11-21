@@ -20,7 +20,7 @@ export interface Account {
   name: string;
   email: string;
   phone: string;
-  role: 'admin' | 'user';
+  role: 'owner' | 'admin' | 'staff' | 'user';
   createdAt: string;
   addresses: Address[];
 }

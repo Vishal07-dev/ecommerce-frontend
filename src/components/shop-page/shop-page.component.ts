@@ -68,12 +68,15 @@ export class ShopPageComponent {
       (!f.edition || p.edition?.slug === f.edition) &&
       (!f.category || p.category?.name === f.category) &&
       (!f.size || sizesOf(p).some(v => v.size === f.size && v.stock > 0)));
+    // `all` arrives newest first from the API.
     switch (f.sort) {
-      case 'price-asc': list = [...list].sort((a, b) => a.price - b.price); break;
-      case 'price-desc': list = [...list].sort((a, b) => b.price - a.price); break;
-      case 'newest': list = [...list].reverse(); break;
+      case 'price-asc': return [...list].sort((a, b) => a.price - b.price);
+      case 'price-desc': return [...list].sort((a, b) => b.price - a.price);
+      case 'newest': return list;
+      // Featured: the home hero, then featured pieces in their set order, then
+      // everything else (shop-only pieces), newest first. Sort is stable.
+      default: return [...list].sort((a, b) => featuredRank(a) - featuredRank(b));
     }
-    return list;
   });
 
   readonly hasFilters = computed(() => !!(this.params().category || this.params().size));
@@ -84,7 +87,8 @@ export class ShopPageComponent {
   });
 
   constructor() {
-    this.catalog.products({ featured: true, limit: 100 }).subscribe({
+    // Every live piece: featured and shop-only alike (archived ones are excluded by the API).
+    this.catalog.products({ limit: 200 }).subscribe({
       next: res => { this.all.set(res.products); this.state.set('ready'); },
       error: () => this.state.set('error'),
     });
@@ -138,4 +142,11 @@ function readDensity(): Density {
     if (v === 2 || v === 3 || v === 4) return v;
   } catch { /* storage unavailable */ }
   return 4;
+}
+
+/** Hero first, then featured by its order, then everything else. */
+function featuredRank(p: Product): number {
+  const f = (p as Product & { featured?: { hero?: boolean; order?: number } }).featured;
+  if (f?.hero) return -1;
+  return f?.order != null ? f.order : Number.MAX_SAFE_INTEGER;
 }

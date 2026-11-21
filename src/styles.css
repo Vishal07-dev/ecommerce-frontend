@@ -942,20 +942,6 @@ dialog.sheet.sheet-curtain.is-open { translate: 0 0; }
 }
 @keyframes heart-pop { 0% { scale: 0.6; } 60% { scale: 1.18; } 100% { scale: 1; } }
 
-/* 12j · Admin panel on small screens: drawer sidebar, scrollable tables,
-   comfortable tap targets in table rows. */
-.admin-sidebar { translate: -100% 0; transition: translate 300ms var(--ease-out); }
-.admin-sidebar.is-open { translate: 0 0; }
-@media (min-width: 1024px) { .admin-sidebar { translate: none; transition: none; } }
-@media (prefers-reduced-motion: reduce) { .admin-sidebar { transition: none; } }
-@media (max-width: 1023px) {
-  .admin-shell main table { display: block; overflow-x: auto; white-space: nowrap; }
-}
-.admin-shell td button, .admin-shell td a { min-block-size: 2rem; padding-inline: 0.375rem; }
-
-/* Tailwind's font-display class (used in a few templates) gets the same optical size. */
-.font-display { font-variation-settings: "opsz" var(--display-opsz); }
-
 /* 12k · Ask KŌRA (chatbot). A raised panel above the launcher on larger
    screens; a full-screen sheet on phones. */
 .chat-dock { position: fixed; z-index: 45; inset-block-end: 6rem; inset-inline-end: 1rem; }
@@ -1031,3 +1017,4 @@ dialog.sheet.sheet-curtain.is-open { translate: 0 0; }
 .chat-send:not(:disabled):active { scale: 0.94; }
 /* On phones the open chat covers the screen and has its own close button. */
 @media (max-width: 639px) { .chat-panel ~ .chat-launcher { display: none; } }
+
