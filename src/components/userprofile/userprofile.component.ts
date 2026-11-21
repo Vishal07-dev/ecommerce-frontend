@@ -130,6 +130,7 @@ export class UserprofileComponent {
 
   signOut(): void { this.auth.logout(); }
 
+  /** Same short reference the server, receipt and Studio use (# + last 8). */
   orderRef(id: string): string { return id.slice(-8).toUpperCase(); }
   itemCount(o: AccountOrder): number { return o.items.reduce((n, i) => n + (i.quantity ?? 1), 0); }
 

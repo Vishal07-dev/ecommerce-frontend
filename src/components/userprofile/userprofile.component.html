@@ -76,7 +76,7 @@
                       <li class="acct-order">
                         <div class="flex flex-wrap items-start justify-between gap-4">
                           <div>
-                            <p class="type-label text-fg-3">Order {{ orderRef(o._id) }}</p>
+                            <p class="type-label text-fg-3">Order #{{ o.ref }}</p>
                             <p class="mt-1 type-h3">{{ o.createdAt | date: 'd MMMM y' }}</p>
                           </div>
                           <span class="acct-status" [attr.data-status]="o.status">{{ statusLabel[o.status] }}</span>
@@ -94,15 +94,19 @@
                                 } @else {
                                   <p class="type-body-sm font-medium">{{ it.name }}</p>
                                 }
-                                <p class="type-body-sm text-fg-3">Qty {{ it.quantity }}</p>
+                                <p class="type-body-sm text-fg-3">@if (it.size) { Size {{ it.size }} · }Qty {{ it.quantity }}@if (it.quantity > 1) { · {{ it.unitPrice | inr }} each }</p>
                               </div>
                               <p class="type-price type-body-sm">{{ it.price | inr }}</p>
                             </li>
                           }
                         </ul>
 
-                        <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
-                          <p class="type-body-sm text-fg-2">{{ itemCount(o) }} {{ itemCount(o) === 1 ? 'piece' : 'pieces' }} · Total <span class="type-price font-medium text-fg">{{ o.totalAmount | inr }}</span></p>
+                        <dl class="mt-4 ms-auto flex max-w-xs flex-col gap-1 type-body-sm">
+                          <div class="flex justify-between gap-4 text-fg-2"><dt>Subtotal ({{ itemCount(o) }} {{ itemCount(o) === 1 ? 'piece' : 'pieces' }})</dt><dd class="type-price">{{ o.subtotal | inr }}</dd></div>
+                          <div class="flex justify-between gap-4 text-fg-2"><dt>Delivery</dt><dd class="type-price">{{ o.deliveryFee > 0 ? (o.deliveryFee | inr) : 'Free' }}</dd></div>
+                          <div class="flex justify-between gap-4 border-t border-line pt-1.5 font-medium"><dt>Total paid</dt><dd class="type-price">{{ o.totalAmount | inr }}</dd></div>
+                        </dl>
+                        <div class="mt-4 flex flex-wrap items-center justify-end gap-4">
                           <button type="button" class="btn btn-quiet min-h-10 px-4 text-sm" [disabled]="downloading() === o._id" (click)="downloadReceipt(o)">
                             {{ downloading() === o._id ? 'Preparing…' : 'Download receipt' }}
                           </button>
