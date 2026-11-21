@@ -111,7 +111,7 @@
             <tbody>
               @for (o of d.recentOrders; track o._id) {
                 <tr>
-                  <td><a [routerLink]="['/admin/orders']" [queryParams]="{ open: o._id }" class="type-price link-underline">#{{ o._id.slice(-6).toUpperCase() }}</a></td>
+                  <td><a [routerLink]="['/admin/orders']" [queryParams]="{ open: o._id }" class="type-price link-underline">#{{ o.ref }}</a></td>
                   <td class="max-w-[14rem] truncate">{{ o.email }}</td>
                   <td class="whitespace-nowrap text-fg-2">{{ o.createdAt | date: 'd MMM, h:mm a' }}</td>
                   <td><span class="studio-pill" [attr.data-tone]="o.status">{{ statusLabel[o.status] }}</span></td>

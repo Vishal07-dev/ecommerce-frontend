@@ -34,7 +34,7 @@ export interface Overview {
   daily: { date: string; revenue: number; orders: number }[];
   topProducts: { id: string; name: string; units: number; revenue: number }[];
   statuses: { status: OrderStatus; count: number }[];
-  recentOrders: { _id: string; email: string; totalAmount: number; status: OrderStatus; createdAt: string; items: number }[];
+  recentOrders: { _id: string; ref: string; email: string; totalAmount: number; status: OrderStatus; createdAt: string; items: number }[];
   catalogue: { live: number; archived: number; featured: number; hero: { _id: string; name: string; image: string | null } | null };
   lowStock: { _id: string; name: string; image: string | null; stock: number; sizes: { size: string; stock: number }[] }[];
 }
@@ -42,8 +42,9 @@ export interface Overview {
 export interface AdminNotification { id: string; kind: 'order' | 'customer' | 'stock'; title: string; detail: string; at: string; link: string; }
 
 export interface AdminOrder {
-  _id: string; email: string; totalAmount: number; status: OrderStatus; createdAt: string; sessionId: string;
-  items: { name: string; quantity: number; price: number; size?: string; image?: string; productId?: string }[];
+  _id: string; ref: string; email: string; subtotal: number; deliveryFee: number; totalAmount: number; status: OrderStatus; createdAt: string; sessionId: string;
+  /** price = line amount charged; unitPrice = one piece. */
+  items: { name: string; quantity: number; price: number; unitPrice: number; size?: string; image?: string; productId?: string }[];
 }
 export interface OrderPage { orders: AdminOrder[]; total: number; page: number; pages: number; counts: Record<OrderStatus, number>; }
 

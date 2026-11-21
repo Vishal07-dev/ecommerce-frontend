@@ -25,10 +25,14 @@ export interface Account {
   addresses: Address[];
 }
 
-export interface OrderItem { name: string; quantity: number; price: number; size?: string; image?: string; productId?: string; }
+/** price = line amount charged (unit × qty); unitPrice = one piece. */
+export interface OrderItem { name: string; quantity: number; price: number; unitPrice: number; size?: string; image?: string; productId?: string; }
 export interface AccountOrder {
   _id: string;
+  ref: string;
   createdAt: string;
+  subtotal: number;
+  deliveryFee: number;
   totalAmount: number;
   status: 'paid' | 'packed' | 'shipped' | 'delivered' | 'cancelled';
   items: OrderItem[];

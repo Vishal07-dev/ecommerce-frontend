@@ -74,12 +74,17 @@ import { formatValue } from '../charts';
                               <span class="studio-thumb">@if (it.image) { <img [src]="it.image" alt="" /> }</span>
                               <span class="min-w-0 flex-1">
                                 @if (it.productId && canManage) { <a [routerLink]="['/admin/products', it.productId]" class="link-underline">{{ it.name }}</a> } @else { {{ it.name }} }
-                                <span class="block text-fg-3">Qty {{ it.quantity }}@if (it.size) { · Size {{ it.size }} }</span>
+                                <span class="block text-fg-3">@if (it.size) { Size {{ it.size }} · }Qty {{ it.quantity }}@if (it.quantity > 1) { · {{ inr(it.unitPrice) }} each }</span>
                               </span>
                               <span class="type-price">{{ inr(it.price) }}</span>
                             </li>
                           }
                         </ul>
+                        <dl class="mt-3 ms-auto flex max-w-xs flex-col gap-1">
+                          <div class="flex justify-between gap-4 text-fg-2"><dt>Subtotal</dt><dd class="type-price">{{ inr(o.subtotal) }}</dd></div>
+                          <div class="flex justify-between gap-4 text-fg-2"><dt>Delivery</dt><dd class="type-price">{{ o.deliveryFee > 0 ? inr(o.deliveryFee) : 'Free' }}</dd></div>
+                          <div class="flex justify-between gap-4 border-t border-line pt-1 font-medium"><dt>Total paid</dt><dd class="type-price">{{ inr(o.totalAmount) }}</dd></div>
+                        </dl>
                         <p class="mt-2 text-fg-3">Stripe session <span class="font-mono text-xs">{{ o.sessionId }}</span></p>
                       </td>
                     </tr>
@@ -155,7 +160,7 @@ export class OrderComponent {
   clear(): void { this.router.navigate([], { queryParams: {} }); }
   toggle(id: string): void { this.open.set(this.open() === id ? null : id); }
 
-  ref(o: AdminOrder): string { return o._id.slice(-6).toUpperCase(); }
+  ref(o: AdminOrder): string { return o.ref ?? o._id.slice(-8).toUpperCase(); }
   itemCount(o: AdminOrder): number { return o.items.reduce((n, i) => n + (i.quantity ?? 1), 0); }
   inr(v: number): string { return formatValue(v, 'inr'); }
 
